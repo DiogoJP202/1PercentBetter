@@ -2,11 +2,13 @@ const chartElement = document.querySelector('[data-weekly-progress-chart]');
 
 if (chartElement && window.ApexCharts) {
   const points = JSON.parse(chartElement.dataset.points ?? '[]');
+  const hasData = points.some((point) => point.completed > 0 || point.failed > 0 || point.skipped > 0);
 
   const chart = new window.ApexCharts(chartElement, {
     chart: {
       type: 'bar',
       height: 280,
+      stacked: true,
       toolbar: { show: false },
       foreColor: '#cbd5e1'
     },
@@ -18,9 +20,13 @@ if (chartElement && window.ApexCharts) {
       {
         name: 'Falhas',
         data: points.map((point) => point.failed)
+      },
+      {
+        name: 'Pulados',
+        data: points.map((point) => point.skipped)
       }
     ],
-    colors: ['#34d399', '#fb7185'],
+    colors: ['#34d399', '#fb7185', '#fbbf24'],
     plotOptions: {
       bar: {
         borderRadius: 7,
@@ -39,6 +45,9 @@ if (chartElement && window.ApexCharts) {
     },
     tooltip: {
       theme: 'dark'
+    },
+    noData: {
+      text: hasData ? undefined : 'Sem registros na semana'
     }
   });
 

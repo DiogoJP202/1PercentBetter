@@ -34,7 +34,7 @@
         </div>
         <div>
             <label asp-for="Status" class="form-label">Status</label>
-            <select asp-for="Status" asp-items="Html.GetEnumSelectList<ItemStatus>()" class="form-select"></select>
+            <select asp-for="Status" asp-items="@(EnumDisplayExtensions.ToSelectList<ItemStatus>())" class="form-select"></select>
         </div>
     </div>
 

@@ -33,7 +33,7 @@
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="status-pill">Hoje: @(item.TodayStatus?.ToString() ?? "Pendente")</span>
+                        <span class="status-pill">Hoje: @(item.TodayStatus?.ToDisplayName() ?? "Pendente")</span>
                         <a class="btn-secondary" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
                         <form asp-action="Complete" asp-route-id="@item.Id" method="post">
                             <button class="btn-primary" type="submit">Concluir</button>

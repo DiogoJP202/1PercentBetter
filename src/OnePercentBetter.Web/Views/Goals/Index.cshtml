@@ -29,8 +29,8 @@
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="status-pill">@item.Status</span>
-                        <span class="status-pill">@item.Priority</span>
+                        <span class="status-pill">@item.Status.ToDisplayName()</span>
+                        <span class="status-pill">@item.Priority.ToDisplayName()</span>
                     </div>
                 </div>
                 <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-400">

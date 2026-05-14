@@ -57,15 +57,15 @@
     <div class="grid gap-4 md:grid-cols-3">
         <div>
             <label asp-for="FrequencyType" class="form-label">Frequencia</label>
-            <select asp-for="FrequencyType" asp-items="Html.GetEnumSelectList<HabitFrequencyType>()" class="form-select"></select>
+            <select asp-for="FrequencyType" asp-items="@(EnumDisplayExtensions.ToSelectList<HabitFrequencyType>())" class="form-select"></select>
         </div>
         <div>
             <label asp-for="Difficulty" class="form-label">Dificuldade</label>
-            <select asp-for="Difficulty" asp-items="Html.GetEnumSelectList<HabitDifficulty>()" class="form-select"></select>
+            <select asp-for="Difficulty" asp-items="@(EnumDisplayExtensions.ToSelectList<HabitDifficulty>())" class="form-select"></select>
         </div>
         <div>
             <label asp-for="Status" class="form-label">Status</label>
-            <select asp-for="Status" asp-items="Html.GetEnumSelectList<ItemStatus>()" class="form-select"></select>
+            <select asp-for="Status" asp-items="@(EnumDisplayExtensions.ToSelectList<ItemStatus>())" class="form-select"></select>
         </div>
     </div>
 

@@ -29,7 +29,7 @@
                         </div>
                         <p class="mt-4 text-sm leading-6 text-slate-300">@item.IdentityStatement</p>
                     </div>
-                    <span class="status-pill">@item.Status</span>
+                    <span class="status-pill">@item.Status.ToDisplayName()</span>
                 </div>
                 <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
                     <div class="text-sm text-slate-400">@item.HabitsCount habito(s) - @item.GoalsCount objetivo(s)</div>

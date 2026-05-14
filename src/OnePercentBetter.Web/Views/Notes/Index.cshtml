@@ -19,7 +19,7 @@
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-black text-white">@item.Title</h2>
-                        <p class="mt-1 text-sm text-slate-400">@item.Date.ToString("dd/MM/yyyy") - @item.NoteType</p>
+                        <p class="mt-1 text-sm text-slate-400">@item.Date.ToString("dd/MM/yyyy") - @item.NoteType.ToDisplayName()</p>
                     </div>
                     <a class="btn-secondary" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
                 </div>

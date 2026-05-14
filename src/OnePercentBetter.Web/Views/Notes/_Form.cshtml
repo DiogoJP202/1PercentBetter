@@ -24,7 +24,7 @@
     <div class="grid gap-4 md:grid-cols-2">
         <div>
             <label asp-for="NoteType" class="form-label">Tipo</label>
-            <select asp-for="NoteType" asp-items="Html.GetEnumSelectList<NoteType>()" class="form-select"></select>
+            <select asp-for="NoteType" asp-items="@(EnumDisplayExtensions.ToSelectList<NoteType>())" class="form-select"></select>
         </div>
         <div>
             <label asp-for="Tags" class="form-label">Tags</label>

@@ -7,7 +7,7 @@
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="text-sm font-semibold text-emerald-300">Dashboard</p>
-            <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Hoje, voce esta @Model.TodayCompletionRate% melhor</h1>
+            <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Hoje, voce concluiu @Model.CompletedToday de @Model.DueToday habito(s)</h1>
         </div>
         <div class="flex flex-wrap gap-2">
             <a class="btn-primary" asp-controller="Habits" asp-action="Create"><i data-lucide="plus" class="h-4 w-4"></i>Novo habito</a>
@@ -19,20 +19,40 @@
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Conclusao hoje</div>
             <div class="mt-3 text-4xl font-black text-emerald-300">@Model.TodayCompletionRate%</div>
+            <div class="mt-2 text-xs text-slate-500">@Model.CompletedToday concluidos, @Model.FailedToday falhas, @Model.SkippedToday pulados</div>
+        </div>
+        <div class="app-card p-5">
+            <div class="text-sm text-slate-400">Taxa semanal</div>
+            <div class="mt-3 text-4xl font-black text-white">@Model.WeeklyCompletionRate%</div>
+            <div class="mt-2 text-xs text-slate-500">@Model.CompletedLast7Days conclusoes nos ultimos 7 dias</div>
         </div>
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Sequencia atual</div>
             <div class="mt-3 text-4xl font-black text-white">@Model.CurrentStreak</div>
-        </div>
-        <div class="app-card p-5">
-            <div class="text-sm text-slate-400">Habitos ativos</div>
-            <div class="mt-3 text-4xl font-black text-white">@Model.ActiveHabits</div>
+            <div class="mt-2 text-xs text-slate-500">Melhor sequencia: @Model.BestStreak</div>
         </div>
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Indice 1% Better</div>
             <div class="mt-3 text-4xl font-black text-sky-300">@Model.BetterIndex</div>
+            <div class="mt-2 text-xs text-slate-500">@Model.CheckInsLast7Days check-in(s) na semana</div>
         </div>
     </div>
+
+    @if (Model.Alerts.Any())
+    {
+        <section class="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-5">
+            <div class="flex items-center gap-2 text-sm font-bold text-amber-100">
+                <i data-lucide="sparkles" class="h-4 w-4"></i>
+                Ajustes sugeridos
+            </div>
+            <div class="mt-3 grid gap-2 md:grid-cols-3">
+                @foreach (var alert in Model.Alerts)
+                {
+                    <p class="rounded-xl bg-slate-950/40 px-3 py-2 text-sm text-amber-50">@alert</p>
+                }
+            </div>
+        </section>
+    }
 
     <div class="grid gap-6 xl:grid-cols-[1fr_0.85fr]">
         <section class="app-card p-5">
@@ -41,14 +61,15 @@
                     <h2 class="text-xl font-bold text-white">Habitos de hoje</h2>
                     <p class="mt-1 text-sm text-slate-400">Marque o voto diario na identidade que voce quer construir.</p>
                 </div>
-                <span class="status-pill">@Model.TodayHabits.Count item(s)</span>
+                <span class="status-pill">@Model.DueToday item(s)</span>
             </div>
 
             <div class="mt-5 space-y-3">
                 @if (!Model.TodayHabits.Any())
                 {
-                    <div class="rounded-2xl border border-dashed border-white/15 p-6 text-center text-slate-400">
-                        Nenhum habito ativo para hoje.
+                    <div class="rounded-2xl border border-dashed border-white/15 p-6 text-center">
+                        <p class="text-sm text-slate-300">Nenhum habito ativo para hoje.</p>
+                        <a class="btn-secondary mt-4" asp-controller="Habits" asp-action="Create">Criar habito</a>
                     </div>
                 }
                 else
@@ -70,6 +91,7 @@
                                     <p class="mt-3 rounded-xl bg-slate-950/60 px-3 py-2 text-sm text-slate-300">@habit.TwoMinuteVersion</p>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
+                                    <span class="status-pill">Status: @(habit.TodayStatus?.ToDisplayName() ?? "Pendente")</span>
                                     <form asp-controller="Habits" asp-action="Complete" asp-route-id="@habit.Id" method="post">
                                         <button class="btn-primary" type="submit">Concluir</button>
                                     </form>
@@ -104,12 +126,20 @@
                 <h2 class="text-xl font-bold text-white">Resumo do sistema</h2>
                 <div class="mt-4 grid grid-cols-2 gap-3">
                     <div class="rounded-2xl bg-white/[0.04] p-4">
+                        <div class="text-2xl font-black text-white">@Model.ActiveHabits</div>
+                        <div class="text-sm text-slate-400">Habitos ativos</div>
+                    </div>
+                    <div class="rounded-2xl bg-white/[0.04] p-4">
                         <div class="text-2xl font-black text-white">@Model.ActiveGoals</div>
                         <div class="text-sm text-slate-400">Objetivos ativos</div>
                     </div>
                     <div class="rounded-2xl bg-white/[0.04] p-4">
                         <div class="text-2xl font-black text-white">@Model.ActiveIdentities</div>
                         <div class="text-sm text-slate-400">Identidades</div>
+                    </div>
+                    <div class="rounded-2xl bg-white/[0.04] p-4">
+                        <div class="text-2xl font-black text-white">@Model.CheckInsLast7Days</div>
+                        <div class="text-sm text-slate-400">Check-ins semanais</div>
                     </div>
                 </div>
             </section>

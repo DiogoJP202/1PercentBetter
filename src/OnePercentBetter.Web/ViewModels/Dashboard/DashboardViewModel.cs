@@ -4,6 +4,20 @@ public class DashboardViewModel
 {
     public int TodayCompletionRate { get; set; }
 
+    public int CompletedToday { get; set; }
+
+    public int FailedToday { get; set; }
+
+    public int SkippedToday { get; set; }
+
+    public int DueToday { get; set; }
+
+    public int WeeklyCompletionRate { get; set; }
+
+    public int CompletedLast7Days { get; set; }
+
+    public int CheckInsLast7Days { get; set; }
+
     public int CurrentStreak { get; set; }
 
     public int BestStreak { get; set; }
@@ -23,4 +37,6 @@ public class DashboardViewModel
     public IReadOnlyList<TodayHabitViewModel> TodayHabits { get; set; } = [];
 
     public IReadOnlyList<WeeklyProgressPointViewModel> WeeklyProgress { get; set; } = [];
+
+    public IReadOnlyList<string> Alerts { get; set; } = [];
 }
