@@ -1,0 +1,46 @@
+@model IReadOnlyList<IdentityListItemViewModel>
+@{
+    ViewData["Title"] = "Identidades";
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-sm font-semibold text-emerald-300">Identidades</p>
+            <h1 class="mt-1 text-3xl font-black text-white">Quem voce esta se tornando</h1>
+        </div>
+        <a class="btn-primary" asp-action="Create"><i data-lucide="plus" class="h-4 w-4"></i>Nova identidade</a>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-2">
+        @foreach (var item in Model)
+        {
+            <article class="app-card p-5">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-10 w-10 place-items-center rounded-xl border border-white/10" style="color:@item.Color">
+                                <i data-lucide="@item.Icon" class="h-5 w-5"></i>
+                            </span>
+                            <div class="min-w-0">
+                                <h2 class="truncate text-lg font-black text-white">@item.Name</h2>
+                                <p class="text-sm text-slate-400">@item.CategoryName</p>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-sm leading-6 text-slate-300">@item.IdentityStatement</p>
+                    </div>
+                    <span class="status-pill">@item.Status</span>
+                </div>
+                <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
+                    <div class="text-sm text-slate-400">@item.HabitsCount habito(s) - @item.GoalsCount objetivo(s)</div>
+                    <a class="btn-secondary" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
+                </div>
+            </article>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="app-card p-8 text-center text-slate-400">Nenhuma identidade criada ainda.</div>
+    }
+</div>

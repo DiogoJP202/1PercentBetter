@@ -1,0 +1,13 @@
+@model GoalFormViewModel
+@{
+    ViewData["Title"] = "Editar objetivo";
+}
+
+<div class="mx-auto max-w-3xl">
+    <h1 class="mb-6 text-3xl font-black text-white">Editar objetivo</h1>
+    <partial name="_Form" model="Model" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

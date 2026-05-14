@@ -1,0 +1,14 @@
+bin/
+obj/
+.vs/
+.vscode/
+.dotnet/
+.dotnet-home/
+.templateengine/
+.tools/
+node_modules/
+*.user
+*.suo
+*.log
+
+src/**/wwwroot/css/app.css.map

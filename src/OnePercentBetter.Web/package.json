@@ -1,0 +1,11 @@
+{
+  "name": "one-percent-better-web",
+  "private": true,
+  "scripts": {
+    "css:build": "tailwindcss -i ./wwwroot/css/input.css -o ./wwwroot/css/app.css --minify",
+    "css:watch": "tailwindcss -i ./wwwroot/css/input.css -o ./wwwroot/css/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

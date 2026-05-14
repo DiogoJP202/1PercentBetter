@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Calendario";
+}
+
+<div class="space-y-6">
+    <div>
+        <p class="text-sm font-semibold text-sky-300">Calendario</p>
+        <h1 class="mt-1 text-3xl font-black text-white">Linha do tempo dos habitos</h1>
+    </div>
+
+    <section class="app-card p-5">
+        <div data-habit-calendar></div>
+    </section>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" />
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script type="module" src="~/js/modules/calendar.js" asp-append-version="true"></script>
+}

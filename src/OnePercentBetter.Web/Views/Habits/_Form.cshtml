@@ -1,0 +1,105 @@
+@model HabitFormViewModel
+
+<form class="app-card space-y-6 p-6" method="post">
+    <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+        <div>
+            <label asp-for="Title" class="form-label">Titulo</label>
+            <input asp-for="Title" class="form-input" />
+            <span asp-validation-for="Title"></span>
+        </div>
+        <div>
+            <label asp-for="SuggestedTime" class="form-label">Horario sugerido</label>
+            <input asp-for="SuggestedTime" class="form-input" />
+            <span asp-validation-for="SuggestedTime"></span>
+        </div>
+    </div>
+
+    <div>
+        <label asp-for="Description" class="form-label">Descricao</label>
+        <textarea asp-for="Description" class="form-textarea"></textarea>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-3">
+        <div>
+            <label asp-for="IdentityId" class="form-label">Identidade</label>
+            <select asp-for="IdentityId" class="form-select">
+                <option value="">Sem identidade</option>
+                @foreach (var identity in Model.Identities)
+                {
+                    <option value="@identity.Value">@identity.Text</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label asp-for="GoalId" class="form-label">Objetivo</label>
+            <select asp-for="GoalId" class="form-select">
+                <option value="">Sem objetivo</option>
+                @foreach (var goal in Model.Goals)
+                {
+                    <option value="@goal.Value">@goal.Text</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label asp-for="CategoryId" class="form-label">Categoria</label>
+            <select asp-for="CategoryId" class="form-select">
+                <option value="">Sem categoria</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.Value">@category.Text</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-3">
+        <div>
+            <label asp-for="FrequencyType" class="form-label">Frequencia</label>
+            <select asp-for="FrequencyType" asp-items="Html.GetEnumSelectList<HabitFrequencyType>()" class="form-select"></select>
+        </div>
+        <div>
+            <label asp-for="Difficulty" class="form-label">Dificuldade</label>
+            <select asp-for="Difficulty" asp-items="Html.GetEnumSelectList<HabitDifficulty>()" class="form-select"></select>
+        </div>
+        <div>
+            <label asp-for="Status" class="form-label">Status</label>
+            <select asp-for="Status" asp-items="Html.GetEnumSelectList<ItemStatus>()" class="form-select"></select>
+        </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+        <div>
+            <label asp-for="Trigger" class="form-label">Gatilho</label>
+            <input asp-for="Trigger" class="form-input" />
+            <span asp-validation-for="Trigger"></span>
+        </div>
+        <div>
+            <label asp-for="TwoMinuteVersion" class="form-label">Versao de 2 minutos</label>
+            <input asp-for="TwoMinuteVersion" class="form-input" />
+            <span asp-validation-for="TwoMinuteVersion"></span>
+        </div>
+    </div>
+
+    <div>
+        <label asp-for="Reward" class="form-label">Recompensa</label>
+        <input asp-for="Reward" class="form-input" />
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+        <div>
+            <label asp-for="Color" class="form-label">Cor</label>
+            <input asp-for="Color" class="form-input" />
+        </div>
+        <div>
+            <label asp-for="Icon" class="form-label">Icone Lucide</label>
+            <input asp-for="Icon" class="form-input" />
+        </div>
+    </div>
+
+    <div class="flex flex-wrap justify-end gap-2">
+        <a class="btn-secondary" asp-action="Index">Cancelar</a>
+        <button class="btn-primary" type="submit">Salvar</button>
+    </div>
+</form>

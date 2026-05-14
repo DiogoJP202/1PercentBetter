@@ -1,0 +1,78 @@
+@model OnboardingViewModel
+@{
+    ViewData["Title"] = "Onboarding";
+}
+
+<div class="mx-auto max-w-4xl">
+    <div class="mb-6">
+        <p class="text-sm font-semibold text-emerald-300">Primeira configuracao</p>
+        <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Monte seu primeiro sistema 1% Better</h1>
+    </div>
+
+    <form class="app-card space-y-6 p-6" asp-action="Index" method="post">
+        <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
+
+        <div>
+            <label asp-for="CategoryId" class="form-label">Area de foco</label>
+            <select asp-for="CategoryId" class="form-select">
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.Value">@category.Text</option>
+                }
+            </select>
+            <span asp-validation-for="CategoryId"></span>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label asp-for="IdentityName" class="form-label">Identidade</label>
+                <input asp-for="IdentityName" class="form-input" />
+                <span asp-validation-for="IdentityName"></span>
+            </div>
+            <div>
+                <label asp-for="GoalTitle" class="form-label">Objetivo</label>
+                <input asp-for="GoalTitle" class="form-input" />
+                <span asp-validation-for="GoalTitle"></span>
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="IdentityStatement" class="form-label">Frase da identidade</label>
+            <input asp-for="IdentityStatement" class="form-input" />
+            <span asp-validation-for="IdentityStatement"></span>
+        </div>
+
+        <div>
+            <label asp-for="HabitTitle" class="form-label">Primeiro habito</label>
+            <input asp-for="HabitTitle" class="form-input" />
+            <span asp-validation-for="HabitTitle"></span>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label asp-for="Trigger" class="form-label">Gatilho</label>
+                <input asp-for="Trigger" class="form-input" />
+                <span asp-validation-for="Trigger"></span>
+            </div>
+            <div>
+                <label asp-for="TwoMinuteVersion" class="form-label">Versao de 2 minutos</label>
+                <input asp-for="TwoMinuteVersion" class="form-input" />
+                <span asp-validation-for="TwoMinuteVersion"></span>
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="Reward" class="form-label">Recompensa</label>
+            <input asp-for="Reward" class="form-input" />
+            <span asp-validation-for="Reward"></span>
+        </div>
+
+        <div class="flex justify-end">
+            <button class="btn-primary" type="submit">Criar meu sistema</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

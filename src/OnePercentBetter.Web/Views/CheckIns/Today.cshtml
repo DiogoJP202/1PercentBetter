@@ -1,0 +1,70 @@
+@model DailyCheckInViewModel
+@{
+    ViewData["Title"] = "Check-in diario";
+}
+
+<div class="mx-auto max-w-3xl">
+    <div class="mb-6">
+        <p class="text-sm font-semibold text-emerald-300">Check-in diario</p>
+        <h1 class="mt-1 text-3xl font-black text-white">Como foi seu dia?</h1>
+    </div>
+
+    <form class="app-card space-y-6 p-6" asp-action="Today" method="post">
+        <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
+
+        <input asp-for="Date" type="hidden" />
+
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label asp-for="Mood" class="form-label">Humor</label>
+                <select asp-for="Mood" asp-items="Html.GetEnumSelectList<MoodLevel>()" class="form-select"></select>
+            </div>
+            <div>
+                <label asp-for="DayScore" class="form-label">Nota do dia</label>
+                <input asp-for="DayScore" class="form-input" min="1" max="5" />
+                <span asp-validation-for="DayScore"></span>
+            </div>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label asp-for="EnergyLevel" class="form-label">Energia</label>
+                <input asp-for="EnergyLevel" class="form-input" min="1" max="5" />
+                <span asp-validation-for="EnergyLevel"></span>
+            </div>
+            <div>
+                <label asp-for="ProductivityLevel" class="form-label">Produtividade</label>
+                <input asp-for="ProductivityLevel" class="form-input" min="1" max="5" />
+                <span asp-validation-for="ProductivityLevel"></span>
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="SmallWin" class="form-label">Pequena vitoria</label>
+            <input asp-for="SmallWin" class="form-input" />
+        </div>
+
+        <div>
+            <label asp-for="MainDifficulty" class="form-label">Principal dificuldade</label>
+            <input asp-for="MainDifficulty" class="form-input" />
+        </div>
+
+        <div>
+            <label asp-for="TomorrowAdjustment" class="form-label">Ajuste para amanha</label>
+            <input asp-for="TomorrowAdjustment" class="form-input" />
+        </div>
+
+        <div>
+            <label asp-for="Notes" class="form-label">Notas</label>
+            <textarea asp-for="Notes" class="form-textarea"></textarea>
+        </div>
+
+        <div class="flex justify-end">
+            <button class="btn-primary" type="submit">Salvar check-in</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

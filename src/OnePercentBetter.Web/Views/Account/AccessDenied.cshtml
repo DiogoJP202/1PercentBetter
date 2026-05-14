@@ -1,0 +1,12 @@
+@{
+    ViewData["Title"] = "Acesso negado";
+}
+
+<section class="grid min-h-screen place-items-center px-4">
+    <div class="app-card max-w-md p-6 text-center">
+        <i data-lucide="lock" class="mx-auto h-10 w-10 text-rose-300"></i>
+        <h1 class="mt-4 text-2xl font-black text-white">Acesso negado</h1>
+        <p class="mt-2 text-slate-400">Sua conta nao tem permissao para acessar esta area.</p>
+        <a class="btn-primary mt-6" asp-controller="Dashboard" asp-action="Index">Voltar</a>
+    </div>
+</section>

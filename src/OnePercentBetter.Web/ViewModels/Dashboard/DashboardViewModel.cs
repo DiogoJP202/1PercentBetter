@@ -1,0 +1,26 @@
+namespace OnePercentBetter.Web.ViewModels.Dashboard;
+
+public class DashboardViewModel
+{
+    public int TodayCompletionRate { get; set; }
+
+    public int CurrentStreak { get; set; }
+
+    public int BestStreak { get; set; }
+
+    public int ActiveHabits { get; set; }
+
+    public int ActiveGoals { get; set; }
+
+    public int ActiveIdentities { get; set; }
+
+    public int BetterIndex { get; set; }
+
+    public string? FocusIdentityName { get; set; }
+
+    public string? FocusIdentityStatement { get; set; }
+
+    public IReadOnlyList<TodayHabitViewModel> TodayHabits { get; set; } = [];
+
+    public IReadOnlyList<WeeklyProgressPointViewModel> WeeklyProgress { get; set; } = [];
+}

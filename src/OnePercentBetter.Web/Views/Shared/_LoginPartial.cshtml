@@ -1,0 +1,24 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    var appUser = await UserManager.GetUserAsync(User);
+    <div class="flex items-center gap-3">
+        <span class="hidden max-w-44 truncate text-sm text-slate-300 sm:inline">@(appUser?.DisplayName ?? User.Identity?.Name)</span>
+        <form asp-controller="Account" asp-action="Logout" method="post">
+            <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg border border-white/10 px-3 text-sm text-slate-300 transition hover:border-rose-400/60 hover:text-white">
+                <i data-lucide="log-out" class="h-4 w-4"></i>
+                Sair
+            </button>
+        </form>
+    </div>
+}
+else
+{
+    <div class="flex items-center gap-2">
+        <a class="btn-secondary" asp-controller="Account" asp-action="Login">Entrar</a>
+        <a class="btn-primary" asp-controller="Account" asp-action="Register">Criar conta</a>
+    </div>
+}

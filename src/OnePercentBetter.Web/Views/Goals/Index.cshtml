@@ -1,0 +1,56 @@
+@model IReadOnlyList<GoalListItemViewModel>
+@{
+    ViewData["Title"] = "Objetivos";
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-sm font-semibold text-sky-300">Objetivos</p>
+            <h1 class="mt-1 text-3xl font-black text-white">Direcoes do seu sistema</h1>
+        </div>
+        <a class="btn-primary" asp-action="Create"><i data-lucide="plus" class="h-4 w-4"></i>Novo objetivo</a>
+    </div>
+
+    <div class="grid gap-4">
+        @foreach (var item in Model)
+        {
+            <article class="app-card p-5">
+                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-10 w-10 place-items-center rounded-xl border border-white/10" style="color:@item.Color">
+                                <i data-lucide="@item.Icon" class="h-5 w-5"></i>
+                            </span>
+                            <div class="min-w-0">
+                                <h2 class="truncate text-lg font-black text-white">@item.Title</h2>
+                                <p class="text-sm text-slate-400">@item.IdentityName</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="status-pill">@item.Status</span>
+                        <span class="status-pill">@item.Priority</span>
+                    </div>
+                </div>
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-400">
+                    <span>@item.HabitsCount habito(s) vinculado(s)</span>
+                    <div class="flex flex-wrap gap-2">
+                        <a class="btn-secondary" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
+                        <form asp-action="Pause" asp-route-id="@item.Id" method="post">
+                            <button class="btn-secondary" type="submit">Pausar</button>
+                        </form>
+                        <form asp-action="Complete" asp-route-id="@item.Id" method="post">
+                            <button class="btn-primary" type="submit">Concluir</button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="app-card p-8 text-center text-slate-400">Nenhum objetivo criado ainda.</div>
+    }
+</div>

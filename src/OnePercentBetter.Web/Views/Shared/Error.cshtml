@@ -1,0 +1,16 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Erro";
+}
+
+<div class="mx-auto max-w-xl">
+    <div class="app-card p-6">
+        <i data-lucide="triangle-alert" class="h-10 w-10 text-rose-300"></i>
+        <h1 class="mt-4 text-2xl font-black text-white">Algo saiu do trilho.</h1>
+        <p class="mt-2 text-slate-400">A requisicao nao foi concluida.</p>
+        @if (Model.ShowRequestId)
+        {
+            <p class="mt-4 rounded-xl bg-slate-950/70 p-3 text-xs text-slate-400">Request ID: @Model.RequestId</p>
+        }
+    </div>
+</div>

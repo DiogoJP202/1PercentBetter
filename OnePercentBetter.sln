@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F05233C5-0C09-4448-AD1B-BC3169CC8DDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnePercentBetter.Web", "src\OnePercentBetter.Web\OnePercentBetter.Web.csproj", "{D7CB56A1-E564-4D9D-80FE-C94F49921548}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D7CB56A1-E564-4D9D-80FE-C94F49921548}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7CB56A1-E564-4D9D-80FE-C94F49921548}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7CB56A1-E564-4D9D-80FE-C94F49921548}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7CB56A1-E564-4D9D-80FE-C94F49921548}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D7CB56A1-E564-4D9D-80FE-C94F49921548} = {F05233C5-0C09-4448-AD1B-BC3169CC8DDE}
+	EndGlobalSection
+EndGlobal
