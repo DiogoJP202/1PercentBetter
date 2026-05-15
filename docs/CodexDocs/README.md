@@ -15,7 +15,7 @@ Esta documentacao considera o working tree atual, incluindo os ajustes recentes 
 
 ## Estado rapido
 
-O projeto ja possui um MVP web em ASP.NET Core MVC com autenticacao, onboarding, identidades, objetivos, habitos, logs diarios de habitos, check-in diario, dashboard inicial, anotacoes e calendario visual inicial.
+O projeto ja possui um MVP web em ASP.NET Core MVC com autenticacao, onboarding, identidades, objetivos, habitos, logs diarios de habitos, check-in diario, dashboard inicial, anotacoes e calendario com eventos reais de logs de habitos.
 
 A stack atual e:
 

@@ -1,23 +1,87 @@
 @model IdentityFormViewModel
+@{
+    var colorOptions = new[]
+    {
+        new { Value = "#22c55e", Name = "Verde" },
+        new { Value = "#38bdf8", Name = "Azul" },
+        new { Value = "#a78bfa", Name = "Roxo" },
+        new { Value = "#f59e0b", Name = "Laranja" },
+        new { Value = "#fb7185", Name = "Vermelho" }
+    };
 
-<form class="app-card space-y-5 p-6" method="post">
+    var iconOptions = new[]
+    {
+        new { Value = "user-round-check", Name = "Identidade" },
+        new { Value = "code-2", Name = "Código" },
+        new { Value = "languages", Name = "Idiomas" },
+        new { Value = "coffee", Name = "Café" },
+        new { Value = "sparkles", Name = "Evolução" },
+        new { Value = "home", Name = "Casa" },
+        new { Value = "dumbbell", Name = "Treino" },
+        new { Value = "book-open", Name = "Estudo" },
+        new { Value = "brain", Name = "Mente" },
+        new { Value = "heart", Name = "Cuidado" },
+        new { Value = "target", Name = "Foco" },
+        new { Value = "briefcase-business", Name = "Carreira" }
+    };
+
+    var selectedColor = string.IsNullOrWhiteSpace(Model.Color) ? "#22c55e" : Model.Color;
+    var selectedIconValue = string.IsNullOrWhiteSpace(Model.Icon) ? "user-round-check" : Model.Icon;
+    var selectedIconName = iconOptions.FirstOrDefault(icon => icon.Value == selectedIconValue)?.Name ?? selectedIconValue;
+}
+
+<form class="app-card space-y-6 p-6" method="post" autocomplete="off" data-identity-form>
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+
     <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
 
+    <section class="rounded-2xl border border-white/10 bg-white/[0.03] p-4" data-identity-preview>
+        <div class="flex items-start gap-4">
+            <span class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-white/10 bg-slate-950/50" style="color:@selectedColor" data-identity-preview-icon>
+                <i data-lucide="@selectedIconValue" class="h-7 w-7"></i>
+            </span>
+            <div class="min-w-0">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Prévia da identidade</p>
+                <h2 class="mt-1 truncate text-2xl font-black text-white" data-identity-preview-name>@(string.IsNullOrWhiteSpace(Model.Name) ? "Sua nova identidade" : Model.Name)</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-300" data-identity-preview-statement>@(string.IsNullOrWhiteSpace(Model.IdentityStatement) ? "Eu sou uma pessoa que evolui um pouco todos os dias." : Model.IdentityStatement)</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-3">
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div class="text-sm font-bold text-white">Quem, não só o quê</div>
+            <p class="mt-2 text-xs leading-5 text-slate-400">Identidades representam quem você quer se tornar, não apenas o que deseja alcançar.</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div class="text-sm font-bold text-white">Direção para hábitos</div>
+            <p class="mt-2 text-xs leading-5 text-slate-400">Uma boa identidade ajuda seus hábitos a terem direção e sentido.</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div class="text-sm font-bold text-white">Escreva no presente</div>
+            <p class="mt-2 text-xs leading-5 text-slate-400">Use uma frase simples, como se essa versão de você já estivesse em prática.</p>
+        </div>
+    </section>
+
     <div>
-        <label asp-for="Name" class="form-label">Nome</label>
-        <input asp-for="Name" class="form-input" />
+        <label asp-for="Name" class="form-label">Nome da identidade</label>
+        <input asp-for="Name" class="form-input" placeholder="Desenvolvedor .NET Junior" data-identity-name-input />
+        <p class="mt-2 text-xs text-slate-500">Escolha um nome curto para a versão de você que quer fortalecer.</p>
         <span asp-validation-for="Name"></span>
     </div>
 
     <div>
         <label asp-for="IdentityStatement" class="form-label">Frase da identidade</label>
-        <input asp-for="IdentityStatement" class="form-input" />
+        <input asp-for="IdentityStatement" class="form-input" placeholder="Eu sou uma pessoa que evolui tecnicamente todos os dias" data-identity-statement-input />
+        <p class="mt-2 text-xs text-slate-500">Essa frase deve lembrar como essa identidade age no dia a dia.</p>
         <span asp-validation-for="IdentityStatement"></span>
     </div>
 
     <div>
-        <label asp-for="Description" class="form-label">Descricao</label>
-        <textarea asp-for="Description" class="form-textarea"></textarea>
+        <label asp-for="Description" class="form-label">Descrição</label>
+        <textarea asp-for="Description" class="form-textarea" placeholder="Explique o que essa identidade representa para você"></textarea>
+        <p class="mt-2 text-xs text-slate-500">Opcional. Descreva comportamentos, escolhas e sinais de progresso dessa versão de você.</p>
         <span asp-validation-for="Description"></span>
     </div>
 
@@ -31,26 +95,65 @@
                     <option value="@category.Value">@category.Text</option>
                 }
             </select>
+            <p class="mt-2 text-xs text-slate-500">Use categorias para organizar suas identidades por área de foco.</p>
+            <span asp-validation-for="CategoryId"></span>
         </div>
         <div>
             <label asp-for="Status" class="form-label">Status</label>
             <select asp-for="Status" asp-items="@(EnumDisplayExtensions.ToSelectList<ItemStatus>())" class="form-select"></select>
+            <p class="mt-2 text-xs text-slate-500">Mantenha como ativo enquanto essa identidade fizer parte do seu sistema atual.</p>
+            <span asp-validation-for="Status"></span>
         </div>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2">
+    <section class="grid gap-4 md:grid-cols-2">
         <div>
             <label asp-for="Color" class="form-label">Cor</label>
-            <input asp-for="Color" class="form-input" />
+            <div class="flex items-center gap-3">
+                <input asp-for="Color" type="color" class="h-12 w-16 cursor-pointer rounded-xl border border-white/10 bg-slate-950 p-1" data-identity-color-input />
+                <div class="flex flex-wrap gap-2">
+                    @foreach (var color in colorOptions)
+                    {
+                        <button type="button" class="h-9 w-9 rounded-full border border-white/15 transition hover:scale-105" style="background:@color.Value" data-identity-color-swatch="@color.Value" title="@color.Name">
+                            <span class="sr-only">@color.Name</span>
+                        </button>
+                    }
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">Escolha uma cor para reconhecer essa identidade rapidamente.</p>
+            <span asp-validation-for="Color"></span>
         </div>
+
         <div>
-            <label asp-for="Icon" class="form-label">Icone Lucide</label>
-            <input asp-for="Icon" class="form-input" />
+            <label asp-for="Icon" class="form-label">Ícone</label>
+            <input asp-for="Icon" type="hidden" data-identity-icon-input />
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-300">
+                    <span class="grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-slate-950/60" data-identity-icon-preview>
+                        <i data-lucide="@selectedIconValue" class="h-4 w-4"></i>
+                    </span>
+                    <span data-identity-icon-label>@selectedIconName</span>
+                </div>
+                <div class="grid gap-2 sm:grid-cols-3">
+                    @foreach (var icon in iconOptions)
+                    {
+                        <button type="button" class="rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-emerald-300/70 hover:bg-emerald-300/10" data-identity-icon-option="@icon.Value" data-identity-icon-name="@icon.Name">
+                            <i data-lucide="@icon.Value" class="mx-auto mb-1 h-4 w-4"></i>
+                            @icon.Name
+                        </button>
+                    }
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">O ícone aparece nos cards e ajuda a diferenciar suas identidades.</p>
+            <span asp-validation-for="Icon"></span>
         </div>
-    </div>
+    </section>
 
     <div class="flex flex-wrap justify-end gap-2">
         <a class="btn-secondary" asp-action="Index">Cancelar</a>
-        <button class="btn-primary" type="submit">Salvar</button>
+        <button class="btn-primary" type="submit">
+            <i data-lucide="save" class="h-4 w-4"></i>
+            Salvar identidade
+        </button>
     </div>
 </form>

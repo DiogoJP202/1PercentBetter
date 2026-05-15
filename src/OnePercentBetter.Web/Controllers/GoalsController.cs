@@ -41,6 +41,19 @@ public class GoalsController : Controller
             return View(viewModel);
         }
 
+        foreach (var error in await _goalService.ValidateFormAsync(userId, viewModel))
+        {
+            ModelState.AddModelError(error.Key, error.Value);
+        }
+
+        if (!ModelState.IsValid)
+        {
+            var form = await _goalService.CreateFormAsync(userId);
+            viewModel.Categories = form.Categories;
+            viewModel.Identities = form.Identities;
+            return View(viewModel);
+        }
+
         await _goalService.CreateAsync(userId, viewModel);
         TempData["Success"] = "Objetivo criado.";
 
@@ -60,6 +73,19 @@ public class GoalsController : Controller
     {
         var userId = User.GetRequiredUserId();
         viewModel.Id = id;
+
+        if (!ModelState.IsValid)
+        {
+            var form = await _goalService.CreateFormAsync(userId);
+            viewModel.Categories = form.Categories;
+            viewModel.Identities = form.Identities;
+            return View(viewModel);
+        }
+
+        foreach (var error in await _goalService.ValidateFormAsync(userId, viewModel))
+        {
+            ModelState.AddModelError(error.Key, error.Value);
+        }
 
         if (!ModelState.IsValid)
         {
@@ -92,6 +118,20 @@ public class GoalsController : Controller
     public async Task<IActionResult> Pause(int id)
     {
         await _goalService.ChangeStatusAsync(User.GetRequiredUserId(), id, ItemStatus.Paused);
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var deleted = await _goalService.DeleteAsync(User.GetRequiredUserId(), id);
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        TempData["Success"] = "Objetivo excluído. Hábitos e anotações vinculados foram preservados.";
         return RedirectToAction(nameof(Index));
     }
 }

@@ -39,6 +39,7 @@ public class DashboardService
                     Title = habit.Title,
                     TwoMinuteVersion = habit.TwoMinuteVersion,
                     Trigger = habit.Trigger,
+                    SuggestedTime = habit.SuggestedTime,
                     Icon = habit.Icon,
                     Color = habit.Color,
                     TodayStatus = todayLog?.Status

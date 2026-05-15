@@ -20,6 +20,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Habit> Habits => Set<Habit>();
 
+    public DbSet<SimpleHabit> SimpleHabits => Set<SimpleHabit>();
+
+    public DbSet<HabitLocation> HabitLocations => Set<HabitLocation>();
+
     public DbSet<HabitLog> HabitLogs => Set<HabitLog>();
 
     public DbSet<DailyCheckIn> DailyCheckIns => Set<DailyCheckIn>();
@@ -122,6 +126,42 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .WithMany(category => category.Habits)
                 .HasForeignKey(habit => habit.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(habit => habit.Location)
+                .WithMany(location => location.Habits)
+                .HasForeignKey(habit => habit.LocationId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(habit => habit.StackedAfterHabit)
+                .WithMany(habit => habit.StackedHabits)
+                .HasForeignKey(habit => habit.StackedAfterHabitId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(habit => habit.StackedAfterSimpleHabit)
+                .WithMany(simpleHabit => simpleHabit.StackedHabits)
+                .HasForeignKey(habit => habit.StackedAfterSimpleHabitId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<HabitLocation>(entity =>
+        {
+            entity.HasIndex(location => new { location.UserId, location.Name }).IsUnique();
+
+            entity.HasOne(location => location.User)
+                .WithMany(user => user.HabitLocations)
+                .HasForeignKey(location => location.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<SimpleHabit>(entity =>
+        {
+            entity.HasIndex(simpleHabit => new { simpleHabit.UserId, simpleHabit.IsActive });
+            entity.HasIndex(simpleHabit => new { simpleHabit.UserId, simpleHabit.Name, simpleHabit.ScheduledTime });
+
+            entity.HasOne(simpleHabit => simpleHabit.User)
+                .WithMany(user => user.SimpleHabits)
+                .HasForeignKey(simpleHabit => simpleHabit.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<HabitLog>(entity =>

@@ -19,39 +19,39 @@ Recomendacao:
 - Encerrar manualmente com `Ctrl+C`.
 - Como alternativa, usar Visual Studio/Rider.
 
-### Calendario sem eventos reais
+### Calendario precisa validacao visual
 
-`wwwroot/js/modules/calendar.js` inicializa FullCalendar com `events: []`.
-
-Impacto:
-
-- A tela existe, mas ainda nao representa dados do banco.
-
-### SweetAlert2 carregado mas nao usado
-
-O layout carrega SweetAlert2, mas ainda nao existem confirmacoes implementadas.
+O calendario agora busca eventos reais em `Calendar/Events`, mas ainda nao foi validado visualmente no navegador nesta rodada.
 
 Impacto:
 
-- Operacoes sensiveis ainda acontecem direto no POST.
+- Pode haver ajustes finos de layout, tooltip ou cores depois do teste manual.
 
-### Frequencia de habitos incompleta
+### Confirmacoes ainda precisam ser reaproveitadas em fluxos futuros
+
+SweetAlert2 ja foi integrado para falhar/pular habitos e pausar/concluir objetivos. Novas acoes sensiveis devem usar o mesmo padrao de `data-confirm`.
+
+Impacto:
+
+- Futuras exclusoes ou edicoes destrutivas podem ficar sem confirmacao se o padrao nao for reaplicado.
+
+### Placeholders do onboarding dependem do nome da categoria
+
+O mapeamento de exemplos dinamicos usa o texto da categoria selecionada, normalizado sem acentos.
+
+Impacto:
+
+- Categorias novas ou renomeadas usam fallback generico ate receberem exemplos especificos em `wwwroot/js/modules/onboarding.js`.
+
+### Frequencia de habitos parcialmente incompleta
 
 O backend possui enum para frequencias, mas a UI ainda nao cobre tudo.
 
 Pontos:
 
-- `SpecificDays` depende de `DaysOfWeek`, mas nao ha seletor claro na view.
-- `Custom` nao tem regra real.
+- `SpecificDays` ja possui checkboxes no formulario de habitos.
+- `Custom` nao tem regra real e foi removido do select do MVP.
 - `Monthly` compara dia do mes com `CreatedAt.Day`, sem tratar meses mais curtos.
-
-### Botao de pular nao aparece nas principais telas
-
-`HabitsController.Skip` existe e `HabitService.RegisterLogAsync` aceita `Skipped`, mas a tela atual prioriza `Concluir` e `Falhei`.
-
-Impacto:
-
-- Funcionalidade existe no backend, mas fica pouco acessivel.
 
 ### Dashboard usa regras simples de score
 
@@ -94,20 +94,19 @@ Impacto:
 
 ## Riscos tecnicos
 
-### Validacao ainda concentrada em DataAnnotations
+### Validacao ainda precisa evoluir alem dos vinculos principais
 
-ViewModels tem `Required`, `MaxLength` e `Range`, mas algumas regras de negocio ainda nao sao validadas no service.
+ViewModels tem `Required`, `MaxLength` e `Range`. Os vinculos opcionais principais ja sao validados nos services de identidades, objetivos, habitos e anotacoes, mas ainda ha regras de negocio que podem melhorar.
 
 Exemplos:
 
-- Verificar se `CategoryId`, `IdentityId`, `GoalId` e `HabitId` pertencem ao usuario antes de vincular.
 - Validar formato de `Icon`.
 - Validar formato de `Color`.
 - Validar `DaysOfWeek`.
 
-### Vinculos opcionais podem aceitar IDs de outro usuario
+### Vinculos opcionais devem ser reavaliados em novos modulos
 
-Nos services de criacao/edicao, os IDs opcionais sao atribuidos diretamente.
+Os modulos atuais ja receberam validacao de vinculos. O risco volta a existir se novos fluxos forem criados sem repetir esse padrao.
 
 Impacto potencial:
 
@@ -115,7 +114,7 @@ Impacto potencial:
 
 Recomendacao:
 
-- Antes de salvar, validar propriedade dos IDs opcionais.
+- Antes de salvar em novos fluxos, validar propriedade dos IDs opcionais.
 - Categorias globais devem permitir `UserId == null`; categorias privadas devem exigir `UserId == usuario`.
 
 ### Dependencia de CDN
@@ -189,4 +188,3 @@ O seed demo contem hash de senha e IDs fixos. Deve ser tratado apenas como dado 
 - Frequencia semanal, mensal e dias especificos.
 - Calendario depois que receber eventos reais.
 - Responsividade em mobile.
-

@@ -458,9 +458,18 @@ namespace OnePercentBetter.Web.Data.Migrations
                     b.Property<int?>("IdentityId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Reward")
                         .HasMaxLength(260)
                         .HasColumnType("nvarchar(260)");
+
+                    b.Property<int?>("StackedAfterHabitId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StackedAfterSimpleHabitId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -498,9 +507,50 @@ namespace OnePercentBetter.Web.Data.Migrations
 
                     b.HasIndex("IdentityId");
 
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("StackedAfterHabitId");
+
+                    b.HasIndex("StackedAfterSimpleHabitId");
+
                     b.HasIndex("UserId", "Status");
 
                     b.ToTable("Habits");
+                });
+
+            modelBuilder.Entity("OnePercentBetter.Web.Models.Entities.HabitLocation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("HabitLocations");
                 });
 
             modelBuilder.Entity("OnePercentBetter.Web.Models.Entities.HabitLog", b =>
@@ -611,6 +661,44 @@ namespace OnePercentBetter.Web.Data.Migrations
                     b.HasIndex("UserId", "Date");
 
                     b.ToTable("Notes");
+                });
+
+            modelBuilder.Entity("OnePercentBetter.Web.Models.Entities.SimpleHabit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.Property<TimeSpan?>("ScheduledTime")
+                        .HasColumnType("time");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "IsActive");
+
+                    b.HasIndex("UserId", "Name", "ScheduledTime");
+
+                    b.ToTable("SimpleHabits");
                 });
 
             modelBuilder.Entity("OnePercentBetter.Web.Models.Entities.UserIdentity", b =>
@@ -879,6 +967,21 @@ namespace OnePercentBetter.Web.Data.Migrations
                         .HasForeignKey("IdentityId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("OnePercentBetter.Web.Models.Entities.HabitLocation", "Location")
+                        .WithMany("Habits")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("OnePercentBetter.Web.Models.Entities.Habit", "StackedAfterHabit")
+                        .WithMany("StackedHabits")
+                        .HasForeignKey("StackedAfterHabitId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("OnePercentBetter.Web.Models.Entities.SimpleHabit", "StackedAfterSimpleHabit")
+                        .WithMany("StackedHabits")
+                        .HasForeignKey("StackedAfterSimpleHabitId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("OnePercentBetter.Web.Models.Identity.ApplicationUser", "User")
                         .WithMany("Habits")
                         .HasForeignKey("UserId")
@@ -890,6 +993,23 @@ namespace OnePercentBetter.Web.Data.Migrations
                     b.Navigation("Goal");
 
                     b.Navigation("Identity");
+
+                    b.Navigation("Location");
+
+                    b.Navigation("StackedAfterHabit");
+
+                    b.Navigation("StackedAfterSimpleHabit");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OnePercentBetter.Web.Models.Entities.HabitLocation", b =>
+                {
+                    b.HasOne("OnePercentBetter.Web.Models.Identity.ApplicationUser", "User")
+                        .WithMany("HabitLocations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -945,6 +1065,17 @@ namespace OnePercentBetter.Web.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("OnePercentBetter.Web.Models.Entities.SimpleHabit", b =>
+                {
+                    b.HasOne("OnePercentBetter.Web.Models.Identity.ApplicationUser", "User")
+                        .WithMany("SimpleHabits")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("OnePercentBetter.Web.Models.Entities.UserIdentity", b =>
                 {
                     b.HasOne("OnePercentBetter.Web.Models.Entities.Category", "Category")
@@ -984,6 +1115,18 @@ namespace OnePercentBetter.Web.Data.Migrations
                     b.Navigation("Logs");
 
                     b.Navigation("Notes");
+
+                    b.Navigation("StackedHabits");
+                });
+
+            modelBuilder.Entity("OnePercentBetter.Web.Models.Entities.HabitLocation", b =>
+                {
+                    b.Navigation("Habits");
+                });
+
+            modelBuilder.Entity("OnePercentBetter.Web.Models.Entities.SimpleHabit", b =>
+                {
+                    b.Navigation("StackedHabits");
                 });
 
             modelBuilder.Entity("OnePercentBetter.Web.Models.Entities.UserIdentity", b =>
@@ -1003,7 +1146,11 @@ namespace OnePercentBetter.Web.Data.Migrations
 
                     b.Navigation("Goals");
 
+                    b.Navigation("HabitLocations");
+
                     b.Navigation("Habits");
+
+                    b.Navigation("SimpleHabits");
 
                     b.Navigation("UserIdentities");
                 });

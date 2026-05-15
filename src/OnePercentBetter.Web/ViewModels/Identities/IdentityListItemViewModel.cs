@@ -10,6 +10,8 @@ public class IdentityListItemViewModel
 
     public string IdentityStatement { get; set; } = string.Empty;
 
+    public string? Description { get; set; }
+
     public string? CategoryName { get; set; }
 
     public ItemStatus Status { get; set; }

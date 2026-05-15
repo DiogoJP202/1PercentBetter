@@ -73,6 +73,28 @@ public class NoteService
         }, userId);
     }
 
+    public async Task<IReadOnlyDictionary<string, string>> ValidateFormAsync(string userId, NoteFormViewModel viewModel)
+    {
+        var errors = new Dictionary<string, string>();
+
+        if (viewModel.IdentityId.HasValue && !await _identityService.ExistsForUserAsync(userId, viewModel.IdentityId.Value))
+        {
+            errors[nameof(viewModel.IdentityId)] = "Identidade invalida para este usuario.";
+        }
+
+        if (viewModel.GoalId.HasValue && !await _goalService.ExistsForUserAsync(userId, viewModel.GoalId.Value))
+        {
+            errors[nameof(viewModel.GoalId)] = "Objetivo invalido para este usuario.";
+        }
+
+        if (viewModel.HabitId.HasValue && !await _habitService.ExistsForUserAsync(userId, viewModel.HabitId.Value))
+        {
+            errors[nameof(viewModel.HabitId)] = "Habito invalido para este usuario.";
+        }
+
+        return errors;
+    }
+
     public async Task<int> CreateAsync(string userId, NoteFormViewModel viewModel)
     {
         var note = new Note

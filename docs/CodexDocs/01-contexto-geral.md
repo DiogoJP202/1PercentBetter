@@ -47,7 +47,7 @@ Frontend:
 - ApexCharts para grafico do dashboard.
 - FullCalendar para tela de calendario.
 - Notyf para notificacoes.
-- SweetAlert2 carregado no layout para confirmacoes futuras.
+- SweetAlert2 para confirmacoes em acoes sensiveis.
 - Lucide Icons para icones.
 - jQuery apenas para validacao unobtrusive do ASP.NET Core.
 
@@ -118,4 +118,3 @@ Banco esperado para desenvolvimento local:
 
 - Instancia: `(localdb)\OnePercentBetterLocalDb`
 - Database: `OnePercentBetter`
-

@@ -10,13 +10,13 @@ public class DailyCheckInViewModel
 
     public MoodLevel Mood { get; set; } = MoodLevel.Neutral;
 
-    [Range(1, 5)]
+    [Range(1, 5, ErrorMessage = "Informe uma nota entre 1 e 5.")]
     public int EnergyLevel { get; set; } = 3;
 
-    [Range(1, 5)]
+    [Range(1, 5, ErrorMessage = "Informe uma nota entre 1 e 5.")]
     public int ProductivityLevel { get; set; } = 3;
 
-    [Range(1, 5)]
+    [Range(1, 5, ErrorMessage = "Informe uma nota entre 1 e 5.")]
     public int DayScore { get; set; } = 3;
 
     [MaxLength(500)]

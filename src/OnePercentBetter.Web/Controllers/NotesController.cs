@@ -41,6 +41,20 @@ public class NotesController : Controller
             return View(viewModel);
         }
 
+        foreach (var error in await _noteService.ValidateFormAsync(userId, viewModel))
+        {
+            ModelState.AddModelError(error.Key, error.Value);
+        }
+
+        if (!ModelState.IsValid)
+        {
+            var form = await _noteService.CreateFormAsync(userId);
+            viewModel.Identities = form.Identities;
+            viewModel.Goals = form.Goals;
+            viewModel.Habits = form.Habits;
+            return View(viewModel);
+        }
+
         await _noteService.CreateAsync(userId, viewModel);
         TempData["Success"] = "Anotacao criada.";
 
@@ -60,6 +74,20 @@ public class NotesController : Controller
     {
         var userId = User.GetRequiredUserId();
         viewModel.Id = id;
+
+        if (!ModelState.IsValid)
+        {
+            var form = await _noteService.CreateFormAsync(userId);
+            viewModel.Identities = form.Identities;
+            viewModel.Goals = form.Goals;
+            viewModel.Habits = form.Habits;
+            return View(viewModel);
+        }
+
+        foreach (var error in await _noteService.ValidateFormAsync(userId, viewModel))
+        {
+            ModelState.AddModelError(error.Key, error.Value);
+        }
 
         if (!ModelState.IsValid)
         {

@@ -18,7 +18,17 @@ public class HabitListItemViewModel
 
     public string? CategoryName { get; set; }
 
+    public string? LocationName { get; set; }
+
+    public string? StackedAfterHabitTitle { get; set; }
+
+    public string? StackedAfterText { get; set; }
+
     public ItemStatus Status { get; set; }
+
+    public HabitFrequencyType FrequencyType { get; set; }
+
+    public TimeSpan? SuggestedTime { get; set; }
 
     public HabitLogStatus? TodayStatus { get; set; }
 

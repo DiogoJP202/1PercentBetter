@@ -9,6 +9,7 @@ O build passa, mas a ultima tentativa de abrir servidor via comando em backgroun
 - Login.
 - Cadastro.
 - Onboarding.
+- Placeholders dinamicos do onboarding por area de foco.
 - Dashboard.
 - Criacao e edicao de identidade.
 - Criacao e edicao de objetivo.
@@ -27,36 +28,38 @@ Recomendacao:
 
 Pendencias:
 
-- Adicionar botao visivel de `Pular` na tela de habitos e no dashboard, ja que a action `Skip` existe.
-- Melhorar configuracao de frequencia:
-  - UI para dias especificos.
-  - Validacao de `DaysOfWeek`.
-  - Regra para `Custom`.
-  - Tratamento melhor para `Monthly` em meses sem o mesmo dia.
-- Exibir horario sugerido na listagem quando existir.
+- Validar visualmente a nova UI de dias especificos no navegador.
+- Melhorar regra de frequencia mensal para meses sem o mesmo dia.
+- Implementar regra real para `Custom` antes de voltar a exibir essa opcao.
+- Avaliar se frequencia semanal deve usar dia de criacao ou um dia escolhido pelo usuario.
 
-### Calendario com dados reais
+### Refinar calendario real
 
-Hoje o calendario renderiza, mas `events` esta vazio.
+O calendario ja consome `HabitLogs` reais via endpoint JSON. Ainda falta validar e refinar a experiencia.
 
-Implementar:
+Pendencias:
 
-- Endpoint JSON em `CalendarController`.
-- Eventos baseados em `HabitLogs`.
-- Cores por status.
+- Validar visualmente no navegador com dados demo.
+- Melhorar tooltip ou modal de detalhe do evento.
 - Filtros por habito, identidade ou status.
+- Opcional: mostrar tambem habitos pendentes do dia, nao apenas logs registrados.
 
-### Confirmacoes com SweetAlert2
+### Refinar confirmacoes com SweetAlert2
 
-SweetAlert2 esta carregado, mas ainda nao foi integrado.
+SweetAlert2 ja esta integrado de forma generica para forms com `data-confirm`.
 
-Aplicar confirmacoes em:
+Ja aplicado em:
 
 - Concluir objetivo.
 - Pausar objetivo.
 - Falhar habito.
 - Pular habito.
+
+Pendencias:
+
 - Futuras exclusoes.
+- Revisar textos depois de testes manuais.
+- Reaproveitar o padrao em novas acoes sensiveis.
 
 ### Testar e ajustar SQL LocalDB
 
@@ -77,7 +80,7 @@ Pendencias:
 - Campo de icone Lucide poderia virar seletor simples.
 - Formularios poderiam ter textos de ajuda curtos.
 - Datas e horarios precisam de revisao de UX.
-- Validacoes server-side podem ser reforcadas em services.
+- Validacoes server-side podem ser reforcadas para formatos de cor, icone e regras especificas de frequencia.
 
 ### Melhorar empty states
 
@@ -175,4 +178,3 @@ Deixar para fases posteriores:
 - Metas compostas e progresso quantitativo.
 - Relatorios exportaveis.
 - Gamificacao mais profunda.
-

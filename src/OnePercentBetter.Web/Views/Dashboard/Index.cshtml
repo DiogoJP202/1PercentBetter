@@ -11,7 +11,7 @@
         </div>
         <div class="flex flex-wrap gap-2">
             <a class="btn-primary" asp-controller="Habits" asp-action="Create"><i data-lucide="plus" class="h-4 w-4"></i>Novo habito</a>
-            <a class="btn-secondary" asp-controller="CheckIns" asp-action="Today">Check-in</a>
+            <a class="btn-secondary" asp-controller="CheckIns" asp-action="Index">Check-ins</a>
         </div>
     </div>
 
@@ -85,7 +85,13 @@
                                         </span>
                                         <div class="min-w-0">
                                             <h3 class="truncate font-bold text-white">@habit.Title</h3>
-                                            <p class="truncate text-sm text-slate-400">@habit.Trigger</p>
+                                            <p class="truncate text-sm text-slate-400">
+                                                @habit.Trigger
+                                                @if (habit.SuggestedTime.HasValue)
+                                                {
+                                                    <span> - @habit.SuggestedTime.Value.ToString(@"hh\:mm")</span>
+                                                }
+                                            </p>
                                         </div>
                                     </div>
                                     <p class="mt-3 rounded-xl bg-slate-950/60 px-3 py-2 text-sm text-slate-300">@habit.TwoMinuteVersion</p>
@@ -95,8 +101,20 @@
                                     <form asp-controller="Habits" asp-action="Complete" asp-route-id="@habit.Id" method="post">
                                         <button class="btn-primary" type="submit">Concluir</button>
                                     </form>
-                                    <form asp-controller="Habits" asp-action="Fail" asp-route-id="@habit.Id" method="post">
-                                        <button class="btn-secondary" type="submit">Falhei</button>
+                                    <form asp-controller="Habits" asp-action="Fail" asp-route-id="@habit.Id" method="post"
+                                          data-confirm
+                                          data-confirm-tone="danger"
+                                          data-confirm-title="Registrar falha?"
+                                          data-confirm-text="Isso marcara este habito como falhou hoje."
+                                          data-confirm-button="Registrar falha">
+                                        <button class="btn-danger" type="submit">Falhei</button>
+                                    </form>
+                                    <form asp-controller="Habits" asp-action="Skip" asp-route-id="@habit.Id" method="post"
+                                          data-confirm
+                                          data-confirm-title="Pular habito hoje?"
+                                          data-confirm-text="Isso registrara o habito como pulado no dia atual."
+                                          data-confirm-button="Pular hoje">
+                                        <button class="btn-secondary" type="submit">Pular</button>
                                     </form>
                                 </div>
                             </div>

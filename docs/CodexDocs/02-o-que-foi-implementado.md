@@ -31,11 +31,14 @@ Arquivos principais:
 - `Services/OnboardingService.cs`
 - `ViewModels/Onboarding/OnboardingViewModel.cs`
 - `Views/Onboarding/Index.cshtml`
+- `wwwroot/js/modules/onboarding.js`
 
 Implementado:
 
 - Tela inicial obrigatoria apos cadastro.
 - Formulario para criar uma area de foco, identidade, objetivo e primeiro habito.
+- Campos do onboarding iniciam vazios; exemplos aparecem apenas como placeholders.
+- Placeholders dinamicos por area de foco, com fallback generico quando a categoria nao possui exemplos especificos.
 - Criacao conjunta de `UserIdentity`, `Goal` e `Habit`.
 - Marcacao de `ApplicationUser.OnboardingCompletedAt`.
 - Bloqueio do dashboard para usuarios sem onboarding completo.
@@ -87,6 +90,7 @@ Implementado:
 - Relacionamento opcional com categoria.
 - Status, cor e icone configuraveis.
 - Contadores de objetivos e habitos relacionados.
+- Validacao de categoria vinculada para garantir categoria global ou pertencente ao usuario.
 
 ## Objetivos
 
@@ -111,6 +115,7 @@ Implementado:
 - Datas de inicio e alvo.
 - Acoes de pausar e concluir.
 - Contagem de habitos vinculados.
+- Validacao de categoria e identidade vinculadas para garantir que pertencem ao usuario logado ou, no caso de categoria, que seja global.
 
 ## Habitos
 
@@ -133,10 +138,14 @@ Implementado:
 - Criacao e edicao.
 - Vinculo opcional com identidade, objetivo e categoria.
 - Frequencia, dias especificos, horario sugerido e dificuldade no modelo.
+- Formulario com selecao visual de dias da semana quando a frequencia e dias especificos.
 - Versao de 2 minutos, gatilho e recompensa.
 - Status, cor e icone.
 - Registro diario de log como concluido, falhou ou pulado.
+- Botao `Pular` visivel na listagem e no dashboard.
+- Listagem com frequencia e horario sugerido.
 - Upsert de log por usuario, habito e data atual.
+- Validacao de categoria, identidade e objetivo vinculados para garantir que pertencem ao usuario logado ou, no caso de categoria, que seja global.
 
 ## Check-in diario
 
@@ -178,21 +187,30 @@ Implementado:
 - Tags.
 - Vinculo opcional com identidade, objetivo e habito.
 - Preview de conteudo com limite de 180 caracteres.
+- Validacao de identidade, objetivo e habito vinculados para garantir que pertencem ao usuario logado.
 
 ## Calendario
 
 Arquivos principais:
 
 - `Controllers/CalendarController.cs`
+- `Services/CalendarService.cs`
+- `ViewModels/Calendar/CalendarEventViewModel.cs`
+- `ViewModels/Calendar/CalendarEventExtendedPropsViewModel.cs`
 - `Views/Calendar/Index.cshtml`
 - `wwwroot/js/modules/calendar.js`
 
 Implementado:
 
-- Tela inicial de calendario.
+- Tela de calendario com FullCalendar.
 - FullCalendar carregado com locale `pt-br`.
 - Views `dayGridMonth`, `timeGridWeek` e `listWeek`.
-- Ainda nao ha eventos reais vindos do banco.
+- Endpoint JSON `Calendar/Events`.
+- Eventos reais baseados em `HabitLogs` do usuario logado.
+- Filtro por periodo usando `start` e `end` enviados pelo FullCalendar.
+- Eventos coloridos por status: concluido, falhou, pulado e parcial.
+- Legenda visual de status na tela.
+- Tooltip nativo com status e notas quando disponiveis.
 
 ## Categorias
 
@@ -220,6 +238,10 @@ Arquivos principais:
 - `wwwroot/css/app.css`
 - `wwwroot/js/app.js`
 - `wwwroot/js/modules/notifications.js`
+- `wwwroot/js/modules/dialogs.js`
+- `wwwroot/js/modules/dashboard.js`
+- `wwwroot/js/modules/calendar.js`
+- `wwwroot/js/modules/habits-form.js`
 - `tailwind.config.js`
 - `package.json`
 - `package-lock.json`
@@ -231,6 +253,7 @@ Implementado:
 - Tailwind CSS local, sem CDN do Tailwind.
 - Classes globais para botoes, cards, campos de formulario, validacoes e badges.
 - Notificacoes globais por `TempData` usando Notyf.
+- Confirmacoes globais com SweetAlert2 para forms marcados com `data-confirm`.
 - Inicializacao global de Lucide Icons.
 - JavaScript modular.
 - Traducoes de enums para PT-BR via `EnumDisplayExtensions`.
@@ -279,4 +302,5 @@ Implementado:
 - Bibliotecas visuais externas ainda sao carregadas por CDN para acelerar MVP.
 - Enums continuam persistidos como numeros, com traducao apenas na camada de exibicao.
 - Logs de habitos usam upsert por data para evitar duplicidade.
-
+- A frequencia `Custom` foi retirada do select de habitos por enquanto, pois ainda nao ha regra de negocio implementada para ela.
+- Services principais validam vinculos opcionais antes de persistir IDs enviados por formularios.

@@ -70,20 +70,26 @@ O onboarding cria a primeira estrutura minima do usuario.
 Fluxo:
 
 1. Cadastro redireciona para `OnboardingController.Index`.
-2. `OnboardingService.CreateFormAsync` carrega categorias disponiveis.
-3. Usuario preenche identidade, objetivo, habito, gatilho, versao de 2 minutos e recompensa.
-4. `OnboardingService.CompleteAsync` cria:
+2. `OnboardingService.CreateFormAsync` carrega categorias disponiveis sem selecionar uma categoria automaticamente.
+3. `Views/Onboarding/Index.cshtml` renderiza campos vazios e placeholders genericos iniciais.
+4. `wwwroot/js/modules/onboarding.js` troca os placeholders conforme a area de foco selecionada.
+5. Usuario preenche identidade, objetivo, habito, gatilho, versao de 2 minutos e recompensa.
+6. `OnboardingService.ValidateFormAsync` valida se a categoria informada pertence ao usuario ou e global.
+7. `OnboardingService.CompleteAsync` cria:
    - `UserIdentity`
    - `Goal`
    - `Habit`
-5. O mesmo metodo atualiza `ApplicationUser.OnboardingCompletedAt`.
-6. Usuario vai para o dashboard.
+8. O mesmo metodo atualiza `ApplicationUser.OnboardingCompletedAt`.
+9. Usuario vai para o dashboard.
 
 Detalhe importante:
 
+- `OnboardingViewModel.CategoryId` e nullable com `[Required]`, evitando selecao automatica no GET.
 - `Goal` recebe a `Identity` criada em memoria.
 - `Habit` recebe a `Identity` e o `Goal` criados em memoria.
+- `Reward` continua opcional e e salvo quando preenchido.
 - EF Core salva todo o grafo no mesmo `SaveChangesAsync`.
+- Nao houve nova migration para os placeholders dinamicos, pois a alteracao e de fluxo, ViewModel e frontend.
 
 ## Identidades, objetivos, habitos e anotacoes
 
@@ -191,10 +197,17 @@ Regras atuais:
 - `SpecificDays`: compara `DaysOfWeek` com o dia da semana.
 - Outros tipos caem como devido.
 
+Formulario:
+
+- O formulario de habitos exibe checkboxes de segunda a domingo quando `FrequencyType` e `SpecificDays`.
+- Os checkboxes preenchem `HabitFormViewModel.SelectedDaysOfWeek`.
+- `HabitService` converte `SelectedDaysOfWeek` para a string persistida em `Habit.DaysOfWeek`.
+- Quando a frequencia nao e `SpecificDays`, `DaysOfWeek` e salvo como `null`.
+- `Custom` foi removido do select do MVP, porque ainda nao possui regra real.
+
 Ponto de atencao:
 
-- O formulario ainda nao oferece uma UI completa para configurar `DaysOfWeek`.
-- `Custom` ainda nao tem regra real.
+- `Monthly` compara o dia do mes com `CreatedAt.Day`, sem tratamento especial para meses mais curtos.
 
 ### Sequencias
 
@@ -212,6 +225,38 @@ Ponto de atencao:
 - `Skipped`
 
 A View serializa `Model.WeeklyProgress` em `data-points`. O modulo `dashboard.js` le esse JSON e cria um ApexCharts de barras empilhadas.
+
+## Calendario
+
+O calendario usa FullCalendar no frontend e `CalendarService` no backend.
+
+Fluxo:
+
+1. `Views/Calendar/Index.cshtml` renderiza o container com `data-events-url`.
+2. `wwwroot/js/modules/calendar.js` inicializa FullCalendar.
+3. FullCalendar chama `CalendarController.Events` com query string `start` e `end`.
+4. `CalendarController` obtem o usuario logado e chama `CalendarService.GetHabitLogEventsAsync`.
+5. `CalendarService` consulta `HabitLogs` do usuario no periodo.
+6. Cada log vira um `CalendarEventViewModel`.
+7. A resposta JSON alimenta o calendario.
+
+Cada evento contem:
+
+- `id`
+- `title`
+- `start`
+- `allDay`
+- `backgroundColor`
+- `borderColor`
+- `textColor`
+- `extendedProps`
+
+As cores seguem o status:
+
+- `Completed`: verde.
+- `Failed`: rosa/vermelho.
+- `Skipped`: amarelo.
+- `Partial`: azul.
 
 ## Frontend
 
@@ -244,7 +289,24 @@ O layout tambem transforma `TempData["Success"]`, `TempData["Warning"]` e `TempD
 `wwwroot/js/app.js`:
 
 - Chama `showFlashMessages`.
+- Chama `bindConfirmDialogs`.
 - Inicializa `window.lucide.createIcons()`.
+
+### Confirmacoes
+
+`wwwroot/js/modules/dialogs.js`:
+
+- Procura forms com `data-confirm`.
+- Intercepta o submit.
+- Exibe SweetAlert2 com textos definidos em `data-confirm-title`, `data-confirm-text` e `data-confirm-button`.
+- Se o usuario confirma, reenvia o form.
+
+Usado atualmente em:
+
+- Falhar habito.
+- Pular habito.
+- Pausar objetivo.
+- Concluir objetivo.
 
 ### CSS
 
@@ -353,4 +415,3 @@ Delete behavior:
 `003_demo_summary_queries.sql`:
 
 - Lista usuario, identidades, objetivos, habitos, logs, check-ins e notas do usuario demo.
-

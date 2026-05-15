@@ -28,6 +28,7 @@ public class IdentityService
                 Id = identity.Id,
                 Name = identity.Name,
                 IdentityStatement = identity.IdentityStatement,
+                Description = identity.Description,
                 CategoryName = identity.Category != null ? identity.Category.Name : null,
                 Status = identity.Status,
                 Color = identity.Color,
@@ -85,6 +86,25 @@ public class IdentityService
             .ToListAsync();
     }
 
+    public async Task<bool> ExistsForUserAsync(string userId, int identityId)
+    {
+        return await _dbContext.UserIdentities
+            .AsNoTracking()
+            .AnyAsync(identity => identity.Id == identityId && identity.UserId == userId);
+    }
+
+    public async Task<IReadOnlyDictionary<string, string>> ValidateFormAsync(string userId, IdentityFormViewModel viewModel)
+    {
+        var errors = new Dictionary<string, string>();
+
+        if (viewModel.CategoryId.HasValue && !await _categoryService.ExistsForUserAsync(userId, viewModel.CategoryId.Value))
+        {
+            errors[nameof(viewModel.CategoryId)] = "Categoria inválida para este usuário.";
+        }
+
+        return errors;
+    }
+
     public async Task<int> CreateAsync(string userId, IdentityFormViewModel viewModel)
     {
         var identity = new UserIdentity
@@ -95,8 +115,8 @@ public class IdentityService
             Description = viewModel.Description?.Trim(),
             CategoryId = viewModel.CategoryId,
             Status = viewModel.Status,
-            Color = viewModel.Color,
-            Icon = viewModel.Icon
+            Color = NormalizeColor(viewModel.Color),
+            Icon = NormalizeIcon(viewModel.Icon)
         };
 
         _dbContext.UserIdentities.Add(identity);
@@ -125,11 +145,37 @@ public class IdentityService
         identity.Description = viewModel.Description?.Trim();
         identity.CategoryId = viewModel.CategoryId;
         identity.Status = viewModel.Status;
-        identity.Color = viewModel.Color;
-        identity.Icon = viewModel.Icon;
+        identity.Color = NormalizeColor(viewModel.Color);
+        identity.Icon = NormalizeIcon(viewModel.Icon);
         identity.UpdatedAt = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<bool> DeleteAsync(string userId, int id)
+    {
+        var identity = await _dbContext.UserIdentities
+            .FirstOrDefaultAsync(item => item.UserId == userId && item.Id == id);
+
+        if (identity is null)
+        {
+            return false;
+        }
+
+        _dbContext.UserIdentities.Remove(identity);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
+
+    private static string NormalizeColor(string? color)
+    {
+        return string.IsNullOrWhiteSpace(color) ? "#22c55e" : color.Trim();
+    }
+
+    private static string NormalizeIcon(string? icon)
+    {
+        return string.IsNullOrWhiteSpace(icon) ? "user-round-check" : icon.Trim();
     }
 }

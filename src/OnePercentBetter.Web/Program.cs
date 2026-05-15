@@ -36,9 +36,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<IdentityService>();
 builder.Services.AddScoped<GoalService>();
+builder.Services.AddScoped<HabitLocationService>();
+builder.Services.AddScoped<SimpleHabitService>();
 builder.Services.AddScoped<HabitService>();
 builder.Services.AddScoped<CheckInService>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<CalendarService>();
 builder.Services.AddScoped<OnboardingService>();
 builder.Services.AddScoped<NoteService>();
 

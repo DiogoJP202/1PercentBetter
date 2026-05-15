@@ -1,56 +1,187 @@
 @model IReadOnlyList<GoalListItemViewModel>
 @{
     ViewData["Title"] = "Objetivos";
+    var today = DateTime.Today;
+    var activeCount = Model.Count(item => item.Status == ItemStatus.Active);
+    var completedCount = Model.Count(item => item.Status == ItemStatus.Completed);
+    var overdueCount = Model.Count(item => item.Status == ItemStatus.Active && item.TargetDate.HasValue && item.TargetDate.Value.Date < today);
+    var totalHabits = Model.Sum(item => item.HabitsCount);
 }
 
 <div class="space-y-6">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
             <p class="text-sm font-semibold text-sky-300">Objetivos</p>
-            <h1 class="mt-1 text-3xl font-black text-white">Direcoes do seu sistema</h1>
+            <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Direções do seu sistema</h1>
+            <p class="mt-2 max-w-2xl text-sm text-slate-400">Objetivos traduzem suas identidades em resultados claros. Depois, os hábitos transformam esses resultados em rotina.</p>
         </div>
-        <a class="btn-primary" asp-action="Create"><i data-lucide="plus" class="h-4 w-4"></i>Novo objetivo</a>
+        <a class="btn-primary" asp-action="Create">
+            <i data-lucide="plus" class="h-4 w-4"></i>
+            Novo objetivo
+        </a>
     </div>
 
-    <div class="grid gap-4">
-        @foreach (var item in Model)
-        {
-            <article class="app-card p-5">
-                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-3">
-                            <span class="grid h-10 w-10 place-items-center rounded-xl border border-white/10" style="color:@item.Color">
-                                <i data-lucide="@item.Icon" class="h-5 w-5"></i>
-                            </span>
-                            <div class="min-w-0">
-                                <h2 class="truncate text-lg font-black text-white">@item.Title</h2>
-                                <p class="text-sm text-slate-400">@item.IdentityName</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="status-pill">@item.Status.ToDisplayName()</span>
-                        <span class="status-pill">@item.Priority.ToDisplayName()</span>
-                    </div>
-                </div>
-                <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-400">
-                    <span>@item.HabitsCount habito(s) vinculado(s)</span>
-                    <div class="flex flex-wrap gap-2">
-                        <a class="btn-secondary" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
-                        <form asp-action="Pause" asp-route-id="@item.Id" method="post">
-                            <button class="btn-secondary" type="submit">Pausar</button>
-                        </form>
-                        <form asp-action="Complete" asp-route-id="@item.Id" method="post">
-                            <button class="btn-primary" type="submit">Concluir</button>
-                        </form>
-                    </div>
-                </div>
-            </article>
-        }
-    </div>
+    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="app-card p-5">
+            <div class="text-sm text-slate-400">Objetivos ativos</div>
+            <div class="mt-3 text-4xl font-black text-sky-300">@activeCount</div>
+            <p class="mt-2 text-xs text-slate-500">Direções abertas no sistema.</p>
+        </div>
+        <div class="app-card p-5">
+            <div class="text-sm text-slate-400">Concluídos</div>
+            <div class="mt-3 text-4xl font-black text-emerald-300">@completedCount</div>
+            <p class="mt-2 text-xs text-slate-500">Resultados já alcançados.</p>
+        </div>
+        <div class="app-card p-5">
+            <div class="text-sm text-slate-400">Hábitos vinculados</div>
+            <div class="mt-3 text-4xl font-black text-white">@totalHabits</div>
+            <p class="mt-2 text-xs text-slate-500">Ações conectadas aos objetivos.</p>
+        </div>
+        <div class="app-card p-5">
+            <div class="text-sm text-slate-400">Atenção</div>
+            <div class="mt-3 text-4xl font-black @(overdueCount > 0 ? "text-rose-300" : "text-slate-300")">@overdueCount</div>
+            <p class="mt-2 text-xs text-slate-500">Objetivos ativos com data alvo vencida.</p>
+        </div>
+    </section>
 
     @if (!Model.Any())
     {
-        <div class="app-card p-8 text-center text-slate-400">Nenhum objetivo criado ainda.</div>
+        <section class="app-card p-8 text-center">
+            <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-sky-300/20 bg-sky-300/10 text-sky-300">
+                <i data-lucide="target" class="h-7 w-7"></i>
+            </div>
+            <h2 class="mt-5 text-2xl font-black text-white">Você ainda não criou nenhum objetivo.</h2>
+            <p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-400">Comece escolhendo uma direção clara. Um bom objetivo conecta quem você quer se tornar com os hábitos que vai praticar.</p>
+            <a class="btn-primary mt-5" asp-action="Create">
+                <i data-lucide="plus" class="h-4 w-4"></i>
+                Criar primeiro objetivo
+            </a>
+        </section>
+    }
+    else
+    {
+        <div class="grid gap-4">
+            @foreach (var item in Model)
+            {
+                var statusClass = item.Status switch
+                {
+                    ItemStatus.Active => "status-pill-success",
+                    ItemStatus.Paused => "status-pill-warning",
+                    ItemStatus.Completed => "status-pill-info",
+                    ItemStatus.Canceled => "status-pill-danger",
+                    _ => "status-pill-neutral"
+                };
+                var priorityClass = item.Priority switch
+                {
+                    GoalPriority.High => "status-pill-danger",
+                    GoalPriority.Medium => "status-pill-warning",
+                    GoalPriority.Low => "status-pill-info",
+                    _ => "status-pill-neutral"
+                };
+                var targetLabel = item.TargetDate.HasValue ? item.TargetDate.Value.ToString("dd/MM/yyyy") : "Sem data alvo";
+                var isOverdue = item.Status == ItemStatus.Active && item.TargetDate.HasValue && item.TargetDate.Value.Date < today;
+
+                <article class="app-card p-5">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-3">
+                                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/10 bg-slate-950/50" style="color:@item.Color">
+                                    <i data-lucide="@item.Icon" class="h-6 w-6"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <h2 class="truncate text-xl font-black text-white">@item.Title</h2>
+                                    <p class="mt-1 text-sm text-slate-400">
+                                        @(string.IsNullOrWhiteSpace(item.IdentityName) ? "Sem identidade vinculada" : item.IdentityName)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            <span class="status-pill @statusClass">@item.Status.ToDisplayName()</span>
+                            <span class="status-pill @priorityClass">@item.Priority.ToDisplayName()</span>
+                            @if (isOverdue)
+                            {
+                                <span class="status-pill status-pill-danger">Vencido</span>
+                            }
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        <p class="mt-4 text-sm leading-6 text-slate-400">@item.Description</p>
+                    }
+
+                    <div class="mt-5 grid gap-3 md:grid-cols-4">
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                            <div class="text-xs text-slate-500">Categoria</div>
+                            <div class="mt-1 truncate text-sm font-bold text-slate-200">@(string.IsNullOrWhiteSpace(item.CategoryName) ? "Sem categoria" : item.CategoryName)</div>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                            <div class="text-xs text-slate-500">Início</div>
+                            <div class="mt-1 text-sm font-bold text-slate-200">@item.StartDate.ToString("dd/MM/yyyy")</div>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                            <div class="text-xs text-slate-500">Data alvo</div>
+                            <div class="mt-1 text-sm font-bold @(isOverdue ? "text-rose-300" : "text-slate-200")">@targetLabel</div>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                            <div class="text-xs text-slate-500">Hábitos</div>
+                            <div class="mt-1 text-sm font-bold text-slate-200">@item.HabitsCount vinculado(s)</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 flex flex-wrap items-center justify-end gap-2">
+                        <a class="btn-secondary" asp-action="Edit" asp-route-id="@item.Id">
+                            <i data-lucide="pencil" class="h-4 w-4"></i>
+                            Editar
+                        </a>
+                        @if (item.Status == ItemStatus.Active)
+                        {
+                            <form asp-action="Pause"
+                                  asp-route-id="@item.Id"
+                                  method="post"
+                                  data-confirm
+                                  data-confirm-title="Pausar objetivo?"
+                                  data-confirm-text="O objetivo sairá dos objetivos ativos até ser reativado por edição."
+                                  data-confirm-button="Pausar">
+                                <button class="btn-secondary" type="submit">
+                                    <i data-lucide="pause" class="h-4 w-4"></i>
+                                    Pausar
+                                </button>
+                            </form>
+                        }
+                        @if (item.Status != ItemStatus.Completed)
+                        {
+                            <form asp-action="Complete"
+                                  asp-route-id="@item.Id"
+                                  method="post"
+                                  data-confirm
+                                  data-confirm-title="Concluir objetivo?"
+                                  data-confirm-text="Isso marcará o objetivo como concluído."
+                                  data-confirm-button="Concluir">
+                                <button class="btn-primary" type="submit">
+                                    <i data-lucide="check" class="h-4 w-4"></i>
+                                    Concluir
+                                </button>
+                            </form>
+                        }
+                        <form asp-action="Delete"
+                              asp-route-id="@item.Id"
+                              method="post"
+                              data-confirm
+                              data-confirm-tone="danger"
+                              data-confirm-title="Excluir objetivo?"
+                              data-confirm-text="Hábitos e anotações vinculados serão preservados, mas ficarão sem este objetivo."
+                              data-confirm-button="Excluir">
+                            <button class="btn-danger" type="submit">
+                                <i data-lucide="trash-2" class="h-4 w-4"></i>
+                                Excluir
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            }
+        </div>
     }
 </div>

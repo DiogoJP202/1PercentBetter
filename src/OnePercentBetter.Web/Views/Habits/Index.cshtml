@@ -1,20 +1,44 @@
 @model IReadOnlyList<HabitListItemViewModel>
 @{
-    ViewData["Title"] = "Habitos";
+    ViewData["Title"] = "Hábitos";
 }
 
 <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-            <p class="text-sm font-semibold text-emerald-300">Habitos</p>
-            <h1 class="mt-1 text-3xl font-black text-white">Pequenas acoes, todos os dias</h1>
+            <p class="text-sm font-semibold text-emerald-300">Hábitos</p>
+            <h1 class="mt-1 text-3xl font-black text-white">Pequenas ações, todos os dias</h1>
         </div>
-        <a class="btn-primary" asp-action="Create"><i data-lucide="plus" class="h-4 w-4"></i>Novo habito</a>
+        <a class="btn-primary" asp-action="Create"><i data-lucide="plus" class="h-4 w-4"></i>Novo hábito</a>
     </div>
 
     <div class="grid gap-4">
         @foreach (var item in Model)
         {
+            var todayPillClass = item.TodayStatus switch
+            {
+                HabitLogStatus.Completed => "status-pill-success",
+                HabitLogStatus.Failed => "status-pill-danger",
+                HabitLogStatus.Skipped => "status-pill-warning",
+                HabitLogStatus.Partial => "status-pill-info",
+                _ => "status-pill-warning"
+            };
+            var todayIcon = item.TodayStatus switch
+            {
+                HabitLogStatus.Completed => "check",
+                HabitLogStatus.Failed => "x",
+                HabitLogStatus.Skipped => "skip-forward",
+                HabitLogStatus.Partial => "circle-dashed",
+                _ => "clock"
+            };
+            var statusPillClass = item.Status switch
+            {
+                ItemStatus.Active => "status-pill-success",
+                ItemStatus.Paused => "status-pill-warning",
+                ItemStatus.Completed => "status-pill-info",
+                ItemStatus.Canceled => "status-pill-danger",
+                _ => "status-pill-neutral"
+            };
             <article class="app-card p-5">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div class="min-w-0">
@@ -24,7 +48,23 @@
                             </span>
                             <div class="min-w-0">
                                 <h2 class="truncate text-lg font-black text-white">@item.Title</h2>
-                                <p class="truncate text-sm text-slate-400">@item.IdentityName - @item.GoalTitle</p>
+                                <p class="truncate text-sm text-slate-400">@(string.Join(" - ", new[] { item.IdentityName, item.GoalTitle }.Where(value => !string.IsNullOrWhiteSpace(value))))</p>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    <span class="status-pill status-pill-info"><i data-lucide="repeat-2"></i>@item.FrequencyType.ToDisplayName()</span>
+                                    <span class="status-pill @statusPillClass"><i data-lucide="activity"></i>@item.Status.ToDisplayName()</span>
+                                    @if (item.SuggestedTime.HasValue)
+                                    {
+                                        <span class="status-pill status-pill-neutral"><i data-lucide="clock"></i>@item.SuggestedTime.Value.ToString(@"hh\:mm")</span>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(item.LocationName))
+                                    {
+                                        <span class="status-pill status-pill-neutral"><i data-lucide="map-pin"></i>@item.LocationName</span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(item.StackedAfterText))
+                                {
+                                    <p class="mt-2 text-xs text-slate-500">Depois de @item.StackedAfterText, eu irei @item.Title.</p>
+                                }
                             </div>
                         </div>
                         <div class="mt-4 grid gap-3 md:grid-cols-2">
@@ -33,13 +73,25 @@
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="status-pill">Hoje: @(item.TodayStatus?.ToDisplayName() ?? "Pendente")</span>
+                        <span class="status-pill @todayPillClass"><i data-lucide="@todayIcon"></i>Hoje: @(item.TodayStatus?.ToDisplayName() ?? "Pendente")</span>
                         <a class="btn-secondary" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
                         <form asp-action="Complete" asp-route-id="@item.Id" method="post">
                             <button class="btn-primary" type="submit">Concluir</button>
                         </form>
-                        <form asp-action="Fail" asp-route-id="@item.Id" method="post">
+                        <form asp-action="Fail" asp-route-id="@item.Id" method="post"
+                              data-confirm
+                              data-confirm-tone="danger"
+                              data-confirm-title="Registrar falha?"
+                              data-confirm-text="Isso marcará este hábito como falhou hoje."
+                              data-confirm-button="Registrar falha">
                             <button class="btn-danger" type="submit">Falhei</button>
+                        </form>
+                        <form asp-action="Skip" asp-route-id="@item.Id" method="post"
+                              data-confirm
+                              data-confirm-title="Pular hábito hoje?"
+                              data-confirm-text="Isso registrará o hábito como pulado no dia atual."
+                              data-confirm-button="Pular hoje">
+                            <button class="btn-secondary" type="submit">Pular</button>
                         </form>
                     </div>
                 </div>
@@ -49,6 +101,6 @@
 
     @if (!Model.Any())
     {
-        <div class="app-card p-8 text-center text-slate-400">Nenhum habito criado ainda.</div>
+        <div class="app-card p-8 text-center text-slate-400">Nenhum hábito criado ainda.</div>
     }
 </div>

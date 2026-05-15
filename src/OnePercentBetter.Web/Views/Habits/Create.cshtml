@@ -1,13 +1,14 @@
 @model HabitFormViewModel
 @{
-    ViewData["Title"] = "Novo habito";
+    ViewData["Title"] = "Novo hábito";
 }
 
 <div class="mx-auto max-w-4xl">
-    <h1 class="mb-6 text-3xl font-black text-white">Novo habito atomico</h1>
+    <h1 class="mb-6 text-3xl font-black text-white">Novo hábito atômico</h1>
     <partial name="_Form" model="Model" />
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script type="module" src="~/js/modules/habits-form.js" asp-append-version="true"></script>
 }

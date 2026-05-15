@@ -5,35 +5,35 @@ namespace OnePercentBetter.Web.ViewModels.Onboarding;
 
 public class OnboardingViewModel
 {
-    [Required(ErrorMessage = "Escolha uma area de foco.")]
-    public int CategoryId { get; set; }
+    [Required(ErrorMessage = "Escolha uma área de foco.")]
+    public int? CategoryId { get; set; }
 
     [Required(ErrorMessage = "Nomeie a identidade.")]
     [MaxLength(120)]
-    public string IdentityName { get; set; } = "Desenvolvedor .NET consistente";
+    public string IdentityName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Escreva a frase da identidade.")]
     [MaxLength(260)]
-    public string IdentityStatement { get; set; } = "Eu sou uma pessoa que evolui tecnicamente todos os dias.";
+    public string IdentityStatement { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Informe o primeiro objetivo.")]
     [MaxLength(160)]
-    public string GoalTitle { get; set; } = "Evoluir em ASP.NET Core MVC";
+    public string GoalTitle { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Informe o primeiro habito.")]
+    [Required(ErrorMessage = "Informe o primeiro hábito.")]
     [MaxLength(160)]
-    public string HabitTitle { get; set; } = "Estudar ASP.NET Core por 20 minutos";
+    public string HabitTitle { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Defina a versao de 2 minutos.")]
+    [Required(ErrorMessage = "Defina a versão de 2 minutos.")]
     [MaxLength(260)]
-    public string TwoMinuteVersion { get; set; } = "Abrir o projeto e revisar uma controller.";
+    public string TwoMinuteVersion { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Defina o gatilho.")]
     [MaxLength(260)]
-    public string Trigger { get; set; } = "Depois do cafe da noite.";
+    public string Trigger { get; set; } = string.Empty;
 
     [MaxLength(260)]
-    public string? Reward { get; set; } = "Marcar progresso no dashboard.";
+    public string? Reward { get; set; }
 
     public IReadOnlyList<SelectOptionViewModel> Categories { get; set; } = [];
 }

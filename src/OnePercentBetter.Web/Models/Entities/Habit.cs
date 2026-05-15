@@ -32,6 +32,18 @@ public class Habit
 
     public Category? Category { get; set; }
 
+    public int? LocationId { get; set; }
+
+    public HabitLocation? Location { get; set; }
+
+    public int? StackedAfterHabitId { get; set; }
+
+    public Habit? StackedAfterHabit { get; set; }
+
+    public int? StackedAfterSimpleHabitId { get; set; }
+
+    public SimpleHabit? StackedAfterSimpleHabit { get; set; }
+
     public HabitFrequencyType FrequencyType { get; set; } = HabitFrequencyType.Daily;
 
     [MaxLength(80)]
@@ -67,4 +79,6 @@ public class Habit
     public ICollection<HabitLog> Logs { get; } = new List<HabitLog>();
 
     public ICollection<Note> Notes { get; } = new List<Note>();
+
+    public ICollection<Habit> StackedHabits { get; } = new List<Habit>();
 }

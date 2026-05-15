@@ -38,6 +38,17 @@ public class IdentitiesController : Controller
             return View(viewModel);
         }
 
+        foreach (var error in await _identityService.ValidateFormAsync(userId, viewModel))
+        {
+            ModelState.AddModelError(error.Key, error.Value);
+        }
+
+        if (!ModelState.IsValid)
+        {
+            viewModel.Categories = (await _identityService.CreateFormAsync(userId)).Categories;
+            return View(viewModel);
+        }
+
         await _identityService.CreateAsync(userId, viewModel);
         TempData["Success"] = "Identidade criada.";
 
@@ -64,6 +75,17 @@ public class IdentitiesController : Controller
             return View(viewModel);
         }
 
+        foreach (var error in await _identityService.ValidateFormAsync(userId, viewModel))
+        {
+            ModelState.AddModelError(error.Key, error.Value);
+        }
+
+        if (!ModelState.IsValid)
+        {
+            viewModel.Categories = (await _identityService.CreateFormAsync(userId)).Categories;
+            return View(viewModel);
+        }
+
         var updated = await _identityService.UpdateAsync(userId, viewModel);
         if (!updated)
         {
@@ -71,6 +93,20 @@ public class IdentitiesController : Controller
         }
 
         TempData["Success"] = "Identidade atualizada.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var deleted = await _identityService.DeleteAsync(User.GetRequiredUserId(), id);
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        TempData["Success"] = "Identidade excluída. Objetivos, hábitos e anotações vinculados foram preservados.";
         return RedirectToAction(nameof(Index));
     }
 }

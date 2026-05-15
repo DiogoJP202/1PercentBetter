@@ -1,24 +1,58 @@
 @model HabitFormViewModel
+@{
+    var dayOptions = new (DayOfWeek Value, string Label)[]
+    {
+        (DayOfWeek.Monday, "Seg"),
+        (DayOfWeek.Tuesday, "Ter"),
+        (DayOfWeek.Wednesday, "Qua"),
+        (DayOfWeek.Thursday, "Qui"),
+        (DayOfWeek.Friday, "Sex"),
+        (DayOfWeek.Saturday, "Sáb"),
+        (DayOfWeek.Sunday, "Dom")
+    };
+    var selectedDays = Model.SelectedDaysOfWeek.ToHashSet();
+    var selectedIcon = HabitVisualOptions.Icons.FirstOrDefault(icon => icon.Value == Model.Icon) ?? HabitVisualOptions.Icons.First();
+    var selectedColor = string.IsNullOrWhiteSpace(Model.Color) ? HabitVisualOptions.DefaultColor : Model.Color;
+}
 
-<form class="app-card space-y-6 p-6" method="post">
+<form class="app-card space-y-6 p-6" method="post" autocomplete="off" data-habit-form data-habit-location-url="@Url.Action("CreateLocation", "Habits")" data-habit-simple-url="@Url.Action("CreateSimpleHabit", "Habits")">
     <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
+
+    <section class="rounded-2xl border border-white/10 bg-white/[0.03] p-4" data-habit-preview>
+        <div class="flex items-start gap-3">
+            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/10 bg-slate-950/60" style="color:@selectedColor" data-habit-preview-icon>
+                <i data-lucide="@selectedIcon.Value" class="h-6 w-6"></i>
+            </span>
+            <div class="min-w-0">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Prévia do hábito</p>
+                <h2 class="mt-1 truncate text-xl font-black text-white" data-habit-preview-title>@(string.IsNullOrWhiteSpace(Model.Title) ? "Seu novo hábito" : Model.Title)</h2>
+                <p class="mt-1 text-sm text-slate-400" data-habit-preview-stack></p>
+                <div class="mt-3 grid gap-2 md:grid-cols-2">
+                    <p class="rounded-xl bg-slate-950/60 px-3 py-2 text-sm text-slate-300" data-habit-preview-trigger>@(string.IsNullOrWhiteSpace(Model.Trigger) ? "Quando a situação X surgir, executarei a resposta Y" : Model.Trigger)</p>
+                    <p class="rounded-xl bg-slate-950/60 px-3 py-2 text-sm text-slate-300" data-habit-preview-two-minute>@(string.IsNullOrWhiteSpace(Model.TwoMinuteVersion) ? "Fazer a menor versão possível por 2 minutos" : Model.TwoMinuteVersion)</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <div class="grid gap-4 md:grid-cols-2">
         <div>
-            <label asp-for="Title" class="form-label">Titulo</label>
-            <input asp-for="Title" class="form-input" />
+            <label asp-for="Title" class="form-label">Título</label>
+            <input asp-for="Title" class="form-input" placeholder="Estudar japonês por 20 minutos" data-habit-title-input />
             <span asp-validation-for="Title"></span>
         </div>
         <div>
-            <label asp-for="SuggestedTime" class="form-label">Horario sugerido</label>
+            <label asp-for="SuggestedTime" class="form-label">Horário sugerido</label>
             <input asp-for="SuggestedTime" class="form-input" />
+            <p class="mt-2 text-xs text-slate-500">Opcional. Use quando quiser lembrar o melhor horário para executar o hábito.</p>
             <span asp-validation-for="SuggestedTime"></span>
         </div>
     </div>
 
     <div>
-        <label asp-for="Description" class="form-label">Descricao</label>
-        <textarea asp-for="Description" class="form-textarea"></textarea>
+        <label asp-for="Description" class="form-label">Descrição</label>
+        <textarea asp-for="Description" class="form-textarea" placeholder="Detalhe contexto, intenção ou observações importantes para este hábito."></textarea>
+        <span asp-validation-for="Description"></span>
     </div>
 
     <div class="grid gap-4 md:grid-cols-3">
@@ -31,6 +65,8 @@
                     <option value="@identity.Value">@identity.Text</option>
                 }
             </select>
+            <p class="mt-2 text-xs text-slate-500">Você pode criar ou gerenciar suas identidades na página de <a class="font-semibold text-emerald-300 hover:text-emerald-200" asp-controller="Identities" asp-action="Index">Identidades</a>.</p>
+            <span asp-validation-for="IdentityId"></span>
         </div>
         <div>
             <label asp-for="GoalId" class="form-label">Objetivo</label>
@@ -41,6 +77,8 @@
                     <option value="@goal.Value">@goal.Text</option>
                 }
             </select>
+            <p class="mt-2 text-xs text-slate-500">Você pode criar ou gerenciar seus objetivos na página de <a class="font-semibold text-emerald-300 hover:text-emerald-200" asp-controller="Goals" asp-action="Index">Objetivos</a>.</p>
+            <span asp-validation-for="GoalId"></span>
         </div>
         <div>
             <label asp-for="CategoryId" class="form-label">Categoria</label>
@@ -51,55 +89,247 @@
                     <option value="@category.Value">@category.Text</option>
                 }
             </select>
+            <p class="mt-2 text-xs text-slate-500">Use a categoria para organizar hábitos por área de foco.</p>
+            <span asp-validation-for="CategoryId"></span>
         </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+        <div>
+            <label asp-for="LocationId" class="form-label">Local do hábito</label>
+            <select asp-for="LocationId" class="form-select" data-habit-location-select>
+                <option value="">Sem local</option>
+                @foreach (var location in Model.Locations)
+                {
+                    <option value="@location.Value">@location.Text</option>
+                }
+            </select>
+            <p class="mt-2 text-xs text-slate-500">Você pode selecionar um local já cadastrado ou criar um novo local pessoal.</p>
+            <span asp-validation-for="LocationId"></span>
+        </div>
+        <button type="button" class="btn-secondary" data-habit-location-open>
+            <i data-lucide="map-pin-plus" class="h-4 w-4"></i>
+            Novo local
+        </button>
     </div>
 
     <div class="grid gap-4 md:grid-cols-3">
         <div>
-            <label asp-for="FrequencyType" class="form-label">Frequencia</label>
-            <select asp-for="FrequencyType" asp-items="@(EnumDisplayExtensions.ToSelectList<HabitFrequencyType>())" class="form-select"></select>
+            <label asp-for="FrequencyType" class="form-label">Frequência</label>
+            <select asp-for="FrequencyType" asp-items="@(EnumDisplayExtensions.ToSelectList<HabitFrequencyType>(HabitFrequencyType.Custom))" class="form-select" data-habit-frequency-select></select>
+            <span asp-validation-for="FrequencyType"></span>
         </div>
         <div>
             <label asp-for="Difficulty" class="form-label">Dificuldade</label>
             <select asp-for="Difficulty" asp-items="@(EnumDisplayExtensions.ToSelectList<HabitDifficulty>())" class="form-select"></select>
+            <span asp-validation-for="Difficulty"></span>
         </div>
         <div>
             <label asp-for="Status" class="form-label">Status</label>
             <select asp-for="Status" asp-items="@(EnumDisplayExtensions.ToSelectList<ItemStatus>())" class="form-select"></select>
+            <span asp-validation-for="Status"></span>
         </div>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2">
+    <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4 @(Model.FrequencyType == HabitFrequencyType.SpecificDays ? string.Empty : "hidden")" data-habit-frequency-days>
+        <div class="mb-3">
+            <div class="text-sm font-bold text-slate-200">Dias da semana</div>
+            <p class="mt-1 text-xs text-slate-500">Use quando a frequência for dias específicos.</p>
+        </div>
+        <div class="grid gap-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
+            @foreach (var day in dayOptions)
+            {
+                <label class="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-slate-950/50 px-3 py-2 text-sm font-semibold text-slate-200">
+                    <input class="h-4 w-4 accent-emerald-400" type="checkbox" name="SelectedDaysOfWeek" value="@day.Value" checked="@selectedDays.Contains(day.Value)" />
+                    <span>@day.Label</span>
+                </label>
+            }
+        </div>
+        <span asp-validation-for="SelectedDaysOfWeek"></span>
+    </div>
+
+    <div class="grid gap-4">
         <div>
             <label asp-for="Trigger" class="form-label">Gatilho</label>
-            <input asp-for="Trigger" class="form-input" />
+            <input asp-for="Trigger" class="form-input" placeholder="Quando eu terminar o almoço, vou revisar minhas anotações" data-habit-trigger-input />
             <span asp-validation-for="Trigger"></span>
         </div>
         <div>
-            <label asp-for="TwoMinuteVersion" class="form-label">Versao de 2 minutos</label>
-            <input asp-for="TwoMinuteVersion" class="form-input" />
+            <label asp-for="TwoMinuteVersion" class="form-label">Versão de 2 minutos</label>
+            <input asp-for="TwoMinuteVersion" class="form-input" placeholder="Ler uma página ou abrir o projeto por 2 minutos" data-habit-two-minute-input />
             <span asp-validation-for="TwoMinuteVersion"></span>
         </div>
     </div>
 
     <div>
         <label asp-for="Reward" class="form-label">Recompensa</label>
-        <input asp-for="Reward" class="form-input" />
+        <input asp-for="Reward" class="form-input" placeholder="Sentir progresso real e marcar o hábito no dashboard" />
+        <span asp-validation-for="Reward"></span>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2">
+    <section class="grid gap-4 md:grid-cols-2">
         <div>
             <label asp-for="Color" class="form-label">Cor</label>
-            <input asp-for="Color" class="form-input" />
+            <div class="flex items-center gap-3">
+                <input asp-for="Color" type="color" class="h-12 w-16 cursor-pointer rounded-xl border border-white/10 bg-slate-950 p-1" data-habit-color-input />
+                <div class="flex flex-wrap gap-2" data-habit-color-swatches>
+                    @foreach (var color in HabitVisualOptions.Colors)
+                    {
+                        <button type="button" class="h-9 w-9 rounded-full border border-white/15 transition hover:scale-105" style="background:@color.Value" data-habit-color-swatch="@color.Value" title="@color.Name">
+                            <span class="sr-only">@color.Name</span>
+                        </button>
+                    }
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">Escolha uma cor pelo seletor visual ou pelos atalhos.</p>
+            <span asp-validation-for="Color"></span>
         </div>
         <div>
-            <label asp-for="Icon" class="form-label">Icone Lucide</label>
-            <input asp-for="Icon" class="form-input" />
+            <label asp-for="Icon" class="form-label">Ícone Lucide</label>
+            <input asp-for="Icon" type="hidden" data-habit-icon-input />
+            <button type="button" class="btn-secondary w-full justify-between" data-habit-icon-open>
+                <span class="flex items-center gap-2">
+                    <span class="grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-slate-950/60" data-habit-icon-preview>
+                        <i data-lucide="@selectedIcon.Value" class="h-4 w-4"></i>
+                    </span>
+                    <span data-habit-icon-label>@selectedIcon.Name</span>
+                </span>
+                <i data-lucide="chevron-down" class="h-4 w-4"></i>
+            </button>
+            <p class="mt-2 text-xs text-slate-500">Escolha visualmente o ícone que melhor representa o hábito.</p>
+            <span asp-validation-for="Icon"></span>
         </div>
-    </div>
+    </section>
+
+    <section class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <div class="mb-3">
+            <h2 class="text-sm font-bold text-slate-200">Empilhamento de hábito</h2>
+            <p class="mt-1 text-xs text-slate-500">Opcional. Conecte este hábito a uma ação existente para formar uma sequência.</p>
+        </div>
+        <div class="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+            <div>
+                <label asp-for="StackBaseKey" class="form-label">Depois de</label>
+                <select asp-for="StackBaseKey" class="form-select" data-habit-stack-select>
+                    <option value="">Sem empilhamento</option>
+                    <optgroup label="Hábitos de melhoria">
+                        @foreach (var habit in Model.StackableHabits)
+                        {
+                            <option value="habit:@habit.Value">@habit.Text</option>
+                        }
+                    </optgroup>
+                    <optgroup label="Hábitos simples" data-habit-simple-optgroup>
+                        @foreach (var simpleHabit in Model.SimpleHabits)
+                        {
+                            <option value="simple:@simpleHabit.Value">@simpleHabit.Text</option>
+                        }
+                    </optgroup>
+                </select>
+            </div>
+            <button type="button" class="btn-secondary" data-habit-simple-open>
+                <i data-lucide="list-plus" class="h-4 w-4"></i>
+                Novo hábito simples
+            </button>
+        </div>
+        <div class="mt-3 rounded-xl bg-slate-950/60 px-3 py-2 text-sm text-slate-300" data-habit-stack-preview>
+            Escolha um hábito base para ver a frase de empilhamento.
+        </div>
+        <p class="mt-2 text-xs text-slate-500">Hábitos simples são âncoras de rotina, como escovar os dentes, almoço ou banho. Eles servem como gatilho e não entram no check-in diário.</p>
+        <span asp-validation-for="StackBaseKey"></span>
+    </section>
 
     <div class="flex flex-wrap justify-end gap-2">
         <a class="btn-secondary" asp-action="Index">Cancelar</a>
-        <button class="btn-primary" type="submit">Salvar</button>
+        <button class="btn-primary" type="submit">Salvar hábito</button>
+    </div>
+
+    <div class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 p-4" data-habit-simple-modal>
+        <div class="w-full max-w-md rounded-2xl border border-white/10 bg-slate-950 p-5 shadow-2xl">
+            <div class="mb-4 flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-black text-white">Novo hábito simples</h2>
+                    <p class="mt-1 text-sm text-slate-400">Cadastre uma âncora rápida para usar no empilhamento.</p>
+                </div>
+                <button type="button" class="btn-secondary px-3" data-habit-simple-close aria-label="Fechar modal de hábito simples">
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+            </div>
+            <div class="grid gap-4">
+                <div>
+                    <label class="form-label" for="SimpleHabitName">Nome</label>
+                    <input id="SimpleHabitName" class="form-input" maxlength="160" placeholder="Escovar os dentes" data-habit-simple-name />
+                </div>
+                <div>
+                    <label class="form-label" for="SimpleHabitTime">Quando acontece</label>
+                    <input id="SimpleHabitTime" type="time" class="form-input" data-habit-simple-time />
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-rose-300" data-habit-simple-error></p>
+            <div class="mt-3 flex flex-wrap gap-2">
+                @foreach (var suggestion in new[] { "Escovar os dentes", "Almoço", "Banho", "Café da manhã", "Chegar em casa", "Dormir" })
+                {
+                    <button type="button" class="status-pill hover:border-emerald-300/60 hover:text-white" data-habit-simple-suggestion="@suggestion">@suggestion</button>
+                }
+            </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <button type="button" class="btn-secondary" data-habit-simple-close>Cancelar</button>
+                <button type="button" class="btn-primary" data-habit-simple-save>
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    Cadastrar hábito simples
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 p-4" data-habit-icon-modal>
+        <div class="w-full max-w-2xl rounded-2xl border border-white/10 bg-slate-950 p-5 shadow-2xl">
+            <div class="mb-4 flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-black text-white">Escolher ícone</h2>
+                    <p class="mt-1 text-sm text-slate-400">Selecione um ícone para representar este hábito.</p>
+                </div>
+                <button type="button" class="btn-secondary px-3" data-habit-icon-close aria-label="Fechar modal de ícones">
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+            </div>
+            <div class="grid gap-2 sm:grid-cols-3 md:grid-cols-5">
+                @foreach (var icon in HabitVisualOptions.Icons)
+                {
+                    <button type="button" class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 text-center text-sm font-semibold text-slate-200 transition hover:border-emerald-300/70 hover:bg-emerald-300/10" data-habit-icon-option="@icon.Value" data-habit-icon-name="@icon.Name">
+                        <i data-lucide="@icon.Value" class="mx-auto mb-2 h-5 w-5"></i>
+                        @icon.Name
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 p-4" data-habit-location-modal>
+        <div class="w-full max-w-md rounded-2xl border border-white/10 bg-slate-950 p-5 shadow-2xl">
+            <div class="mb-4 flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-black text-white">Novo local pessoal</h2>
+                    <p class="mt-1 text-sm text-slate-400">Cadastre um local para associar a este hábito.</p>
+                </div>
+                <button type="button" class="btn-secondary px-3" data-habit-location-close aria-label="Fechar modal de local">
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+            </div>
+            <label class="form-label" for="HabitLocationName">Nome do local</label>
+            <input id="HabitLocationName" class="form-input" maxlength="120" placeholder="Quarto, escritório, cafeteria..." data-habit-location-name />
+            <p class="mt-2 text-xs text-rose-300" data-habit-location-error></p>
+            <div class="mt-3 flex flex-wrap gap-2">
+                @foreach (var suggestion in new[] { "Quarto", "Escritório", "Cafeteria", "Academia", "Sala", "Biblioteca" })
+                {
+                    <button type="button" class="status-pill hover:border-emerald-300/60 hover:text-white" data-habit-location-suggestion="@suggestion">@suggestion</button>
+                }
+            </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <button type="button" class="btn-secondary" data-habit-location-close>Cancelar</button>
+                <button type="button" class="btn-primary" data-habit-location-save>
+                    <i data-lucide="plus" class="h-4 w-4"></i>
+                    Cadastrar local
+                </button>
+            </div>
+        </div>
     </div>
 </form>

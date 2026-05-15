@@ -1,0 +1,210 @@
+@model CheckInsOverviewViewModel
+@{
+    ViewData["Title"] = "Check-ins";
+    var today = DateTime.Today;
+    var todayButtonText = Model.TodayHasCheckIn ? "Editar check-in de hoje" : "Criar check-in de hoje";
+    var tabClass = (string period) => Model.Period == period ? "btn-primary" : "btn-secondary";
+    var currentMonth = new DateTime(Model.Year, Model.Month, 1);
+    var previousMonth = currentMonth.AddMonths(-1);
+    var nextMonth = currentMonth.AddMonths(1);
+    var previousYear = Model.Year - 1;
+    var nextYear = Model.Year + 1;
+    var previousFiveYears = Model.Year - 5;
+    var nextFiveYears = Model.Year + 5;
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+            <p class="text-sm font-semibold text-emerald-300">Check-ins</p>
+            <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Sua evolução ao longo do tempo</h1>
+            <p class="mt-2 max-w-2xl text-sm text-slate-400">Acompanhe energia, produtividade e nota do dia para enxergar padrões reais de progresso.</p>
+        </div>
+        <a class="btn-primary" asp-action="Edit" asp-route-date="@today.ToString("yyyy-MM-dd")">
+            <i data-lucide="calendar-check" class="h-4 w-4"></i>
+            @todayButtonText
+        </a>
+    </div>
+
+    <section class="app-card p-5">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+                <h2 class="text-lg font-black text-white">Período</h2>
+                <p class="mt-1 text-sm text-slate-400">@Model.PeriodLabel</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a class="@tabClass("month")" asp-action="Index" asp-route-period="month" asp-route-year="@Model.Year" asp-route-month="@Model.Month">Mensal</a>
+                <a class="@tabClass("year")" asp-action="Index" asp-route-period="year" asp-route-year="@Model.Year">Anual</a>
+                <a class="@tabClass("five-years")" asp-action="Index" asp-route-period="five-years" asp-route-year="@Model.Year">5 anos</a>
+            </div>
+        </div>
+
+        <form class="mt-5 grid gap-3 md:grid-cols-[1fr_1fr_auto] xl:max-w-3xl" asp-action="Index" method="get">
+            <input type="hidden" name="period" value="@Model.Period" />
+            @if (Model.Period == "month")
+            {
+                <select class="form-select" name="month" asp-items="Model.MonthOptions"></select>
+            }
+            else
+            {
+                <input type="hidden" name="month" value="@Model.Month" />
+            }
+            <select class="form-select" name="year" asp-items="Model.YearOptions"></select>
+            <button class="btn-secondary" type="submit">
+                <i data-lucide="filter" class="h-4 w-4"></i>
+                Aplicar
+            </button>
+        </form>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+            @if (Model.Period == "month")
+            {
+                <a class="btn-secondary" asp-action="Index" asp-route-period="month" asp-route-year="@previousMonth.Year" asp-route-month="@previousMonth.Month">
+                    <i data-lucide="chevron-left" class="h-4 w-4"></i>
+                    Mês anterior
+                </a>
+                <a class="btn-secondary" asp-action="Index" asp-route-period="month" asp-route-year="@nextMonth.Year" asp-route-month="@nextMonth.Month">
+                    Próximo mês
+                    <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                </a>
+            }
+            else if (Model.Period == "year")
+            {
+                <a class="btn-secondary" asp-action="Index" asp-route-period="year" asp-route-year="@previousYear">
+                    <i data-lucide="chevron-left" class="h-4 w-4"></i>
+                    Ano anterior
+                </a>
+                <a class="btn-secondary" asp-action="Index" asp-route-period="year" asp-route-year="@nextYear">
+                    Próximo ano
+                    <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                </a>
+            }
+            else
+            {
+                <a class="btn-secondary" asp-action="Index" asp-route-period="five-years" asp-route-year="@previousFiveYears">
+                    <i data-lucide="chevron-left" class="h-4 w-4"></i>
+                    5 anos anteriores
+                </a>
+                <a class="btn-secondary" asp-action="Index" asp-route-period="five-years" asp-route-year="@nextFiveYears">
+                    Próximos 5 anos
+                    <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                </a>
+            }
+        </div>
+    </section>
+
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="app-card p-5">
+            <div class="text-sm text-slate-400">Média no período</div>
+            <div class="mt-3 text-4xl font-black text-emerald-300">@Model.Metrics.AverageScore.ToString("0.#")</div>
+            <div class="mt-2 text-xs text-slate-500">Nota total máxima: 15</div>
+        </div>
+        <div class="app-card p-5">
+            <div class="text-sm text-slate-400">Melhor dia</div>
+            <div class="mt-3 text-4xl font-black text-white">@(Model.Metrics.BestScore?.ToString() ?? "-")</div>
+            <div class="mt-2 text-xs text-slate-500">@(Model.Metrics.BestDate?.ToString("dd/MM/yyyy") ?? "Sem check-ins no período")</div>
+        </div>
+        <div class="app-card p-5">
+            <div class="text-sm text-slate-400">Check-ins no período</div>
+            <div class="mt-3 text-4xl font-black text-sky-300">@Model.Metrics.CheckInCount</div>
+            <div class="mt-2 text-xs text-slate-500">Consistência registrada</div>
+        </div>
+        <div class="app-card p-5">
+            <div class="text-sm text-slate-400">Sequência atual</div>
+            <div class="mt-3 text-4xl font-black text-white">@Model.Metrics.CurrentStreak</div>
+            <div class="mt-2 text-xs text-slate-500">Dias seguidos com check-in</div>
+        </div>
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-[1fr_0.8fr]">
+        <section class="app-card p-5">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h2 class="text-xl font-black text-white">Evolução dos check-ins</h2>
+                    <p class="mt-1 text-sm text-slate-400">Clique em um ponto do gráfico para ver ou editar o check-in daquele dia.</p>
+                </div>
+                <span class="status-pill status-pill-info"><i data-lucide="line-chart"></i>Nota total</span>
+            </div>
+            <div class="mt-5 min-h-80" data-checkins-chart
+                 data-period="@Model.Period"
+                 data-points='@Json.Serialize(Model.Points)'
+                 data-detail-url="@Url.Action("Detail", "CheckIns")"
+                 data-edit-url="@Url.Action("Edit", "CheckIns")"></div>
+            @if (!Model.Points.Any(point => point.HasCheckIn))
+            {
+                <div class="mt-4 rounded-2xl border border-dashed border-white/15 p-6 text-center">
+                    <p class="text-sm text-slate-300">Você ainda não possui check-ins neste período.</p>
+                    <a class="btn-secondary mt-4" asp-action="Edit" asp-route-date="@today.ToString("yyyy-MM-dd")">Criar primeiro check-in</a>
+                </div>
+            }
+        </section>
+
+        <aside class="app-card p-5" data-checkin-detail-panel data-edit-url="@Url.Action("Edit", "CheckIns")">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-black text-white" data-checkin-detail-title>Check-in</h2>
+                    <p class="mt-1 text-sm text-slate-400" data-checkin-detail-subtitle>Selecione um dia no gráfico.</p>
+                </div>
+                <span class="status-pill status-pill-neutral" data-checkin-detail-status>Hoje</span>
+            </div>
+
+            <div class="mt-5 grid grid-cols-3 gap-3">
+                <div class="rounded-2xl bg-white/[0.04] p-3">
+                    <div class="text-xs text-slate-500">Dia</div>
+                    <div class="mt-1 text-2xl font-black text-white" data-checkin-detail-day-score>-</div>
+                </div>
+                <div class="rounded-2xl bg-white/[0.04] p-3">
+                    <div class="text-xs text-slate-500">Energia</div>
+                    <div class="mt-1 text-2xl font-black text-white" data-checkin-detail-energy>-</div>
+                </div>
+                <div class="rounded-2xl bg-white/[0.04] p-3">
+                    <div class="text-xs text-slate-500">Produtividade</div>
+                    <div class="mt-1 text-2xl font-black text-white" data-checkin-detail-productivity>-</div>
+                </div>
+            </div>
+
+            <div class="mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4">
+                <div class="text-sm text-emerald-100">Nota total</div>
+                <div class="mt-1 text-3xl font-black text-white" data-checkin-detail-total>-</div>
+            </div>
+
+            <div class="mt-4 flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-950/40 text-3xl" data-checkin-detail-mood-face aria-hidden="true">-</div>
+                <div>
+                    <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Humor registrado</div>
+                    <div class="mt-1 text-lg font-black text-white" data-checkin-detail-mood-label>-</div>
+                </div>
+            </div>
+
+            <div class="mt-5 space-y-3 text-sm">
+                <div>
+                    <div class="font-bold text-slate-300">Pequena vitória</div>
+                    <p class="mt-1 text-slate-400" data-checkin-detail-win>-</p>
+                </div>
+                <div>
+                    <div class="font-bold text-slate-300">Principal dificuldade</div>
+                    <p class="mt-1 text-slate-400" data-checkin-detail-difficulty>-</p>
+                </div>
+                <div>
+                    <div class="font-bold text-slate-300">Ajuste para amanhã</div>
+                    <p class="mt-1 text-slate-400" data-checkin-detail-adjustment>-</p>
+                </div>
+                <div>
+                    <div class="font-bold text-slate-300">Notas</div>
+                    <p class="mt-1 whitespace-pre-line text-slate-400" data-checkin-detail-notes>-</p>
+                </div>
+            </div>
+
+            <a class="btn-primary mt-6 w-full" href="#" data-checkin-detail-action>
+                <i data-lucide="pencil" class="h-4 w-4"></i>
+                Editar check-in
+            </a>
+            <script type="application/json" data-checkin-selected-detail-json>@Json.Serialize(Model.SelectedDetail)</script>
+        </aside>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script type="module" src="~/js/modules/checkins.js" asp-append-version="true"></script>
+}

@@ -8,6 +8,8 @@ public class GoalListItemViewModel
 
     public string Title { get; set; } = string.Empty;
 
+    public string? Description { get; set; }
+
     public string? IdentityName { get; set; }
 
     public string? CategoryName { get; set; }

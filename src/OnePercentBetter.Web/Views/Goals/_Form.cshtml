@@ -1,17 +1,87 @@
 @model GoalFormViewModel
+@{
+    var colorOptions = new[]
+    {
+        new { Value = "#38bdf8", Name = "Azul" },
+        new { Value = "#22c55e", Name = "Verde" },
+        new { Value = "#a78bfa", Name = "Roxo" },
+        new { Value = "#f59e0b", Name = "Laranja" },
+        new { Value = "#fb7185", Name = "Vermelho" }
+    };
 
-<form class="app-card space-y-5 p-6" method="post">
+    var iconOptions = new[]
+    {
+        new { Value = "target", Name = "Alvo" },
+        new { Value = "flag", Name = "Marco" },
+        new { Value = "trophy", Name = "Conquista" },
+        new { Value = "code-2", Name = "Código" },
+        new { Value = "languages", Name = "Idiomas" },
+        new { Value = "book-open", Name = "Estudo" },
+        new { Value = "briefcase-business", Name = "Carreira" },
+        new { Value = "home", Name = "Casa" },
+        new { Value = "dumbbell", Name = "Treino" },
+        new { Value = "coffee", Name = "Café" },
+        new { Value = "calendar-check", Name = "Prazo" },
+        new { Value = "sparkles", Name = "Evolução" }
+    };
+
+    var priorityOptions = new[]
+    {
+        new { Value = GoalPriority.Low, Label = "Baixa", Hint = "Bom para objetivos leves" },
+        new { Value = GoalPriority.Medium, Label = "Média", Hint = "Prioridade padrão" },
+        new { Value = GoalPriority.High, Label = "Alta", Hint = "Precisa de foco" }
+    };
+
+    var selectedColor = string.IsNullOrWhiteSpace(Model.Color) ? "#38bdf8" : Model.Color;
+    var selectedIconValue = string.IsNullOrWhiteSpace(Model.Icon) ? "target" : Model.Icon;
+    var selectedIconName = iconOptions.FirstOrDefault(icon => icon.Value == selectedIconValue)?.Name ?? selectedIconValue;
+}
+
+<form class="app-card space-y-6 p-6" method="post" autocomplete="off" data-goal-form>
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+
     <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
 
+    <section class="rounded-2xl border border-white/10 bg-white/[0.03] p-4" data-goal-preview>
+        <div class="flex items-start gap-4">
+            <span class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-white/10 bg-slate-950/50" style="color:@selectedColor" data-goal-preview-icon>
+                <i data-lucide="@selectedIconValue" class="h-7 w-7"></i>
+            </span>
+            <div class="min-w-0">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Prévia do objetivo</p>
+                <h2 class="mt-1 truncate text-2xl font-black text-white" data-goal-preview-title>@(string.IsNullOrWhiteSpace(Model.Title) ? "Seu novo objetivo" : Model.Title)</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-300" data-goal-preview-description>@(string.IsNullOrWhiteSpace(Model.Description) ? "Descreva o resultado esperado e por que ele importa." : Model.Description)</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-3">
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div class="text-sm font-bold text-white">Resultado claro</div>
+            <p class="mt-2 text-xs leading-5 text-slate-400">Escreva o objetivo de forma concreta, para saber quando ele foi alcançado.</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div class="text-sm font-bold text-white">Conecte à identidade</div>
+            <p class="mt-2 text-xs leading-5 text-slate-400">Um objetivo fica mais forte quando aponta para quem você quer se tornar.</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div class="text-sm font-bold text-white">Transforme em hábito</div>
+            <p class="mt-2 text-xs leading-5 text-slate-400">Depois, vincule hábitos que tornem esse objetivo praticável no dia a dia.</p>
+        </div>
+    </section>
+
     <div>
-        <label asp-for="Title" class="form-label">Titulo</label>
-        <input asp-for="Title" class="form-input" />
+        <label asp-for="Title" class="form-label">Título do objetivo</label>
+        <input asp-for="Title" class="form-input" placeholder="Concluir uma aplicação ASP.NET Core completa" data-goal-title-input />
+        <p class="mt-2 text-xs text-slate-500">Use uma frase objetiva para o resultado que você quer alcançar.</p>
         <span asp-validation-for="Title"></span>
     </div>
 
     <div>
-        <label asp-for="Description" class="form-label">Descricao</label>
-        <textarea asp-for="Description" class="form-textarea"></textarea>
+        <label asp-for="Description" class="form-label">Descrição</label>
+        <textarea asp-for="Description" class="form-textarea" placeholder="Explique o resultado esperado, por que ele importa e quais sinais mostram progresso" data-goal-description-input></textarea>
+        <p class="mt-2 text-xs text-slate-500">Opcional. Registre contexto, motivação e critérios de sucesso.</p>
         <span asp-validation-for="Description"></span>
     </div>
 
@@ -25,6 +95,8 @@
                     <option value="@identity.Value">@identity.Text</option>
                 }
             </select>
+            <p class="mt-2 text-xs text-slate-500">Você pode criar ou gerenciar suas identidades na página de <a class="font-semibold text-emerald-300 hover:text-emerald-200" asp-controller="Identities" asp-action="Index">Identidades</a>.</p>
+            <span asp-validation-for="IdentityId"></span>
         </div>
         <div>
             <label asp-for="CategoryId" class="form-label">Categoria</label>
@@ -35,37 +107,102 @@
                     <option value="@category.Value">@category.Text</option>
                 }
             </select>
+            <p class="mt-2 text-xs text-slate-500">Use categorias para organizar objetivos por área de foco.</p>
+            <span asp-validation-for="CategoryId"></span>
         </div>
     </div>
 
     <div class="grid gap-4 md:grid-cols-3">
         <div>
-            <label asp-for="Status" class="form-label">Status</label>
-            <select asp-for="Status" asp-items="@(EnumDisplayExtensions.ToSelectList<ItemStatus>())" class="form-select"></select>
-        </div>
-        <div>
-            <label asp-for="Priority" class="form-label">Prioridade</label>
-            <select asp-for="Priority" asp-items="@(EnumDisplayExtensions.ToSelectList<GoalPriority>())" class="form-select"></select>
+            <label asp-for="StartDate" class="form-label">Data de início</label>
+            <input asp-for="StartDate" class="form-input" />
+            <p class="mt-2 text-xs text-slate-500">Quando este objetivo começou ou começa a valer.</p>
+            <span asp-validation-for="StartDate"></span>
         </div>
         <div>
             <label asp-for="TargetDate" class="form-label">Data alvo</label>
             <input asp-for="TargetDate" class="form-input" />
+            <p class="mt-2 text-xs text-slate-500">Opcional. Use quando houver prazo ou marco desejado.</p>
+            <span asp-validation-for="TargetDate"></span>
+        </div>
+        <div>
+            <label asp-for="Status" class="form-label">Status</label>
+            <select asp-for="Status" asp-items="@(EnumDisplayExtensions.ToSelectList<ItemStatus>())" class="form-select"></select>
+            <p class="mt-2 text-xs text-slate-500">Mantenha como ativo enquanto o objetivo estiver em andamento.</p>
+            <span asp-validation-for="Status"></span>
         </div>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2">
+    <section>
+        <label asp-for="Priority" class="form-label">Prioridade</label>
+        <div class="grid gap-3 md:grid-cols-3">
+            @foreach (var priority in priorityOptions)
+            {
+                var inputId = $"Priority_{priority.Value}";
+                <label for="@inputId" class="group cursor-pointer">
+                    <input id="@inputId"
+                           asp-for="Priority"
+                           type="radio"
+                           value="@((int)priority.Value)"
+                           class="peer sr-only" />
+                    <span class="flex min-h-24 flex-col justify-center rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-sky-300/60 hover:bg-sky-300/10 peer-checked:border-sky-300 peer-checked:bg-sky-300/15 peer-checked:shadow-[0_0_0_1px_rgba(125,211,252,0.35)]">
+                        <span class="text-sm font-black text-white">@priority.Label</span>
+                        <span class="mt-1 text-xs text-slate-500 group-hover:text-slate-300">@priority.Hint</span>
+                    </span>
+                </label>
+            }
+        </div>
+        <span asp-validation-for="Priority"></span>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-2">
         <div>
             <label asp-for="Color" class="form-label">Cor</label>
-            <input asp-for="Color" class="form-input" />
+            <div class="flex items-center gap-3">
+                <input asp-for="Color" type="color" class="h-12 w-16 cursor-pointer rounded-xl border border-white/10 bg-slate-950 p-1" data-goal-color-input />
+                <div class="flex flex-wrap gap-2">
+                    @foreach (var color in colorOptions)
+                    {
+                        <button type="button" class="h-9 w-9 rounded-full border border-white/15 transition hover:scale-105" style="background:@color.Value" data-goal-color-swatch="@color.Value" title="@color.Name">
+                            <span class="sr-only">@color.Name</span>
+                        </button>
+                    }
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">Escolha uma cor para reconhecer esse objetivo rapidamente.</p>
+            <span asp-validation-for="Color"></span>
         </div>
+
         <div>
-            <label asp-for="Icon" class="form-label">Icone Lucide</label>
-            <input asp-for="Icon" class="form-input" />
+            <label asp-for="Icon" class="form-label">Ícone</label>
+            <input asp-for="Icon" type="hidden" data-goal-icon-input />
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-300">
+                    <span class="grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-slate-950/60" data-goal-icon-preview>
+                        <i data-lucide="@selectedIconValue" class="h-4 w-4"></i>
+                    </span>
+                    <span data-goal-icon-label>@selectedIconName</span>
+                </div>
+                <div class="grid gap-2 sm:grid-cols-3">
+                    @foreach (var icon in iconOptions)
+                    {
+                        <button type="button" class="rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-sky-300/70 hover:bg-sky-300/10" data-goal-icon-option="@icon.Value" data-goal-icon-name="@icon.Name">
+                            <i data-lucide="@icon.Value" class="mx-auto mb-1 h-4 w-4"></i>
+                            @icon.Name
+                        </button>
+                    }
+                </div>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">O ícone aparece nos cards e ajuda a diferenciar seus objetivos.</p>
+            <span asp-validation-for="Icon"></span>
         </div>
-    </div>
+    </section>
 
     <div class="flex flex-wrap justify-end gap-2">
         <a class="btn-secondary" asp-action="Index">Cancelar</a>
-        <button class="btn-primary" type="submit">Salvar</button>
+        <button class="btn-primary" type="submit">
+            <i data-lucide="save" class="h-4 w-4"></i>
+            Salvar objetivo
+        </button>
     </div>
 </form>

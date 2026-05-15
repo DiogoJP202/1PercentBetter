@@ -26,4 +26,11 @@ public class CategoryService
             })
             .ToListAsync();
     }
+
+    public async Task<bool> ExistsForUserAsync(string userId, int categoryId)
+    {
+        return await _dbContext.Categories
+            .AsNoTracking()
+            .AnyAsync(category => category.Id == categoryId && (category.UserId == null || category.UserId == userId));
+    }
 }

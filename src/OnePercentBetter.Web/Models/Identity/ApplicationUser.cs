@@ -27,5 +27,9 @@ public class ApplicationUser : IdentityUser
 
     public ICollection<Habit> Habits { get; } = new List<Habit>();
 
+    public ICollection<SimpleHabit> SimpleHabits { get; } = new List<SimpleHabit>();
+
+    public ICollection<HabitLocation> HabitLocations { get; } = new List<HabitLocation>();
+
     public ICollection<DailyCheckIn> DailyCheckIns { get; } = new List<DailyCheckIn>();
 }

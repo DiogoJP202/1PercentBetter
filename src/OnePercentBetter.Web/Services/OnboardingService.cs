@@ -36,19 +36,33 @@ public class OnboardingService
 
         return new OnboardingViewModel
         {
-            CategoryId = int.TryParse(categories.FirstOrDefault()?.Value, out var categoryId) ? categoryId : 0,
             Categories = categories
         };
     }
 
+    public async Task<IReadOnlyDictionary<string, string>> ValidateFormAsync(string userId, OnboardingViewModel viewModel)
+    {
+        var errors = new Dictionary<string, string>();
+
+        if (viewModel.CategoryId.HasValue && !await _categoryService.ExistsForUserAsync(userId, viewModel.CategoryId.Value))
+        {
+            errors[nameof(viewModel.CategoryId)] = "Área de foco inválida para este usuário.";
+        }
+
+        return errors;
+    }
+
     public async Task CompleteAsync(string userId, OnboardingViewModel viewModel)
     {
+        var categoryId = viewModel.CategoryId
+            ?? throw new InvalidOperationException("Focus area is required to complete onboarding.");
+
         var identity = new UserIdentity
         {
             UserId = userId,
             Name = viewModel.IdentityName.Trim(),
             IdentityStatement = viewModel.IdentityStatement.Trim(),
-            CategoryId = viewModel.CategoryId,
+            CategoryId = categoryId,
             Color = "#22c55e",
             Icon = "user-round-check"
         };
@@ -57,7 +71,7 @@ public class OnboardingService
         {
             UserId = userId,
             Identity = identity,
-            CategoryId = viewModel.CategoryId,
+            CategoryId = categoryId,
             Title = viewModel.GoalTitle.Trim(),
             Color = "#38bdf8",
             Icon = "target"
@@ -68,7 +82,7 @@ public class OnboardingService
             UserId = userId,
             Identity = identity,
             Goal = goal,
-            CategoryId = viewModel.CategoryId,
+            CategoryId = categoryId,
             Title = viewModel.HabitTitle.Trim(),
             TwoMinuteVersion = viewModel.TwoMinuteVersion.Trim(),
             Trigger = viewModel.Trigger.Trim(),

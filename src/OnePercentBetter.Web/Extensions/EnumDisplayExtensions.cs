@@ -27,7 +27,7 @@ public static class EnumDisplayExtensions
         {
             ItemStatus.Active => "Ativo",
             ItemStatus.Paused => "Pausado",
-            ItemStatus.Completed => "Concluido",
+            ItemStatus.Completed => "Concluído",
             ItemStatus.Canceled => "Cancelado",
             _ => status.ToString()
         };
@@ -38,7 +38,7 @@ public static class EnumDisplayExtensions
         return priority switch
         {
             GoalPriority.Low => "Baixa",
-            GoalPriority.Medium => "Media",
+            GoalPriority.Medium => "Média",
             GoalPriority.High => "Alta",
             _ => priority.ToString()
         };
@@ -48,11 +48,11 @@ public static class EnumDisplayExtensions
     {
         return difficulty switch
         {
-            HabitDifficulty.VeryEasy => "Muito facil",
-            HabitDifficulty.Easy => "Facil",
-            HabitDifficulty.Medium => "Media",
-            HabitDifficulty.Hard => "Dificil",
-            HabitDifficulty.VeryHard => "Muito dificil",
+            HabitDifficulty.VeryEasy => "Muito fácil",
+            HabitDifficulty.Easy => "Fácil",
+            HabitDifficulty.Medium => "Média",
+            HabitDifficulty.Hard => "Difícil",
+            HabitDifficulty.VeryHard => "Muito difícil",
             _ => difficulty.ToString()
         };
     }
@@ -61,8 +61,8 @@ public static class EnumDisplayExtensions
     {
         return frequencyType switch
         {
-            HabitFrequencyType.Daily => "Diario",
-            HabitFrequencyType.SpecificDays => "Dias especificos",
+            HabitFrequencyType.Daily => "Diário",
+            HabitFrequencyType.SpecificDays => "Dias específicos",
             HabitFrequencyType.Weekly => "Semanal",
             HabitFrequencyType.Monthly => "Mensal",
             HabitFrequencyType.Custom => "Personalizado",
@@ -74,7 +74,7 @@ public static class EnumDisplayExtensions
     {
         return status switch
         {
-            HabitLogStatus.Completed => "Concluido",
+            HabitLogStatus.Completed => "Concluído",
             HabitLogStatus.Skipped => "Pulado",
             HabitLogStatus.Failed => "Falhou",
             HabitLogStatus.Partial => "Parcial",
@@ -99,15 +99,15 @@ public static class EnumDisplayExtensions
     {
         return noteType switch
         {
-            NoteType.DailyReflection => "Reflexao diaria",
+            NoteType.DailyReflection => "Reflexão diária",
             NoteType.Idea => "Ideia",
             NoteType.Learning => "Aprendizado",
             NoteType.Difficulty => "Dificuldade",
-            NoteType.Victory => "Vitoria",
+            NoteType.Victory => "Vitória",
             NoteType.SystemAdjustment => "Ajuste de sistema",
             NoteType.EmotionalRecord => "Registro emocional",
-            NoteType.WeeklyReview => "Revisao semanal",
-            NoteType.MonthlyReview => "Revisao mensal",
+            NoteType.WeeklyReview => "Revisão semanal",
+            NoteType.MonthlyReview => "Revisão mensal",
             _ => noteType.ToString()
         };
     }
@@ -115,7 +115,16 @@ public static class EnumDisplayExtensions
     public static IEnumerable<SelectListItem> ToSelectList<TEnum>()
         where TEnum : struct, Enum
     {
+        return ToSelectList<TEnum>(Array.Empty<TEnum>());
+    }
+
+    public static IEnumerable<SelectListItem> ToSelectList<TEnum>(params TEnum[] excludedValues)
+        where TEnum : struct, Enum
+    {
+        var excluded = excludedValues.ToHashSet();
+
         return Enum.GetValues<TEnum>()
+            .Where(value => !excluded.Contains(value))
             .Select(value => new SelectListItem
             {
                 Value = Convert.ToInt32(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture),

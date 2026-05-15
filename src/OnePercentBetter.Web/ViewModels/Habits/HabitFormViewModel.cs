@@ -8,7 +8,7 @@ public class HabitFormViewModel
 {
     public int? Id { get; set; }
 
-    [Required(ErrorMessage = "Informe o titulo do habito.")]
+    [Required(ErrorMessage = "Informe o título do hábito.")]
     [MaxLength(160)]
     public string Title { get; set; } = string.Empty;
 
@@ -21,21 +21,31 @@ public class HabitFormViewModel
 
     public int? CategoryId { get; set; }
 
+    public int? LocationId { get; set; }
+
+    public int? StackedAfterHabitId { get; set; }
+
+    public int? StackedAfterSimpleHabitId { get; set; }
+
+    public string? StackBaseKey { get; set; }
+
     public HabitFrequencyType FrequencyType { get; set; } = HabitFrequencyType.Daily;
 
     [MaxLength(80)]
     public string? DaysOfWeek { get; set; }
+
+    public List<DayOfWeek> SelectedDaysOfWeek { get; set; } = [];
 
     [DataType(DataType.Time)]
     public TimeSpan? SuggestedTime { get; set; }
 
     public HabitDifficulty Difficulty { get; set; } = HabitDifficulty.Easy;
 
-    [Required(ErrorMessage = "Defina a versao de 2 minutos.")]
+    [Required(ErrorMessage = "Defina a versão de 2 minutos.")]
     [MaxLength(260)]
     public string TwoMinuteVersion { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Defina o gatilho do habito.")]
+    [Required(ErrorMessage = "Defina o gatilho do hábito.")]
     [MaxLength(260)]
     public string Trigger { get; set; } = string.Empty;
 
@@ -45,14 +55,21 @@ public class HabitFormViewModel
     public ItemStatus Status { get; set; } = ItemStatus.Active;
 
     [MaxLength(24)]
-    public string Color { get; set; } = "#22c55e";
+    [RegularExpression("^#[0-9a-fA-F]{6}$", ErrorMessage = "Escolha uma cor válida.")]
+    public string Color { get; set; } = HabitVisualOptions.DefaultColor;
 
     [MaxLength(80)]
-    public string Icon { get; set; } = "repeat-2";
+    public string Icon { get; set; } = HabitVisualOptions.DefaultIcon;
 
     public IReadOnlyList<SelectOptionViewModel> Categories { get; set; } = [];
 
     public IReadOnlyList<SelectOptionViewModel> Identities { get; set; } = [];
 
     public IReadOnlyList<SelectOptionViewModel> Goals { get; set; } = [];
+
+    public IReadOnlyList<SelectOptionViewModel> Locations { get; set; } = [];
+
+    public IReadOnlyList<SelectOptionViewModel> StackableHabits { get; set; } = [];
+
+    public IReadOnlyList<SelectOptionViewModel> SimpleHabits { get; set; } = [];
 }

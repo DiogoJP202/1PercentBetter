@@ -40,8 +40,20 @@ public class OnboardingController : Controller
             return View(viewModel);
         }
 
+        foreach (var error in await _onboardingService.ValidateFormAsync(userId, viewModel))
+        {
+            ModelState.AddModelError(error.Key, error.Value);
+        }
+
+        if (!ModelState.IsValid)
+        {
+            var form = await _onboardingService.CreateFormAsync(userId);
+            viewModel.Categories = form.Categories;
+            return View(viewModel);
+        }
+
         await _onboardingService.CompleteAsync(userId, viewModel);
-        TempData["Success"] = "Seu primeiro sistema de evolucao foi criado.";
+        TempData["Success"] = "Seu primeiro sistema de evolução foi criado.";
 
         return RedirectToAction("Index", "Dashboard");
     }

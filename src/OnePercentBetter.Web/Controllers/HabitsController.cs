@@ -11,10 +11,17 @@ namespace OnePercentBetter.Web.Controllers;
 public class HabitsController : Controller
 {
     private readonly HabitService _habitService;
+    private readonly HabitLocationService _habitLocationService;
+    private readonly SimpleHabitService _simpleHabitService;
 
-    public HabitsController(HabitService habitService)
+    public HabitsController(
+        HabitService habitService,
+        HabitLocationService habitLocationService,
+        SimpleHabitService simpleHabitService)
     {
         _habitService = habitService;
+        _habitLocationService = habitLocationService;
+        _simpleHabitService = simpleHabitService;
     }
 
     public async Task<IActionResult> Index()
@@ -35,15 +42,23 @@ public class HabitsController : Controller
         var userId = User.GetRequiredUserId();
         if (!ModelState.IsValid)
         {
-            var form = await _habitService.CreateFormAsync(userId);
-            viewModel.Categories = form.Categories;
-            viewModel.Identities = form.Identities;
-            viewModel.Goals = form.Goals;
+            await _habitService.PopulateOptionsAsync(viewModel, userId);
+            return View(viewModel);
+        }
+
+        foreach (var error in await _habitService.ValidateFormAsync(userId, viewModel))
+        {
+            ModelState.AddModelError(error.Key, error.Value);
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await _habitService.PopulateOptionsAsync(viewModel, userId);
             return View(viewModel);
         }
 
         await _habitService.CreateAsync(userId, viewModel);
-        TempData["Success"] = "Habito criado.";
+        TempData["Success"] = "Hábito criado.";
 
         return RedirectToAction(nameof(Index));
     }
@@ -64,10 +79,18 @@ public class HabitsController : Controller
 
         if (!ModelState.IsValid)
         {
-            var form = await _habitService.CreateFormAsync(userId);
-            viewModel.Categories = form.Categories;
-            viewModel.Identities = form.Identities;
-            viewModel.Goals = form.Goals;
+            await _habitService.PopulateOptionsAsync(viewModel, userId);
+            return View(viewModel);
+        }
+
+        foreach (var error in await _habitService.ValidateFormAsync(userId, viewModel))
+        {
+            ModelState.AddModelError(error.Key, error.Value);
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await _habitService.PopulateOptionsAsync(viewModel, userId);
             return View(viewModel);
         }
 
@@ -77,8 +100,62 @@ public class HabitsController : Controller
             return NotFound();
         }
 
-        TempData["Success"] = "Habito atualizado.";
+        TempData["Success"] = "Hábito atualizado.";
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateLocation(HabitLocationCreateViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            var message = ModelState.Values
+                .SelectMany(value => value.Errors)
+                .Select(error => error.ErrorMessage)
+                .FirstOrDefault() ?? "Não foi possível cadastrar o local.";
+
+            return BadRequest(new { error = message });
+        }
+
+        var result = await _habitLocationService.CreateAsync(User.GetRequiredUserId(), viewModel);
+        if (!result.Success || result.Option is null)
+        {
+            return BadRequest(new { error = result.Error ?? "Não foi possível cadastrar o local." });
+        }
+
+        return Json(new
+        {
+            value = result.Option.Value,
+            text = result.Option.Text
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateSimpleHabit(SimpleHabitCreateViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            var message = ModelState.Values
+                .SelectMany(value => value.Errors)
+                .Select(error => error.ErrorMessage)
+                .FirstOrDefault() ?? "Não foi possível cadastrar o hábito simples.";
+
+            return BadRequest(new { error = message });
+        }
+
+        var result = await _simpleHabitService.CreateAsync(User.GetRequiredUserId(), viewModel);
+        if (!result.Success || result.Option is null)
+        {
+            return BadRequest(new { error = result.Error ?? "Não foi possível cadastrar o hábito simples." });
+        }
+
+        return Json(new
+        {
+            value = $"simple:{result.Option.Value}",
+            text = result.Option.Text
+        });
     }
 
     [HttpPost]
@@ -86,7 +163,7 @@ public class HabitsController : Controller
     public async Task<IActionResult> Complete(int id)
     {
         await _habitService.RegisterLogAsync(User.GetRequiredUserId(), id, HabitLogStatus.Completed);
-        TempData["Success"] = "Habito concluido.";
+        TempData["Success"] = "Hábito concluído.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -95,7 +172,7 @@ public class HabitsController : Controller
     public async Task<IActionResult> Fail(int id)
     {
         await _habitService.RegisterLogAsync(User.GetRequiredUserId(), id, HabitLogStatus.Failed);
-        TempData["Warning"] = "Falha registrada. A versao de 2 minutos ainda pode salvar o dia.";
+        TempData["Warning"] = "Falha registrada. A versão de 2 minutos ainda pode salvar o dia.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -104,7 +181,7 @@ public class HabitsController : Controller
     public async Task<IActionResult> Skip(int id)
     {
         await _habitService.RegisterLogAsync(User.GetRequiredUserId(), id, HabitLogStatus.Skipped);
-        TempData["Info"] = "Habito pulado hoje.";
+        TempData["Info"] = "Hábito pulado hoje.";
         return RedirectToAction(nameof(Index));
     }
 }
