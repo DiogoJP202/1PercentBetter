@@ -1,5 +1,5 @@
-const categorySelect = document.querySelector('[data-onboarding-category]');
-const fields = [...document.querySelectorAll('[data-onboarding-field]')];
+const categorySelect = document.querySelector('[data-onboarding-category]')
+const fields = [...document.querySelectorAll('[data-onboarding-field]')]
 
 const generic = {
   identityName: 'Pessoa consistente em uma área importante',
@@ -9,7 +9,7 @@ const generic = {
   trigger: 'Quando a situação X surgir, executarei a resposta Y',
   twoMinuteVersion: 'Fazer a menor versão possível por 2 minutos',
   reward: 'Sentir progresso real no fim do dia'
-};
+}
 
 const placeholders = {
   tecnologia: {
@@ -102,30 +102,30 @@ const placeholders = {
     twoMinuteVersion: 'Fazer 3 respirações lentas',
     reward: 'Sentir minha mente mais leve'
   }
-};
+}
 
 function normalizeCategory(value) {
   return value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .trim();
+    .trim()
 }
 
 function getSelectedCategoryKey() {
-  const selectedOption = categorySelect?.selectedOptions?.[0];
-  return normalizeCategory(selectedOption?.textContent ?? '');
+  const selectedOption = categorySelect?.selectedOptions?.[0]
+  return normalizeCategory(selectedOption?.textContent ?? '')
 }
 
 function syncPlaceholders() {
-  const selectedPlaceholders = placeholders[getSelectedCategoryKey()] ?? generic;
+  const selectedPlaceholders = placeholders[getSelectedCategoryKey()] ?? generic
 
   fields.forEach((field) => {
-    field.placeholder = selectedPlaceholders[field.dataset.onboardingField] ?? generic[field.dataset.onboardingField] ?? '';
-  });
+    field.placeholder = selectedPlaceholders[field.dataset.onboardingField] ?? generic[field.dataset.onboardingField] ?? ''
+  })
 }
 
 if (categorySelect && fields.length > 0) {
-  categorySelect.addEventListener('change', syncPlaceholders);
-  syncPlaceholders();
+  categorySelect.addEventListener('change', syncPlaceholders)
+  syncPlaceholders()
 }

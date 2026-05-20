@@ -87,7 +87,7 @@ public class AccountController : Controller
         if (result.Succeeded)
         {
             await _signInManager.SignInAsync(user, isPersistent: false);
-            return RedirectToAction("Index", "Onboarding");
+            return RedirectToAction("Start", "Onboarding");
         }
 
         foreach (var error in result.Errors)

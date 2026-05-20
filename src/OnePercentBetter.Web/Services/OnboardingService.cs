@@ -9,6 +9,8 @@ namespace OnePercentBetter.Web.Services;
 
 public class OnboardingService
 {
+    public const int CurrentTourVersion = 1;
+
     private readonly ApplicationDbContext _dbContext;
     private readonly CategoryService _categoryService;
     private readonly UserManager<ApplicationUser> _userManager;
@@ -28,6 +30,24 @@ public class OnboardingService
         return await _dbContext.Users
             .AsNoTracking()
             .AnyAsync(user => user.Id == userId && user.OnboardingCompletedAt != null);
+    }
+
+    public async Task<bool> HasSeenTourAsync(string userId)
+    {
+        return await _dbContext.Users
+            .AsNoTracking()
+            .AnyAsync(user => user.Id == userId
+                && (user.OnboardingTourCompletedAt != null || user.OnboardingTourSkippedAt != null));
+    }
+
+    public async Task<bool> NeedsTourAsync(string userId)
+    {
+        if (await IsCompletedAsync(userId))
+        {
+            return false;
+        }
+
+        return !await HasSeenTourAsync(userId);
     }
 
     public async Task<OnboardingViewModel> CreateFormAsync(string userId)
@@ -50,6 +70,40 @@ public class OnboardingService
         }
 
         return errors;
+    }
+
+    public async Task MarkTourCompletedAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId)
+            ?? throw new InvalidOperationException("Authenticated user was not found.");
+
+        var now = DateTime.UtcNow;
+        user.OnboardingTourCompletedAt = now;
+        user.OnboardingTourVersion = CurrentTourVersion;
+        user.UpdatedAt = now;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException("Could not persist tour completion state.");
+        }
+    }
+
+    public async Task MarkTourSkippedAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId)
+            ?? throw new InvalidOperationException("Authenticated user was not found.");
+
+        var now = DateTime.UtcNow;
+        user.OnboardingTourSkippedAt = now;
+        user.OnboardingTourVersion = CurrentTourVersion;
+        user.UpdatedAt = now;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException("Could not persist tour skip state.");
+        }
     }
 
     public async Task CompleteAsync(string userId, OnboardingViewModel viewModel)
@@ -95,9 +149,11 @@ public class OnboardingService
 
         var user = await _userManager.FindByIdAsync(userId)
             ?? throw new InvalidOperationException("Authenticated user was not found.");
-        user.OnboardingCompletedAt = DateTime.UtcNow;
-        user.UpdatedAt = DateTime.UtcNow;
+        var now = DateTime.UtcNow;
+        user.OnboardingCompletedAt = now;
+        user.UpdatedAt = now;
 
         await _dbContext.SaveChangesAsync();
     }
 }
+

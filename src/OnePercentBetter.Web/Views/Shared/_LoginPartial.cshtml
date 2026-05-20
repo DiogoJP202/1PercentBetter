@@ -7,6 +7,10 @@
     var appUser = await UserManager.GetUserAsync(User);
     <div class="flex items-center gap-3">
         <span class="hidden max-w-44 truncate text-sm text-slate-300 sm:inline">@(appUser?.DisplayName ?? User.Identity?.Name)</span>
+        <a asp-controller="Onboarding" asp-action="ReviewTour" class="inline-flex h-9 items-center gap-2 rounded-lg border border-white/10 px-3 text-sm text-slate-300 transition hover:border-sky-300/60 hover:text-white">
+            <i data-lucide="circle-help" class="h-4 w-4"></i>
+            Tour
+        </a>
         <form asp-controller="Account" asp-action="Logout" method="post">
             <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-lg border border-white/10 px-3 text-sm text-slate-300 transition hover:border-rose-400/60 hover:text-white">
                 <i data-lucide="log-out" class="h-4 w-4"></i>

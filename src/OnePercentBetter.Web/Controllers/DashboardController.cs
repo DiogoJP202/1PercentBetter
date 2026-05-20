@@ -22,7 +22,11 @@ public class DashboardController : Controller
         var userId = User.GetRequiredUserId();
         if (!await _onboardingService.IsCompletedAsync(userId))
         {
-            return RedirectToAction("Index", "Onboarding");
+            var isTourRequest = string.Equals(Request.Query["tour"], "1", StringComparison.Ordinal);
+            if (!isTourRequest)
+            {
+                return RedirectToAction("Start", "Onboarding");
+            }
         }
 
         var viewModel = await _dashboardService.GetDashboardAsync(userId);

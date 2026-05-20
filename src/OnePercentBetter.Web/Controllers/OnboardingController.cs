@@ -17,7 +17,13 @@ public class OnboardingController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
+    {
+        return RedirectToAction(nameof(Start));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Start()
     {
         var userId = User.GetRequiredUserId();
         if (await _onboardingService.IsCompletedAsync(userId))
@@ -25,19 +31,105 @@ public class OnboardingController : Controller
             return RedirectToAction("Index", "Dashboard");
         }
 
-        return View(await _onboardingService.CreateFormAsync(userId));
+        if (await _onboardingService.NeedsTourAsync(userId))
+        {
+            return RedirectToAction(nameof(Tour));
+        }
+
+        return RedirectToAction(nameof(Setup));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Tour(bool replay = false)
+    {
+        var userId = User.GetRequiredUserId();
+        if (await _onboardingService.IsCompletedAsync(userId))
+        {
+            if (!replay)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+        }
+
+        if (!replay && await _onboardingService.HasSeenTourAsync(userId))
+        {
+            return RedirectToAction(nameof(Setup));
+        }
+
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult ReviewTour()
+    {
+        return RedirectToAction(nameof(Tour), new { replay = true });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Index(OnboardingViewModel viewModel)
+    public async Task<IActionResult> CompleteTour()
     {
         var userId = User.GetRequiredUserId();
+        if (await _onboardingService.IsCompletedAsync(userId))
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        await _onboardingService.MarkTourCompletedAsync(userId);
+        return RedirectToAction(nameof(Setup));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SkipTour()
+    {
+        var userId = User.GetRequiredUserId();
+        if (await _onboardingService.IsCompletedAsync(userId))
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        await _onboardingService.MarkTourSkippedAsync(userId);
+        return RedirectToAction(nameof(Setup));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Setup()
+    {
+        var userId = User.GetRequiredUserId();
+        if (await _onboardingService.IsCompletedAsync(userId))
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        if (await _onboardingService.NeedsTourAsync(userId))
+        {
+            return RedirectToAction(nameof(Tour));
+        }
+
+        return View("Index", await _onboardingService.CreateFormAsync(userId));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Setup(OnboardingViewModel viewModel)
+    {
+        var userId = User.GetRequiredUserId();
+        if (await _onboardingService.IsCompletedAsync(userId))
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        if (await _onboardingService.NeedsTourAsync(userId))
+        {
+            return RedirectToAction(nameof(Tour));
+        }
+
         if (!ModelState.IsValid)
         {
             var form = await _onboardingService.CreateFormAsync(userId);
             viewModel.Categories = form.Categories;
-            return View(viewModel);
+            return View("Index", viewModel);
         }
 
         foreach (var error in await _onboardingService.ValidateFormAsync(userId, viewModel))
@@ -49,11 +141,11 @@ public class OnboardingController : Controller
         {
             var form = await _onboardingService.CreateFormAsync(userId);
             viewModel.Categories = form.Categories;
-            return View(viewModel);
+            return View("Index", viewModel);
         }
 
         await _onboardingService.CompleteAsync(userId, viewModel);
-        TempData["Success"] = "Seu primeiro sistema de evolução foi criado.";
+        TempData["Success"] = "Seu primeiro sistema de evolucao foi criado.";
 
         return RedirectToAction("Index", "Dashboard");
     }

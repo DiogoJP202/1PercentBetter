@@ -3,17 +3,30 @@
     ViewData["Title"] = "Onboarding";
 }
 
-<div class="mx-auto max-w-4xl">
-    <div class="mb-6">
+<div class="mx-auto max-w-6xl space-y-6">
+    <header class="space-y-3" data-tour-anchor="setup-intro">
         <p class="text-sm font-semibold text-emerald-300">Primeira configuração</p>
-        <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Monte seu primeiro sistema 1% Better</h1>
-    </div>
+        <h1 class="text-3xl font-black text-white sm:text-4xl">Monte seu primeiro sistema 1% Better</h1>
+        <p class="max-w-3xl text-sm text-slate-400">
+            Agora você vai transformar o tour em ação. Cada campo abaixo existe para conectar identidade, objetivo e hábito no dia a dia.
+        </p>
+    </header>
 
-    <form class="app-card space-y-6 p-6" asp-action="Index" method="post" autocomplete="off" data-onboarding-form>
+    <section class="app-card p-5">
+        <h2 class="text-lg font-black text-white">Sequência do seu sistema</h2>
+        <p class="mt-2 text-sm text-slate-400">
+            Identidade -> Objetivo -> Hábito -> Versão de 2 minutos -> Gatilho -> Recompensa.
+        </p>
+    </section>
+
+    <form class="app-card space-y-6 p-6" asp-action="Setup" method="post" autocomplete="off" data-onboarding-form>
         <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
 
-        <div>
+        <section class="space-y-3">
             <label asp-for="CategoryId" class="form-label">Área de foco</label>
+            <p class="text-sm text-slate-400">
+                Escolha onde você quer concentrar energia agora. Foco claro evita dispersão nas primeiras semanas.
+            </p>
             <select asp-for="CategoryId" class="form-select" data-onboarding-category>
                 <option value="">Escolha uma área de foco</option>
                 @foreach (var category in Model.Categories)
@@ -22,51 +35,74 @@
                 }
             </select>
             <span asp-validation-for="CategoryId"></span>
-        </div>
+        </section>
 
-        <div class="grid gap-4 md:grid-cols-2">
-            <div>
+        <section class="grid gap-4 md:grid-cols-2">
+            <article class="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                 <label asp-for="IdentityName" class="form-label">Identidade</label>
+                <p class="text-sm text-slate-400">
+                    Antes de criar hábitos, defina quem você quer se tornar. Hábitos duradouros funcionam melhor quando estão ligados à identidade.
+                </p>
                 <input asp-for="IdentityName" class="form-input" data-onboarding-field="identityName" placeholder="Pessoa consistente em uma área importante" />
                 <span asp-validation-for="IdentityName"></span>
-            </div>
-            <div>
+            </article>
+
+            <article class="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                 <label asp-for="GoalTitle" class="form-label">Objetivo</label>
+                <p class="text-sm text-slate-400">
+                    O objetivo mostra para onde você quer ir. O sistema diário é o que vai levar você até lá.
+                </p>
                 <input asp-for="GoalTitle" class="form-input" data-onboarding-field="goalTitle" placeholder="Construir uma rotina simples e sustentável" />
                 <span asp-validation-for="GoalTitle"></span>
-            </div>
-        </div>
+            </article>
+        </section>
 
-        <div>
+        <section class="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
             <label asp-for="IdentityStatement" class="form-label">Frase da identidade</label>
+            <p class="text-sm text-slate-400">
+                Escreva uma frase curta no presente. Ela vira seu lembrete de direção quando a rotina apertar.
+            </p>
             <input asp-for="IdentityStatement" class="form-input" data-onboarding-field="identityStatement" placeholder="Eu sou uma pessoa que melhora um pouco todos os dias" />
             <span asp-validation-for="IdentityStatement"></span>
-        </div>
+        </section>
 
-        <div>
+        <section class="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
             <label asp-for="HabitTitle" class="form-label">Primeiro hábito</label>
+            <p class="text-sm text-slate-400">
+                Este é o menor comportamento repetível que vai fortalecer sua nova identidade.
+            </p>
             <input asp-for="HabitTitle" class="form-input" data-onboarding-field="habitTitle" placeholder="Praticar por 15 minutos em um horário definido" />
             <span asp-validation-for="HabitTitle"></span>
-        </div>
+        </section>
 
-        <div class="grid gap-4">
-            <div>
-                <label asp-for="Trigger" class="form-label">Gatilho</label>
-                <input asp-for="Trigger" class="form-input" data-onboarding-field="trigger" placeholder="Quando a situação X surgir, executarei a resposta Y" />
-                <span asp-validation-for="Trigger"></span>
-            </div>
-            <div>
+        <section class="grid gap-4 md:grid-cols-2">
+            <article class="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                 <label asp-for="TwoMinuteVersion" class="form-label">Versão de 2 minutos</label>
+                <p class="text-sm text-slate-400">
+                    Todo hábito precisa de uma versão extremamente fácil para dias sem tempo ou energia.
+                </p>
                 <input asp-for="TwoMinuteVersion" class="form-input" data-onboarding-field="twoMinuteVersion" placeholder="Fazer a menor versão possível por 2 minutos" />
                 <span asp-validation-for="TwoMinuteVersion"></span>
-            </div>
-        </div>
+            </article>
 
-        <div>
+            <article class="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <label asp-for="Trigger" class="form-label">Gatilho</label>
+                <p class="text-sm text-slate-400">
+                    O gatilho define quando o hábito acontece e aumenta a chance do comportamento ficar automático.
+                </p>
+                <input asp-for="Trigger" class="form-input" data-onboarding-field="trigger" placeholder="Quando a situação X surgir, executarei a resposta Y" />
+                <span asp-validation-for="Trigger"></span>
+            </article>
+        </section>
+
+        <section class="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
             <label asp-for="Reward" class="form-label">Recompensa</label>
+            <p class="text-sm text-slate-400">
+                Uma recompensa pequena torna o hábito mais satisfatório e ajuda a manter repetição.
+            </p>
             <input asp-for="Reward" class="form-input" data-onboarding-field="reward" placeholder="Sentir progresso real no fim do dia" />
             <span asp-validation-for="Reward"></span>
-        </div>
+        </section>
 
         <div class="flex justify-end">
             <button class="btn-primary" type="submit">Criar meu sistema</button>

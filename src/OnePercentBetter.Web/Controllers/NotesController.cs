@@ -56,7 +56,7 @@ public class NotesController : Controller
         }
 
         await _noteService.CreateAsync(userId, viewModel);
-        TempData["Success"] = "Anotacao criada.";
+        TempData["Success"] = "Anotacao criada com sucesso.";
 
         return RedirectToAction(nameof(Index));
     }
@@ -104,7 +104,7 @@ public class NotesController : Controller
             return NotFound();
         }
 
-        TempData["Success"] = "Anotacao atualizada.";
+        TempData["Success"] = "Anotacao atualizada com sucesso.";
         return RedirectToAction(nameof(Index));
     }
 }

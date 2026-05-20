@@ -13,6 +13,12 @@ public class ApplicationUser : IdentityUser
 
     public string ThemePreference { get; set; } = "dark";
 
+    public DateTime? OnboardingTourCompletedAt { get; set; }
+
+    public DateTime? OnboardingTourSkippedAt { get; set; }
+
+    public int? OnboardingTourVersion { get; set; }
+
     public DateTime? OnboardingCompletedAt { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

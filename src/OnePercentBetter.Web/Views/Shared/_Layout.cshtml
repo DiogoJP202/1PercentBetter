@@ -1,14 +1,18 @@
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
     var title = ViewData["Title"] as string ?? "1% Better";
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var csrfToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="request-verification-token" content="@csrfToken" />
     <title>@title - 1% Better</title>
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/tour.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" />
     @await RenderSectionAsync("Styles", required: false)
 </head>

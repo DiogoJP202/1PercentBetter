@@ -1,0 +1,60 @@
+@{
+    ViewData["Title"] = "Tour inicial";
+    var replayMode = string.Equals(Context.Request.Query["replay"], "true", StringComparison.OrdinalIgnoreCase);
+    var startTourUrl = replayMode
+        ? Url.Action("Tour", "Onboarding", new { tour = 1, step = 1, replay = true })
+        : Url.Action("Tour", "Onboarding", new { tour = 1, step = 1 });
+}
+
+<section class="mx-auto max-w-5xl space-y-6">
+    <header class="space-y-3" data-tour-anchor="tour-what-is">
+        <p class="text-sm font-semibold text-sky-300">Integração guiada</p>
+        <h1 class="text-3xl font-black text-white sm:text-4xl">Entenda o sistema antes de configurar</h1>
+        <p class="max-w-3xl text-sm text-slate-400">
+            O tour mostra como cada módulo ajuda você a evoluir 1% por dia.
+            Quando terminar, você monta seu primeiro sistema com clareza.
+        </p>
+    </header>
+
+    <section class="app-card grid gap-4 p-6 md:grid-cols-3" data-tour-anchor="tour-systems">
+        <article class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <h2 class="text-sm font-black text-white">Sistema > motivação</h2>
+            <p class="mt-2 text-xs leading-5 text-slate-400">
+                Metas mudam o destino. Sistema define o que acontece hoje.
+            </p>
+        </article>
+        <article class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <h2 class="text-sm font-black text-white">Ciclo de aprendizado</h2>
+            <p class="mt-2 text-xs leading-5 text-slate-400">
+                Check-ins, anotações e gráficos mostram o que está funcionando.
+            </p>
+        </article>
+        <article class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <h2 class="text-sm font-black text-white">Ajuste contínuo</h2>
+            <p class="mt-2 text-xs leading-5 text-slate-400">
+                Toda semana você ajusta o sistema com base nos seus dados reais.
+            </p>
+        </article>
+    </section>
+
+    <section class="app-card space-y-4 p-6" data-tour-anchor="tour-connection">
+        <h2 class="text-xl font-black text-white">Fluxo completo do 1% Better</h2>
+        <p class="text-sm text-slate-400">
+            Identidade -> Objetivo -> Hábito -> Check-in -> Dashboard -> Ajuste.
+            Este ciclo conecta intenção com comportamento diário.
+        </p>
+        <div class="flex flex-wrap justify-end gap-2">
+            <form asp-action="SkipTour" method="post">
+                @Html.AntiForgeryToken()
+                <button class="btn-secondary" type="submit">
+                    <i data-lucide="skip-forward" class="h-4 w-4"></i>
+                    Pular tour
+                </button>
+            </form>
+            <a class="btn-primary" href="@startTourUrl">
+                <i data-lucide="play" class="h-4 w-4"></i>
+                Começar tour guiado
+            </a>
+        </div>
+    </section>
+</section>
