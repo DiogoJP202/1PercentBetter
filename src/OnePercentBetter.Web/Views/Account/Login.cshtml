@@ -6,7 +6,10 @@
 <section class="grid min-h-screen place-items-center px-4 py-10">
     <div class="w-full max-w-md">
         <a class="mb-8 flex items-center justify-center gap-3" asp-controller="Home" asp-action="Index">
-            <span class="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-400 text-sm font-black text-slate-950">1%</span>
+            <img src="~/1PercentBetterLogo.png"
+                 asp-append-version="true"
+                 alt="1% Better"
+                 class="h-11 w-11 rounded-2xl bg-slate-900/40 object-contain p-1" />
             <span class="text-xl font-black text-white">1% Better</span>
         </a>
 
@@ -39,7 +42,7 @@
             </form>
 
             <p class="mt-6 text-center text-sm text-slate-400">
-                Ainda nao tem conta?
+                Ainda não tem conta?
                 <a class="font-semibold text-emerald-300 hover:text-emerald-200" asp-action="Register">Criar agora</a>
             </p>
         </div>

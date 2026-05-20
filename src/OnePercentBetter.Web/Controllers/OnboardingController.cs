@@ -145,7 +145,7 @@ public class OnboardingController : Controller
         }
 
         await _onboardingService.CompleteAsync(userId, viewModel);
-        TempData["Success"] = "Seu primeiro sistema de evolucao foi criado.";
+        TempData["Success"] = "Seu primeiro sistema de evolução foi criado.";
 
         return RedirectToAction("Index", "Dashboard");
     }

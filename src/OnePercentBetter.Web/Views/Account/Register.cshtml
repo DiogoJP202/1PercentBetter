@@ -6,13 +6,16 @@
 <section class="grid min-h-screen place-items-center px-4 py-10">
     <div class="w-full max-w-md">
         <a class="mb-8 flex items-center justify-center gap-3" asp-controller="Home" asp-action="Index">
-            <span class="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-400 text-sm font-black text-slate-950">1%</span>
+            <img src="~/1PercentBetterLogo.png"
+                 asp-append-version="true"
+                 alt="1% Better"
+                 class="h-11 w-11 rounded-2xl bg-slate-900/40 object-contain p-1" />
             <span class="text-xl font-black text-white">1% Better</span>
         </a>
 
         <div class="app-card p-6">
             <h1 class="text-2xl font-black text-white">Criar conta</h1>
-            <p class="mt-2 text-sm text-slate-400">Crie a base para seu primeiro sistema diario.</p>
+            <p class="mt-2 text-sm text-slate-400">Crie a base para seu primeiro sistema diário.</p>
 
             <form class="mt-6 space-y-4" asp-action="Register" method="post">
                 <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
@@ -45,7 +48,7 @@
             </form>
 
             <p class="mt-6 text-center text-sm text-slate-400">
-                Ja tem conta?
+                Já tem conta?
                 <a class="font-semibold text-emerald-300 hover:text-emerald-200" asp-action="Login">Entrar</a>
             </p>
         </div>
