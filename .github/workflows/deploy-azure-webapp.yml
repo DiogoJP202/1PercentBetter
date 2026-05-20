@@ -3,6 +3,7 @@ name: Deploy 1PercentBetter to Azure Web App
 on:
   push:
     branches:
+      - main
       - master
   workflow_dispatch:
 
