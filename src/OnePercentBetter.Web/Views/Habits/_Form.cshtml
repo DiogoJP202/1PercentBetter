@@ -42,11 +42,18 @@
             <span asp-validation-for="Title"></span>
         </div>
         <div>
-            <label asp-for="SuggestedTime" class="form-label">Horário sugerido</label>
+            <label asp-for="SuggestedTime" class="form-label">Horário de início</label>
             <input asp-for="SuggestedTime" class="form-input" />
-            <p class="mt-2 text-xs text-slate-500">Opcional. Use quando quiser lembrar o melhor horário para executar o hábito.</p>
+            <p class="mt-2 text-xs text-slate-500">Opcional. Define quando o hábito começa no calendário.</p>
             <span asp-validation-for="SuggestedTime"></span>
         </div>
+    </div>
+
+    <div class="md:max-w-sm">
+        <label asp-for="EndTime" class="form-label">Horário de fim</label>
+        <input asp-for="EndTime" class="form-input" />
+        <p class="mt-2 text-xs text-slate-500">Opcional. Use para mostrar a duração do hábito no calendário.</p>
+        <span asp-validation-for="EndTime"></span>
     </div>
 
     <div>
@@ -254,6 +261,20 @@
                 </button>
             </div>
             <div class="grid gap-4">
+                <input type="hidden" value="" data-habit-simple-id />
+                <div>
+                    <label class="form-label" for="SimpleHabitExisting">Editar hábito simples existente</label>
+                    <div class="grid gap-2 sm:grid-cols-[1fr_auto]">
+                        <select id="SimpleHabitExisting" class="form-select" data-habit-simple-existing>
+                            <option value="">Selecione...</option>
+                            @foreach (var simpleHabit in Model.SimpleHabits)
+                            {
+                                <option value="@simpleHabit.Value">@simpleHabit.Text</option>
+                            }
+                        </select>
+                        <button type="button" class="btn-secondary" data-habit-simple-load>Carregar</button>
+                    </div>
+                </div>
                 <div>
                     <label class="form-label" for="SimpleHabitName">Nome</label>
                     <input id="SimpleHabitName" class="form-input" maxlength="160" placeholder="Escovar os dentes" data-habit-simple-name />
@@ -274,7 +295,7 @@
                 <button type="button" class="btn-secondary" data-habit-simple-close>Cancelar</button>
                 <button type="button" class="btn-primary" data-habit-simple-save>
                     <i data-lucide="plus" class="h-4 w-4"></i>
-                    Cadastrar hábito simples
+                    <span data-habit-simple-save-label>Salvar hábito simples</span>
                 </button>
             </div>
         </div>

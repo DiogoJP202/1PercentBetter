@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using OnePercentBetter.Web.Data;
 using OnePercentBetter.Web.Models.Entities;
+using OnePercentBetter.Web.Models.Enums;
 using OnePercentBetter.Web.ViewModels.Identities;
 using OnePercentBetter.Web.ViewModels.Shared;
 
@@ -34,7 +35,12 @@ public class IdentityService
                 Color = identity.Color,
                 Icon = identity.Icon,
                 HabitsCount = identity.Habits.Count,
-                GoalsCount = identity.Goals.Count
+                GoalsCount = identity.Goals.Count,
+                TasksCount = identity.TaskItems.Count,
+                PendingTasksCount = identity.TaskItems.Count(taskItem =>
+                    taskItem.Status == TaskItemStatus.Pending
+                    || taskItem.Status == TaskItemStatus.InProgress
+                    || taskItem.Status == TaskItemStatus.Postponed)
             })
             .ToListAsync();
     }

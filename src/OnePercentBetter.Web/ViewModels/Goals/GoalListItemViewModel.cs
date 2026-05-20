@@ -27,4 +27,8 @@ public class GoalListItemViewModel
     public string Icon { get; set; } = "target";
 
     public int HabitsCount { get; set; }
+
+    public int TasksCount { get; set; }
+
+    public int PendingTasksCount { get; set; }
 }

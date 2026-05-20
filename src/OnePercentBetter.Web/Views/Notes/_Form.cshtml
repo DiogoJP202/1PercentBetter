@@ -115,7 +115,7 @@
             <p class="mt-1 text-sm text-slate-400">Conecte a anotacao com identidade, objetivo e habito quando isso ajudar na leitura do contexto.</p>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-3">
+        <div class="grid gap-4 md:grid-cols-4">
             <div>
                 <label asp-for="IdentityId" class="form-label">Identidade</label>
                 <select asp-for="IdentityId" class="form-select">
@@ -148,6 +148,17 @@
                     }
                 </select>
                 <span asp-validation-for="HabitId"></span>
+            </div>
+            <div>
+                <label asp-for="TaskItemId" class="form-label">Tarefa</label>
+                <select asp-for="TaskItemId" class="form-select">
+                    <option value="">Nenhuma</option>
+                    @foreach (var task in Model.TaskItems)
+                    {
+                        <option value="@task.Value">@task.Text</option>
+                    }
+                </select>
+                <span asp-validation-for="TaskItemId"></span>
             </div>
         </div>
     </section>

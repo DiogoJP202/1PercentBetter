@@ -57,6 +57,7 @@ public class HabitService
                 habit.Status,
                 habit.FrequencyType,
                 habit.SuggestedTime,
+                habit.EndTime,
                 TodayStatus = habit.Logs
                     .Where(log => log.Date == today)
                     .Select(log => (HabitLogStatus?)log.Status)
@@ -85,6 +86,7 @@ public class HabitService
                 Status = habit.Status,
                 FrequencyType = habit.FrequencyType,
                 SuggestedTime = habit.SuggestedTime,
+                EndTime = habit.EndTime,
                 TodayStatus = habit.TodayStatus,
                 Color = habit.Color,
                 Icon = habit.Icon
@@ -124,6 +126,7 @@ public class HabitService
             DaysOfWeek = habit.DaysOfWeek,
             SelectedDaysOfWeek = ParseDaysOfWeek(habit.DaysOfWeek),
             SuggestedTime = habit.SuggestedTime,
+            EndTime = habit.EndTime,
             Difficulty = habit.Difficulty,
             TwoMinuteVersion = habit.TwoMinuteVersion,
             Trigger = habit.Trigger,
@@ -190,6 +193,16 @@ public class HabitService
             errors[nameof(viewModel.Icon)] = "Escolha um ícone válido.";
         }
 
+        if (viewModel.EndTime.HasValue && !viewModel.SuggestedTime.HasValue)
+        {
+            errors[nameof(viewModel.SuggestedTime)] = "Defina o horário de início para usar horário de fim.";
+        }
+
+        if (viewModel.SuggestedTime.HasValue && viewModel.EndTime.HasValue && viewModel.EndTime <= viewModel.SuggestedTime)
+        {
+            errors[nameof(viewModel.EndTime)] = "O horário de fim deve ser maior que o horário de início.";
+        }
+
         return errors;
     }
 
@@ -230,6 +243,7 @@ public class HabitService
             FrequencyType = viewModel.FrequencyType,
             DaysOfWeek = BuildDaysOfWeek(viewModel),
             SuggestedTime = viewModel.SuggestedTime,
+            EndTime = viewModel.EndTime,
             Difficulty = viewModel.Difficulty,
             TwoMinuteVersion = viewModel.TwoMinuteVersion.Trim(),
             Trigger = viewModel.Trigger.Trim(),
@@ -271,6 +285,7 @@ public class HabitService
         habit.FrequencyType = viewModel.FrequencyType;
         habit.DaysOfWeek = BuildDaysOfWeek(viewModel);
         habit.SuggestedTime = viewModel.SuggestedTime;
+        habit.EndTime = viewModel.EndTime;
         habit.Difficulty = viewModel.Difficulty;
         habit.TwoMinuteVersion = viewModel.TwoMinuteVersion.Trim();
         habit.Trigger = viewModel.Trigger.Trim();

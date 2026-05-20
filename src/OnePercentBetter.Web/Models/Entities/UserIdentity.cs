@@ -44,5 +44,7 @@ public class UserIdentity
 
     public ICollection<Habit> Habits { get; } = new List<Habit>();
 
+    public ICollection<TaskItem> TaskItems { get; } = new List<TaskItem>();
+
     public ICollection<Note> Notes { get; } = new List<Note>();
 }

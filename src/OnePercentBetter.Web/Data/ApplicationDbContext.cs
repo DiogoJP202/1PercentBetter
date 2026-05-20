@@ -20,6 +20,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Habit> Habits => Set<Habit>();
 
+    public DbSet<TaskItem> TaskItems => Set<TaskItem>();
+
+    public DbSet<TaskTag> TaskTags => Set<TaskTag>();
+
+    public DbSet<TaskItemTag> TaskItemTags => Set<TaskItemTag>();
+
     public DbSet<SimpleHabit> SimpleHabits => Set<SimpleHabit>();
 
     public DbSet<HabitLocation> HabitLocations => Set<HabitLocation>();
@@ -106,6 +112,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Habit>(entity =>
         {
             entity.HasIndex(habit => new { habit.UserId, habit.Status });
+            entity.Property(habit => habit.SuggestedTime).HasColumnType("time");
+            entity.Property(habit => habit.EndTime).HasColumnType("time");
 
             entity.HasOne(habit => habit.User)
                 .WithMany(user => user.Habits)
@@ -141,6 +149,68 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .WithMany(simpleHabit => simpleHabit.StackedHabits)
                 .HasForeignKey(habit => habit.StackedAfterSimpleHabitId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<TaskItem>(entity =>
+        {
+            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.Status });
+            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.TaskDate });
+            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.DueDate });
+            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.Priority });
+            entity.Property(taskItem => taskItem.TaskDate).HasColumnType("date");
+            entity.Property(taskItem => taskItem.DueDate).HasColumnType("date");
+            entity.Property(taskItem => taskItem.StartTime).HasColumnType("time");
+            entity.Property(taskItem => taskItem.EndTime).HasColumnType("time");
+
+            entity.HasOne(taskItem => taskItem.User)
+                .WithMany(user => user.TaskItems)
+                .HasForeignKey(taskItem => taskItem.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(taskItem => taskItem.Identity)
+                .WithMany(identity => identity.TaskItems)
+                .HasForeignKey(taskItem => taskItem.IdentityId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(taskItem => taskItem.Goal)
+                .WithMany(goal => goal.TaskItems)
+                .HasForeignKey(taskItem => taskItem.GoalId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(taskItem => taskItem.Habit)
+                .WithMany(habit => habit.TaskItems)
+                .HasForeignKey(taskItem => taskItem.HabitId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(taskItem => taskItem.Category)
+                .WithMany(category => category.TaskItems)
+                .HasForeignKey(taskItem => taskItem.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<TaskTag>(entity =>
+        {
+            entity.HasIndex(taskTag => new { taskTag.UserId, taskTag.Name }).IsUnique();
+
+            entity.HasOne(taskTag => taskTag.User)
+                .WithMany(user => user.TaskTags)
+                .HasForeignKey(taskTag => taskTag.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<TaskItemTag>(entity =>
+        {
+            entity.HasKey(taskItemTag => new { taskItemTag.TaskItemId, taskItemTag.TaskTagId });
+
+            entity.HasOne(taskItemTag => taskItemTag.TaskItem)
+                .WithMany(taskItem => taskItem.TaskItemTags)
+                .HasForeignKey(taskItemTag => taskItemTag.TaskItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(taskItemTag => taskItemTag.TaskTag)
+                .WithMany(taskTag => taskTag.TaskItemTags)
+                .HasForeignKey(taskItemTag => taskItemTag.TaskTagId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<HabitLocation>(entity =>
@@ -214,6 +284,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.HasOne(note => note.Habit)
                 .WithMany(habit => habit.Notes)
                 .HasForeignKey(note => note.HabitId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(note => note.TaskItem)
+                .WithMany(taskItem => taskItem.NotesLinks)
+                .HasForeignKey(note => note.TaskItemId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
     }

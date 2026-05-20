@@ -27,6 +27,11 @@
         </article>
     </section>
 
+    <section class="rounded-2xl border border-sky-300/20 bg-sky-300/10 p-4 text-sm text-sky-100">
+        Habito e comportamento recorrente. Para acao pontual com comeco e fim, use
+        <a class="font-bold text-sky-200 underline underline-offset-4" asp-controller="Tasks" asp-action="Index">Tarefas</a>.
+    </section>
+
     <div class="grid gap-4">
         @foreach (var item in Model)
         {
@@ -69,7 +74,14 @@
                                     <span class="status-pill @statusPillClass"><i data-lucide="activity"></i>@item.Status.ToDisplayName()</span>
                                     @if (item.SuggestedTime.HasValue)
                                     {
-                                        <span class="status-pill status-pill-neutral"><i data-lucide="clock"></i>@item.SuggestedTime.Value.ToString(@"hh\:mm")</span>
+                                        <span class="status-pill status-pill-neutral">
+                                            <i data-lucide="clock"></i>
+                                            @item.SuggestedTime.Value.ToString(@"hh\:mm")
+                                            @if (item.EndTime.HasValue)
+                                            {
+                                                <span> - @item.EndTime.Value.ToString(@"hh\:mm")</span>
+                                            }
+                                        </span>
                                     }
                                     @if (!string.IsNullOrWhiteSpace(item.LocationName))
                                     {

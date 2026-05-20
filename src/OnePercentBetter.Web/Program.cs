@@ -44,6 +44,7 @@ builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<CalendarService>();
 builder.Services.AddScoped<OnboardingService>();
 builder.Services.AddScoped<NoteService>();
+builder.Services.AddScoped<TaskItemService>();
 
 builder.Services.AddControllersWithViews();
 

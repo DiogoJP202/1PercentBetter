@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnePercentBetter.Web.Extensions;
 using OnePercentBetter.Web.Models.Enums;
@@ -145,7 +145,11 @@ public class HabitsController : Controller
             return BadRequest(new { error = message });
         }
 
-        var result = await _simpleHabitService.CreateAsync(User.GetRequiredUserId(), viewModel);
+        var userId = User.GetRequiredUserId();
+        var result = viewModel.Id.HasValue
+            ? await _simpleHabitService.UpdateAsync(userId, viewModel)
+            : await _simpleHabitService.CreateAsync(userId, viewModel);
+
         if (!result.Success || result.Option is null)
         {
             return BadRequest(new { error = result.Error ?? "Não foi possível cadastrar o hábito simples." });
@@ -153,6 +157,7 @@ public class HabitsController : Controller
 
         return Json(new
         {
+            id = result.Option.Value,
             value = $"simple:{result.Option.Value}",
             text = result.Option.Text
         });
@@ -185,3 +190,4 @@ public class HabitsController : Controller
         return RedirectToAction(nameof(Index));
     }
 }
+

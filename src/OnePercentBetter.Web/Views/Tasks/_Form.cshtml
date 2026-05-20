@@ -1,0 +1,217 @@
+@model TaskItemFormViewModel
+@{
+    var isEdit = Model.Id.HasValue;
+    var selectedIcon = TaskVisualOptions.Icons.FirstOrDefault(icon => icon.Value == Model.Icon) ?? TaskVisualOptions.Icons.First();
+}
+
+<form class="app-card space-y-6 p-6" method="post" autocomplete="off" data-task-form>
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+
+    <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
+
+    <section class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <div class="flex items-start gap-4">
+            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/10 bg-slate-950/50" style="color:@Model.Color" data-task-preview-icon>
+                <i data-lucide="@selectedIcon.Value" class="h-6 w-6"></i>
+            </span>
+            <div class="min-w-0">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Ação pontual</p>
+                <h2 class="mt-1 truncate text-2xl font-black text-white" data-task-preview-title>@(string.IsNullOrWhiteSpace(Model.Title) ? "Sua próxima ação" : Model.Title)</h2>
+                <p class="mt-2 text-sm text-slate-400">
+                    Tarefas são ações pontuais com começo e fim.
+                    Se você pretende repetir essa ação com frequência, prefira criar um hábito.
+                </p>
+                <p class="mt-3 hidden rounded-xl border border-amber-300/30 bg-amber-300/10 px-3 py-2 text-xs text-amber-100" data-task-recurrence-warning>
+                    Isso parece recorrente. Talvez funcione melhor como hábito.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="grid gap-4 md:grid-cols-2">
+        <div>
+            <label asp-for="Title" class="form-label">Título</label>
+            <input asp-for="Title" class="form-input" placeholder="Ex.: Criar controller de tarefas" data-task-title-input />
+            <span asp-validation-for="Title"></span>
+        </div>
+        <div>
+            <label asp-for="Priority" class="form-label">Prioridade</label>
+            <select asp-for="Priority" asp-items="@(EnumDisplayExtensions.ToSelectList<TaskItemPriority>())" class="form-select"></select>
+            <span asp-validation-for="Priority"></span>
+        </div>
+    </div>
+
+    <div>
+        <label asp-for="Description" class="form-label">Descrição</label>
+        <textarea asp-for="Description" class="form-textarea" placeholder="Descreva a entrega objetiva desta tarefa." data-task-description-input></textarea>
+        <span asp-validation-for="Description"></span>
+    </div>
+
+    <div>
+        <label asp-for="Notes" class="form-label">Observações</label>
+        <textarea asp-for="Notes" class="form-textarea" placeholder="Contexto extra, bloqueios ou detalhes técnicos."></textarea>
+        <span asp-validation-for="Notes"></span>
+    </div>
+
+    <section class="grid gap-4 md:grid-cols-4">
+        <div>
+            <label asp-for="TaskDate" class="form-label">Data da tarefa</label>
+            <input asp-for="TaskDate" class="form-input" />
+            <span asp-validation-for="TaskDate"></span>
+        </div>
+        <div>
+            <label asp-for="StartTime" class="form-label">Horário inicial</label>
+            <input asp-for="StartTime" class="form-input" />
+            <span asp-validation-for="StartTime"></span>
+        </div>
+        <div>
+            <label asp-for="EndTime" class="form-label">Horário final</label>
+            <input asp-for="EndTime" class="form-input" />
+            <span asp-validation-for="EndTime"></span>
+        </div>
+        <div>
+            <label asp-for="DueDate" class="form-label">Prazo</label>
+            <input asp-for="DueDate" class="form-input" />
+            <span asp-validation-for="DueDate"></span>
+        </div>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-2">
+        <div>
+            <label asp-for="Status" class="form-label">Status</label>
+            <select asp-for="Status" asp-items="@(EnumDisplayExtensions.ToSelectList<TaskItemStatus>())" class="form-select"></select>
+            <span asp-validation-for="Status"></span>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <label class="inline-flex items-center gap-2 text-sm font-semibold text-slate-200">
+                <input asp-for="ShowOnCalendar" class="h-4 w-4 accent-emerald-400" />
+                Mostrar no calendário
+            </label>
+            <p class="mt-2 text-xs text-slate-500">Apenas tarefas com data aparecem no calendário.</p>
+        </div>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-4">
+        <div>
+            <label asp-for="IdentityId" class="form-label">Identidade</label>
+            <select asp-for="IdentityId" class="form-select">
+                <option value="">Nenhuma</option>
+                @foreach (var identity in Model.Identities)
+                {
+                    <option value="@identity.Value">@identity.Text</option>
+                }
+            </select>
+            <span asp-validation-for="IdentityId"></span>
+        </div>
+        <div>
+            <label asp-for="GoalId" class="form-label">Objetivo</label>
+            <select asp-for="GoalId" class="form-select">
+                <option value="">Nenhum</option>
+                @foreach (var goal in Model.Goals)
+                {
+                    <option value="@goal.Value">@goal.Text</option>
+                }
+            </select>
+            <span asp-validation-for="GoalId"></span>
+        </div>
+        <div>
+            <label asp-for="HabitId" class="form-label">Hábito relacionado</label>
+            <select asp-for="HabitId" class="form-select">
+                <option value="">Nenhum</option>
+                @foreach (var habit in Model.Habits)
+                {
+                    <option value="@habit.Value">@habit.Text</option>
+                }
+            </select>
+            <span asp-validation-for="HabitId"></span>
+        </div>
+        <div>
+            <label asp-for="CategoryId" class="form-label">Categoria</label>
+            <select asp-for="CategoryId" class="form-select">
+                <option value="">Sem categoria</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.Value">@category.Text</option>
+                }
+            </select>
+            <span asp-validation-for="CategoryId"></span>
+        </div>
+    </section>
+
+    <section class="space-y-3">
+        <div>
+            <label asp-for="SelectedTagIds" class="form-label">Tags</label>
+            <select asp-for="SelectedTagIds" class="form-select min-h-32" multiple>
+                @foreach (var tag in Model.Tags)
+                {
+                    <option value="@tag.Value">@tag.Text</option>
+                }
+            </select>
+            <p class="mt-2 text-xs text-slate-500">Segure Ctrl para selecionar várias tags.</p>
+            <span asp-validation-for="SelectedTagIds"></span>
+        </div>
+        <div>
+            <label asp-for="NewTags" class="form-label">Criar novas tags</label>
+            <input asp-for="NewTags" class="form-input" placeholder="ex.: estudo, projeto, urgente" />
+            <p class="mt-2 text-xs text-slate-500">Separe por vírgula para criar tags novas.</p>
+            <span asp-validation-for="NewTags"></span>
+        </div>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-2">
+        <div>
+            <label asp-for="Color" class="form-label">Cor</label>
+            <div class="flex items-center gap-3">
+                <input asp-for="Color" type="color" class="h-12 w-16 cursor-pointer rounded-xl border border-white/10 bg-slate-950 p-1" data-task-color-input />
+                <div class="flex flex-wrap gap-2">
+                    @foreach (var color in TaskVisualOptions.Colors)
+                    {
+                        <button type="button" class="h-9 w-9 rounded-full border border-white/15 transition hover:scale-105" style="background:@color.Value" data-task-color-swatch="@color.Value" title="@color.Name">
+                            <span class="sr-only">@color.Name</span>
+                        </button>
+                    }
+                </div>
+            </div>
+            <span asp-validation-for="Color"></span>
+        </div>
+        <div>
+            <label asp-for="Icon" class="form-label">Ícone</label>
+            <input asp-for="Icon" type="hidden" data-task-icon-input />
+            <div class="grid gap-2">
+                <div class="btn-secondary w-full justify-between">
+                    <span class="flex items-center gap-2">
+                        <span class="grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-slate-950/60" data-task-icon-preview>
+                            <i data-lucide="@selectedIcon.Value" class="h-4 w-4"></i>
+                        </span>
+                        <span data-task-icon-label>@selectedIcon.Name</span>
+                    </span>
+                </div>
+                <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach (var icon in TaskVisualOptions.Icons)
+                    {
+                        <button type="button"
+                                class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 text-center text-sm font-semibold text-slate-200 transition hover:border-violet-300/80 hover:bg-violet-300/10"
+                                data-task-icon-option="@icon.Value"
+                                data-task-icon-name="@icon.Name">
+                            <i data-lucide="@icon.Value" class="mx-auto mb-2 h-5 w-5"></i>
+                            @icon.Name
+                        </button>
+                    }
+                </div>
+            </div>
+            <span asp-validation-for="Icon"></span>
+        </div>
+    </section>
+
+    <div class="flex flex-wrap justify-end gap-2">
+        <a class="btn-secondary" asp-action="Index">
+            <i data-lucide="x" class="h-4 w-4"></i>
+            Cancelar
+        </a>
+        <button class="btn-primary" type="submit">
+            <i data-lucide="save" class="h-4 w-4"></i>
+            @(isEdit ? "Salvar tarefa" : "Criar tarefa")
+        </button>
+    </div>
+</form>

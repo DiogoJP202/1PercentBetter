@@ -17,6 +17,8 @@ public static class EnumDisplayExtensions
             HabitLogStatus habitLogStatus => habitLogStatus.ToDisplayName(),
             MoodLevel moodLevel => moodLevel.ToDisplayName(),
             NoteType noteType => noteType.ToDisplayName(),
+            TaskItemStatus taskItemStatus => taskItemStatus.ToDisplayName(),
+            TaskItemPriority taskItemPriority => taskItemPriority.ToDisplayName(),
             _ => value.ToString()
         };
     }
@@ -109,6 +111,31 @@ public static class EnumDisplayExtensions
             NoteType.WeeklyReview => "Revisão semanal",
             NoteType.MonthlyReview => "Revisão mensal",
             _ => noteType.ToString()
+        };
+    }
+
+    public static string ToDisplayName(this TaskItemStatus status)
+    {
+        return status switch
+        {
+            TaskItemStatus.Pending => "Pendente",
+            TaskItemStatus.InProgress => "Em andamento",
+            TaskItemStatus.Completed => "Concluida",
+            TaskItemStatus.Cancelled => "Cancelada",
+            TaskItemStatus.Postponed => "Adiada",
+            _ => status.ToString()
+        };
+    }
+
+    public static string ToDisplayName(this TaskItemPriority priority)
+    {
+        return priority switch
+        {
+            TaskItemPriority.Low => "Baixa",
+            TaskItemPriority.Medium => "Media",
+            TaskItemPriority.High => "Alta",
+            TaskItemPriority.Urgent => "Urgente",
+            _ => priority.ToString()
         };
     }
 

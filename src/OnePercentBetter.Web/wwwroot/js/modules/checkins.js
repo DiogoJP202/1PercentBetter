@@ -89,8 +89,13 @@ const renderDetail = (detail) => {
   setText('[data-checkin-detail-energy]', detail.exists ? detail.energyLevel : '-');
   setText('[data-checkin-detail-productivity]', detail.exists ? detail.productivityLevel : '-');
   setText('[data-checkin-detail-total]', detail.exists ? `${detail.totalScore}/15` : '-');
+  setText('[data-checkin-detail-tasks-planned]', detail.plannedTasks);
+  setText('[data-checkin-detail-tasks-completed]', detail.completedTasks);
+  setText('[data-checkin-detail-tasks-postponed]', detail.postponedTasks);
+  setText('[data-checkin-detail-tasks-pending]', detail.pendingTasks);
   setText('[data-checkin-detail-win]', detail.smallWin);
   setText('[data-checkin-detail-difficulty]', detail.mainDifficulty);
+  setText('[data-checkin-detail-task-blocker]', detail.taskBlocker);
   setText('[data-checkin-detail-adjustment]', detail.tomorrowAdjustment);
   setText('[data-checkin-detail-notes]', detail.notes);
   setMood(detail.mood, detail.exists);
@@ -119,8 +124,13 @@ const renderSummary = (point) => {
   setText('[data-checkin-detail-energy]', '-');
   setText('[data-checkin-detail-productivity]', '-');
   setText('[data-checkin-detail-total]', point.hasCheckIn ? `${point.score}/15` : '-');
+  setText('[data-checkin-detail-tasks-planned]', '-');
+  setText('[data-checkin-detail-tasks-completed]', '-');
+  setText('[data-checkin-detail-tasks-postponed]', '-');
+  setText('[data-checkin-detail-tasks-pending]', '-');
   setText('[data-checkin-detail-win]', point.summary);
   setText('[data-checkin-detail-difficulty]', '-');
+  setText('[data-checkin-detail-task-blocker]', '-');
   setText('[data-checkin-detail-adjustment]', '-');
   setText('[data-checkin-detail-notes]', '-');
   setMood(null, false);

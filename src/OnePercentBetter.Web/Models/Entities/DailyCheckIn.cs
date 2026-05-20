@@ -30,6 +30,9 @@ public class DailyCheckIn
     public string? MainDifficulty { get; set; }
 
     [MaxLength(500)]
+    public string? TaskBlocker { get; set; }
+
+    [MaxLength(500)]
     public string? TomorrowAdjustment { get; set; }
 
     [MaxLength(1600)]

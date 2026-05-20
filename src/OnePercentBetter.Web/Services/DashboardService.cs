@@ -81,6 +81,62 @@ public class DashboardService
             0,
             999);
 
+        var todayTasks = await _dbContext.TaskItems
+            .AsNoTracking()
+            .Where(taskItem => taskItem.UserId == userId && taskItem.TaskDate.HasValue && taskItem.TaskDate.Value == today)
+            .ToListAsync();
+        var todayTasksCompleted = todayTasks.Count(taskItem => taskItem.Status == TaskItemStatus.Completed);
+        var todayTasksPending = todayTasks.Count(taskItem =>
+            taskItem.Status == TaskItemStatus.Pending
+            || taskItem.Status == TaskItemStatus.InProgress
+            || taskItem.Status == TaskItemStatus.Postponed);
+        var pendingTasks = await _dbContext.TaskItems
+            .AsNoTracking()
+            .CountAsync(taskItem => taskItem.UserId == userId
+                && (taskItem.Status == TaskItemStatus.Pending
+                    || taskItem.Status == TaskItemStatus.InProgress
+                    || taskItem.Status == TaskItemStatus.Postponed));
+        var overdueTasks = await _dbContext.TaskItems
+            .AsNoTracking()
+            .CountAsync(taskItem => taskItem.UserId == userId
+                && (taskItem.Status == TaskItemStatus.Pending
+                    || taskItem.Status == TaskItemStatus.InProgress
+                    || taskItem.Status == TaskItemStatus.Postponed)
+                && ((taskItem.DueDate.HasValue && taskItem.DueDate.Value < today)
+                    || (taskItem.TaskDate.HasValue && taskItem.TaskDate.Value < today)));
+        var completedTasksLast7Days = await _dbContext.TaskItems
+            .AsNoTracking()
+            .CountAsync(taskItem => taskItem.UserId == userId
+                && taskItem.Status == TaskItemStatus.Completed
+                && taskItem.CompletedAt.HasValue
+                && taskItem.CompletedAt.Value.Date >= weekStart
+                && taskItem.CompletedAt.Value.Date <= today);
+        var urgentTasks = await _dbContext.TaskItems
+            .AsNoTracking()
+            .CountAsync(taskItem => taskItem.UserId == userId
+                && taskItem.Priority == TaskItemPriority.Urgent
+                && (taskItem.Status == TaskItemStatus.Pending
+                    || taskItem.Status == TaskItemStatus.InProgress
+                    || taskItem.Status == TaskItemStatus.Postponed));
+        var nextTask = await _dbContext.TaskItems
+            .AsNoTracking()
+            .Where(taskItem => taskItem.UserId == userId
+                && (taskItem.Status == TaskItemStatus.Pending
+                    || taskItem.Status == TaskItemStatus.InProgress
+                    || taskItem.Status == TaskItemStatus.Postponed)
+                && taskItem.TaskDate.HasValue
+                && taskItem.TaskDate.Value >= today)
+            .OrderBy(taskItem => taskItem.TaskDate)
+            .ThenBy(taskItem => taskItem.StartTime.HasValue ? 0 : 1)
+            .ThenBy(taskItem => taskItem.StartTime)
+            .Select(taskItem => new
+            {
+                taskItem.Title,
+                taskItem.TaskDate,
+                taskItem.StartTime
+            })
+            .FirstOrDefaultAsync();
+
         return new DashboardViewModel
         {
             TodayCompletionRate = completionRate,
@@ -97,6 +153,16 @@ public class DashboardService
             ActiveGoals = activeGoals,
             ActiveIdentities = activeIdentities,
             BetterIndex = betterIndex,
+            TodayTasksPending = todayTasksPending,
+            TodayTasksCompleted = todayTasksCompleted,
+            PendingTasks = pendingTasks,
+            OverdueTasks = overdueTasks,
+            CompletedTasksLast7Days = completedTasksLast7Days,
+            UrgentTasks = urgentTasks,
+            NextTaskTitle = nextTask?.Title,
+            NextTaskTime = nextTask?.StartTime.HasValue == true
+                ? $"{nextTask.TaskDate:dd/MM} {nextTask.StartTime:hh\\:mm}"
+                : nextTask?.TaskDate?.ToString("dd/MM"),
             FocusIdentityName = focusIdentity?.Name,
             FocusIdentityStatement = focusIdentity?.IdentityStatement,
             TodayHabits = todayHabits,

@@ -15,4 +15,10 @@ public class CalendarOverviewViewModel
     public int CurrentCheckInStreak { get; set; }
 
     public int ActiveSimpleHabits { get; set; }
+
+    public int PlannedTasks { get; set; }
+
+    public int CompletedTasks { get; set; }
+
+    public int OverdueTasks { get; set; }
 }

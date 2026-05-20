@@ -89,7 +89,7 @@ const renderImprovementHabits = (habits, date) => {
       habit.suggestedTime ? `${habit.suggestedTime}` : null,
       habit.goalTitle,
       habit.locationName
-    ].filter(Boolean).join(' · ');
+    ].filter(Boolean).join(' � ');
 
     return `
       <article class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
@@ -133,11 +133,64 @@ const renderCommonHabits = (habits) => {
         </span>
         <div class="min-w-0">
           <h4 class="truncate text-sm font-black text-white">${escapeHtml(habit.name)}</h4>
-          <p class="mt-1 text-xs text-violet-100/80">${habit.scheduledTime ? `Horário: ${escapeHtml(habit.scheduledTime)}` : 'Sem horário definido'}</p>
+          <p class="mt-1 text-xs text-violet-100/80">${habit.scheduledTime ? `Horario: ${escapeHtml(habit.scheduledTime)}` : 'Sem horario definido'}</p>
         </div>
       </div>
     </article>
   `).join('');
+};
+
+const renderTasks = (tasks, date) => {
+  const list = dayPanel?.querySelector('[data-calendar-task-list]');
+  const empty = dayPanel?.querySelector('[data-calendar-task-empty]');
+  const action = dayPanel?.querySelector('[data-calendar-task-action]');
+  const taskEditUrl = dayPanel?.dataset.taskEditUrl;
+  const taskCreateUrl = dayPanel?.dataset.taskCreateUrl;
+
+  if (!list || !empty) {
+    return;
+  }
+
+  if (action && taskCreateUrl) {
+    action.href = `${taskCreateUrl}?taskDate=${encodeURIComponent(date)}`;
+  }
+
+  setText('[data-calendar-task-planned]', tasks.length);
+  setText('[data-calendar-task-completed]', tasks.filter((task) => task.isCompleted).length);
+  setText('[data-calendar-task-pending]', tasks.filter((task) => !task.isCompleted).length);
+
+  empty.classList.toggle('hidden', tasks.length > 0);
+
+  list.innerHTML = tasks.map((task) => {
+    const statusClass = statusClasses[task.statusTone] ?? statusClasses.neutral;
+    const meta = [task.timeRange, task.goalTitle, task.identityName].filter(Boolean).join(' � ');
+
+    return `
+      <article class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+        <div class="flex items-start gap-3">
+          <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/10 bg-slate-950/50" style="color:${escapeHtml(task.color)}">
+            <i data-lucide="${escapeHtml(task.icon)}" class="h-4 w-4"></i>
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h4 class="truncate text-sm font-black text-white">${escapeHtml(task.title)}</h4>
+              <div class="flex gap-1">
+                <span class="status-pill ${statusClass}">${escapeHtml(task.statusLabel)}</span>
+                <span class="status-pill status-pill-neutral">${escapeHtml(task.priorityLabel)}</span>
+              </div>
+            </div>
+            ${meta ? `<p class="mt-1 text-xs text-slate-500">${escapeHtml(meta)}</p>` : ''}
+            <div class="mt-3 flex flex-wrap gap-2">
+              ${task.isCompleted
+                ? `<button type="button" class="btn-secondary min-h-0 px-3 py-1 text-xs" data-calendar-reopen-task="${task.id}"><i data-lucide="rotate-ccw" class="h-3.5 w-3.5"></i>Reabrir</button>`
+                : `<button type="button" class="btn-primary min-h-0 px-3 py-1 text-xs" data-calendar-complete-task="${task.id}"><i data-lucide="check" class="h-3.5 w-3.5"></i>Concluir</button>`}
+              ${taskEditUrl ? `<a class="btn-secondary min-h-0 px-3 py-1 text-xs" href="${buildEditUrl(taskEditUrl, task.id)}"><i data-lucide="pencil" class="h-3.5 w-3.5"></i>Editar</a>` : ''}
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('');
 };
 
 const renderCheckIn = (checkIn, date) => {
@@ -169,7 +222,7 @@ const renderCheckIn = (checkIn, date) => {
         <span class="text-3xl leading-none" aria-hidden="true">${escapeHtml(checkIn.moodFace)}</span>
         <div class="min-w-0">
           <div class="text-xs font-semibold uppercase tracking-wide text-violet-100/80">Check-in registrado</div>
-          <div class="mt-1 text-lg font-black text-white">${escapeHtml(checkIn.totalScore)}/15 · ${escapeHtml(checkIn.moodLabel)}</div>
+          <div class="mt-1 text-lg font-black text-white">${escapeHtml(checkIn.totalScore)}/15 � ${escapeHtml(checkIn.moodLabel)}</div>
           ${checkIn.smallWin ? `<p class="mt-2 text-sm text-violet-50">${escapeHtml(checkIn.smallWin)}</p>` : ''}
           ${checkIn.mainDifficulty ? `<p class="mt-1 text-xs text-violet-100/80">${escapeHtml(checkIn.mainDifficulty)}</p>` : ''}
         </div>
@@ -187,7 +240,7 @@ const renderDay = (detail) => {
   dayPanel.dataset.selectedDate = date;
 
   setText('[data-calendar-day-title]', detail.dateLabel || 'Detalhes do dia');
-  setText('[data-calendar-day-subtitle]', detail.plannedCount > 0 ? 'Veja o que estava planejado e o que já foi registrado.' : 'Nenhum hábito de melhoria planejado para esta data.');
+  setText('[data-calendar-day-subtitle]', detail.plannedCount > 0 ? 'Veja o que estava planejado e o que ja foi registrado.' : 'Nenhum habito de melhoria planejado para esta data.');
   setText('[data-calendar-day-date]', date);
   setText('[data-calendar-day-planned]', detail.plannedCount);
   setText('[data-calendar-day-completed]', detail.completedCount);
@@ -195,6 +248,7 @@ const renderDay = (detail) => {
 
   renderImprovementHabits(detail.improvementHabits ?? [], date);
   renderCommonHabits(detail.commonHabits ?? []);
+  renderTasks(detail.tasks ?? [], date);
   renderCheckIn(detail.checkIn, date);
   refreshIcons();
 };
@@ -215,7 +269,7 @@ const loadDay = async (date) => {
   });
 
   if (!response.ok) {
-    showMessage('Não foi possível carregar os detalhes do dia.', 'error');
+    showMessage('Nao foi possivel carregar os detalhes do dia.', 'error');
     return;
   }
 
@@ -250,22 +304,71 @@ const updateHabitStatus = async (habitId, date, status = 'Completed') => {
   const result = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    showMessage(result.error || 'Não foi possível atualizar o hábito.', 'error');
+    showMessage(result.error || 'Nao foi possivel atualizar o habito.', 'error');
     return;
   }
 
-  showMessage(result.message || 'Hábito atualizado.');
+  showMessage(result.message || 'Habito atualizado.');
   window.__calendarInstance?.refetchEvents();
   await loadDay(date);
 };
 
-dayPanel?.addEventListener('click', (event) => {
-  const completeButton = event.target.closest('[data-calendar-complete-habit]');
-  if (!completeButton) {
+const updateTaskStatus = async (taskId, status = 'Completed') => {
+  const statusUrl = dayPanel?.dataset.taskStatusUrl;
+  const token = tokenInput?.value;
+  const date = dayPanel?.dataset.selectedDate;
+
+  if (!statusUrl || !taskId) {
     return;
   }
 
-  updateHabitStatus(completeButton.dataset.calendarCompleteHabit, completeButton.dataset.calendarDate);
+  const payload = new FormData();
+  payload.append('id', taskId);
+  payload.append('status', status);
+
+  if (token) {
+    payload.append('__RequestVerificationToken', token);
+  }
+
+  const response = await fetch(statusUrl, {
+    method: 'POST',
+    body: payload,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    showMessage(result.error || 'Nao foi possivel atualizar a tarefa.', 'error');
+    return;
+  }
+
+  showMessage(result.message || 'Tarefa atualizada.');
+  window.__calendarInstance?.refetchEvents();
+  if (date) {
+    await loadDay(date);
+  }
+};
+
+dayPanel?.addEventListener('click', (event) => {
+  const completeHabitButton = event.target.closest('[data-calendar-complete-habit]');
+  if (completeHabitButton) {
+    updateHabitStatus(completeHabitButton.dataset.calendarCompleteHabit, completeHabitButton.dataset.calendarDate);
+    return;
+  }
+
+  const completeTaskButton = event.target.closest('[data-calendar-complete-task]');
+  if (completeTaskButton) {
+    updateTaskStatus(completeTaskButton.dataset.calendarCompleteTask, 'Completed');
+    return;
+  }
+
+  const reopenTaskButton = event.target.closest('[data-calendar-reopen-task]');
+  if (reopenTaskButton) {
+    updateTaskStatus(reopenTaskButton.dataset.calendarReopenTask, 'Pending');
+  }
 });
 
 filterButtons.forEach((button) => {
@@ -296,11 +399,11 @@ if (calendarElement && window.FullCalendar) {
     },
     buttonText: {
       today: 'Hoje',
-      month: 'Mês',
+      month: 'Mes',
       week: 'Semana',
       list: 'Lista'
     },
-    noEventsContent: 'Nenhum item encontrado neste período.',
+    noEventsContent: 'Nenhum item encontrado neste periodo.',
     events: async (fetchInfo, successCallback, failureCallback) => {
       if (!eventsUrl) {
         successCallback([]);
@@ -346,7 +449,7 @@ if (calendarElement && window.FullCalendar) {
     }),
     eventDidMount: (info) => {
       const props = info.event.extendedProps;
-      const details = [props.typeLabel, props.statusLabel, props.notes].filter(Boolean).join(' · ');
+      const details = [props.typeLabel, props.statusLabel, props.priorityLabel, props.notes].filter(Boolean).join(' � ');
       info.el.setAttribute('title', details || info.event.title);
     }
   });

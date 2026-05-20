@@ -8,6 +8,8 @@ public class CalendarEventViewModel
 
     public string Start { get; set; } = string.Empty;
 
+    public string? End { get; set; }
+
     public bool AllDay { get; set; } = true;
 
     public string BackgroundColor { get; set; } = "#34d399";

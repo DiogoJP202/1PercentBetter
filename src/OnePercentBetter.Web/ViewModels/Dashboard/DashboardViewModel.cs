@@ -30,6 +30,22 @@ public class DashboardViewModel
 
     public int BetterIndex { get; set; }
 
+    public int TodayTasksPending { get; set; }
+
+    public int TodayTasksCompleted { get; set; }
+
+    public int PendingTasks { get; set; }
+
+    public int OverdueTasks { get; set; }
+
+    public int CompletedTasksLast7Days { get; set; }
+
+    public int UrgentTasks { get; set; }
+
+    public string? NextTaskTitle { get; set; }
+
+    public string? NextTaskTime { get; set; }
+
     public string? FocusIdentityName { get; set; }
 
     public string? FocusIdentityStatement { get; set; }

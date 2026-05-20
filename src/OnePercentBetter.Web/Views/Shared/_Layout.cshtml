@@ -40,9 +40,10 @@
                     <a class="nav-link" asp-controller="CheckIns" asp-action="Index"><i data-lucide="calendar-check"></i> Check-ins</a>
                     <a class="nav-link" asp-controller="Identities" asp-action="Index"><i data-lucide="user-round-check"></i> Identidades</a>
                     <a class="nav-link" asp-controller="Goals" asp-action="Index"><i data-lucide="target"></i> Objetivos</a>
+                    <a class="nav-link" asp-controller="Tasks" asp-action="Index"><i data-lucide="list-checks"></i> Tarefas</a>
                     <a class="nav-link" asp-controller="Calendar" asp-action="Index"><i data-lucide="calendar-days"></i> Calendário</a>
                     <a class="nav-link" asp-controller="Notes" asp-action="Index"><i data-lucide="notebook-pen"></i> Anotações</a>
-                </nav>
+                    </nav>
             </aside>
 
             <div class="min-w-0">
@@ -63,6 +64,7 @@
                         <a class="mobile-nav-link" asp-controller="Habits" asp-action="Index">Hábitos</a>
                         <a class="mobile-nav-link" asp-controller="CheckIns" asp-action="Index">Check-ins</a>
                         <a class="mobile-nav-link" asp-controller="Goals" asp-action="Index">Objetivos</a>
+                        <a class="mobile-nav-link" asp-controller="Tasks" asp-action="Index">Tarefas</a>
                     </nav>
                 </header>
 
@@ -101,3 +103,6 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+
+

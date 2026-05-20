@@ -27,6 +27,8 @@ public class NoteFormViewModel
 
     public int? HabitId { get; set; }
 
+    public int? TaskItemId { get; set; }
+
     [DataType(DataType.Date)]
     public DateTime Date { get; set; } = DateTime.Today;
 
@@ -35,4 +37,6 @@ public class NoteFormViewModel
     public IReadOnlyList<SelectOptionViewModel> Identities { get; set; } = [];
 
     public IReadOnlyList<SelectOptionViewModel> Habits { get; set; } = [];
+
+    public IReadOnlyList<SelectOptionViewModel> TaskItems { get; set; } = [];
 }

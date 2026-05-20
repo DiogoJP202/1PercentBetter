@@ -12,6 +12,8 @@ public class CalendarEventExtendedPropsViewModel
 
     public int? CheckInId { get; set; }
 
+    public int? TaskItemId { get; set; }
+
     public string Date { get; set; } = string.Empty;
 
     public string Status { get; set; } = string.Empty;
@@ -25,4 +27,8 @@ public class CalendarEventExtendedPropsViewModel
     public string? Time { get; set; }
 
     public string? Notes { get; set; }
+
+    public string? Priority { get; set; }
+
+    public string? PriorityLabel { get; set; }
 }

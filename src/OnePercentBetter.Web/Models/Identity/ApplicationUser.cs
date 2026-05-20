@@ -38,4 +38,8 @@ public class ApplicationUser : IdentityUser
     public ICollection<HabitLocation> HabitLocations { get; } = new List<HabitLocation>();
 
     public ICollection<DailyCheckIn> DailyCheckIns { get; } = new List<DailyCheckIn>();
+
+    public ICollection<TaskItem> TaskItems { get; } = new List<TaskItem>();
+
+    public ICollection<TaskTag> TaskTags { get; } = new List<TaskTag>();
 }

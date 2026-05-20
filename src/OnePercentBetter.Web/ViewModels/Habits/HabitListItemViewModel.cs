@@ -30,6 +30,8 @@ public class HabitListItemViewModel
 
     public TimeSpan? SuggestedTime { get; set; }
 
+    public TimeSpan? EndTime { get; set; }
+
     public HabitLogStatus? TodayStatus { get; set; }
 
     public string Color { get; set; } = "#22c55e";

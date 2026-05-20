@@ -11,7 +11,7 @@
     Este script e idempotente para o usuario demo:
     - Cria ou atualiza o usuario demo.
     - Remove dados antigos desse usuario demo.
-    - Recria identidades, objetivos, habitos, logs, check-ins e notas.
+    - Recria identidades, objetivos, habitos, tarefas, logs, check-ins e notas.
 */
 
 SET NOCOUNT ON;
@@ -32,7 +32,9 @@ IF EXISTS (
       AND Id <> @UserId
 )
 BEGIN
-    THROW 51000, 'Ja existe outro usuario com o email demo@1better.local.', 1;
+    ROLLBACK TRANSACTION;
+    RAISERROR ('Ja existe outro usuario com o email demo@1better.local.', 16, 1);
+    RETURN;
 END;
 
 IF NOT EXISTS (SELECT 1 FROM AspNetUsers WHERE Id = @UserId)
@@ -106,6 +108,25 @@ END;
 
 DELETE FROM HabitLogs WHERE UserId = @UserId;
 DELETE FROM Notes WHERE UserId = @UserId;
+
+IF OBJECT_ID(N'TaskItemTags', N'U') IS NOT NULL AND OBJECT_ID(N'TaskItems', N'U') IS NOT NULL
+BEGIN
+    DELETE taskItemTag
+    FROM TaskItemTags taskItemTag
+    INNER JOIN TaskItems taskItem ON taskItem.Id = taskItemTag.TaskItemId
+    WHERE taskItem.UserId = @UserId;
+END;
+
+IF OBJECT_ID(N'TaskItems', N'U') IS NOT NULL
+BEGIN
+    DELETE FROM TaskItems WHERE UserId = @UserId;
+END;
+
+IF OBJECT_ID(N'TaskTags', N'U') IS NOT NULL
+BEGIN
+    DELETE FROM TaskTags WHERE UserId = @UserId;
+END;
+
 DELETE FROM DailyCheckIns WHERE UserId = @UserId;
 DELETE FROM Habits WHERE UserId = @UserId;
 DELETE FROM Goals WHERE UserId = @UserId;
@@ -576,6 +597,226 @@ BEGIN
     );
 
     SET @CheckOffset -= 1;
+END;
+
+IF OBJECT_ID(N'TaskItems', N'U') IS NOT NULL AND OBJECT_ID(N'TaskTags', N'U') IS NOT NULL
+BEGIN
+    DECLARE @TaskTagTech int;
+    DECLARE @TaskTagProjeto int;
+    DECLARE @TaskTagSaude int;
+
+    DECLARE @TaskBuildTasks int;
+    DECLARE @TaskCalendar int;
+    DECLARE @TaskReview int;
+    DECLARE @TaskShoes int;
+
+    INSERT INTO TaskTags (UserId, Name, Color, CreatedAt)
+    VALUES (@UserId, N'tecnologia', N'#38bdf8', @Now);
+    SET @TaskTagTech = CONVERT(int, SCOPE_IDENTITY());
+
+    INSERT INTO TaskTags (UserId, Name, Color, CreatedAt)
+    VALUES (@UserId, N'projeto', N'#a78bfa', @Now);
+    SET @TaskTagProjeto = CONVERT(int, SCOPE_IDENTITY());
+
+    INSERT INTO TaskTags (UserId, Name, Color, CreatedAt)
+    VALUES (@UserId, N'saude', N'#22c55e', @Now);
+    SET @TaskTagSaude = CONVERT(int, SCOPE_IDENTITY());
+
+    INSERT INTO TaskItems (
+        UserId,
+        Title,
+        Description,
+        Notes,
+        Status,
+        Priority,
+        TaskDate,
+        StartTime,
+        EndTime,
+        DueDate,
+        CategoryId,
+        IdentityId,
+        GoalId,
+        HabitId,
+        Color,
+        Icon,
+        ShowOnCalendar,
+        CompletedAt,
+        CreatedAt,
+        UpdatedAt
+    )
+    VALUES (
+        @UserId,
+        N'Criar migration do modulo de tarefas',
+        N'Consolidar entidades, relacionamentos e snapshot do EF Core.',
+        N'Entrega tecnica concluida para liberar integracoes do modulo.',
+        3,
+        3,
+        DATEADD(day, -2, @Today),
+        '20:00',
+        '21:00',
+        DATEADD(day, -2, @Today),
+        1,
+        @IdentityDotNet,
+        @GoalMvc,
+        @HabitCommit,
+        N'#38bdf8',
+        N'code-2',
+        1,
+        DATEADD(day, -2, @Now),
+        DATEADD(day, -3, @Now),
+        @Now
+    );
+    SET @TaskBuildTasks = CONVERT(int, SCOPE_IDENTITY());
+
+    INSERT INTO TaskItems (
+        UserId,
+        Title,
+        Description,
+        Notes,
+        Status,
+        Priority,
+        TaskDate,
+        StartTime,
+        EndTime,
+        DueDate,
+        CategoryId,
+        IdentityId,
+        GoalId,
+        HabitId,
+        Color,
+        Icon,
+        ShowOnCalendar,
+        CompletedAt,
+        CreatedAt,
+        UpdatedAt
+    )
+    VALUES (
+        @UserId,
+        N'Ajustar calendario para exibir tarefas',
+        N'Incluir filtros e cards para diferenciar habitos e tarefas.',
+        N'Priorizar visualizacao de tarefas atrasadas e com horario.',
+        1,
+        4,
+        @Today,
+        '19:30',
+        '20:30',
+        DATEADD(day, 1, @Today),
+        1,
+        @IdentityDotNet,
+        @GoalMvc,
+        @HabitStudy,
+        N'#f97316',
+        N'calendar-days',
+        1,
+        NULL,
+        DATEADD(day, -1, @Now),
+        @Now
+    );
+    SET @TaskCalendar = CONVERT(int, SCOPE_IDENTITY());
+
+    INSERT INTO TaskItems (
+        UserId,
+        Title,
+        Description,
+        Notes,
+        Status,
+        Priority,
+        TaskDate,
+        StartTime,
+        EndTime,
+        DueDate,
+        CategoryId,
+        IdentityId,
+        GoalId,
+        HabitId,
+        Color,
+        Icon,
+        ShowOnCalendar,
+        CompletedAt,
+        CreatedAt,
+        UpdatedAt
+    )
+    VALUES (
+        @UserId,
+        N'Revisar copy do onboarding',
+        N'Lapidar textos para deixar o fluxo inicial mais didatico.',
+        N'Garantir diferenca clara entre habitos recorrentes e tarefas pontuais.',
+        2,
+        2,
+        @Today,
+        '10:00',
+        NULL,
+        @Today,
+        2,
+        @IdentityLanguage,
+        @GoalEnglish,
+        @HabitEnglish,
+        N'#a78bfa',
+        N'file-text',
+        1,
+        NULL,
+        DATEADD(day, -1, @Now),
+        @Now
+    );
+    SET @TaskReview = CONVERT(int, SCOPE_IDENTITY());
+
+    INSERT INTO TaskItems (
+        UserId,
+        Title,
+        Description,
+        Notes,
+        Status,
+        Priority,
+        TaskDate,
+        StartTime,
+        EndTime,
+        DueDate,
+        CategoryId,
+        IdentityId,
+        GoalId,
+        HabitId,
+        Color,
+        Icon,
+        ShowOnCalendar,
+        CompletedAt,
+        CreatedAt,
+        UpdatedAt
+    )
+    VALUES (
+        @UserId,
+        N'Comprar tenis de treino',
+        N'Resolver item de apoio para sustentar a caminhada da semana.',
+        N'Acao pontual vinculada a energia e constancia fisica.',
+        5,
+        1,
+        DATEADD(day, 2, @Today),
+        NULL,
+        NULL,
+        DATEADD(day, 4, @Today),
+        3,
+        @IdentityHealth,
+        @GoalEnergy,
+        @HabitWalk,
+        N'#22c55e',
+        N'heart-pulse',
+        1,
+        NULL,
+        DATEADD(day, -4, @Now),
+        @Now
+    );
+    SET @TaskShoes = CONVERT(int, SCOPE_IDENTITY());
+
+    IF OBJECT_ID(N'TaskItemTags', N'U') IS NOT NULL
+    BEGIN
+        INSERT INTO TaskItemTags (TaskItemId, TaskTagId)
+        VALUES
+        (@TaskBuildTasks, @TaskTagTech),
+        (@TaskBuildTasks, @TaskTagProjeto),
+        (@TaskCalendar, @TaskTagTech),
+        (@TaskCalendar, @TaskTagProjeto),
+        (@TaskReview, @TaskTagProjeto),
+        (@TaskShoes, @TaskTagSaude);
+    END;
 END;
 
 INSERT INTO Notes (

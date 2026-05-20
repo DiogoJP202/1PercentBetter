@@ -4,6 +4,8 @@
     var activeCount = Model.Count(item => item.Status == ItemStatus.Active);
     var totalHabits = Model.Sum(item => item.HabitsCount);
     var totalGoals = Model.Sum(item => item.GoalsCount);
+    var totalTasks = Model.Sum(item => item.TasksCount);
+    var pendingTasks = Model.Sum(item => item.PendingTasksCount);
 }
 
 <div class="space-y-6">
@@ -19,7 +21,7 @@
         </a>
     </div>
 
-    <section class="grid gap-4 sm:grid-cols-3">
+    <section class="grid gap-4 sm:grid-cols-4">
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Identidades ativas</div>
             <div class="mt-3 text-4xl font-black text-emerald-300">@activeCount</div>
@@ -34,6 +36,11 @@
             <div class="text-sm text-slate-400">Objetivos vinculados</div>
             <div class="mt-3 text-4xl font-black text-white">@totalGoals</div>
             <p class="mt-2 text-xs text-slate-500">Resultados conectados ao seu sistema.</p>
+        </div>
+        <div class="app-card p-5">
+            <div class="text-sm text-slate-400">Tarefas vinculadas</div>
+            <div class="mt-3 text-4xl font-black text-violet-300">@totalTasks</div>
+            <p class="mt-2 text-xs text-slate-500">@pendingTasks pendente(s).</p>
         </div>
     </section>
 
@@ -100,6 +107,10 @@
                             <i data-lucide="target"></i>
                             @item.GoalsCount objetivo(s)
                         </span>
+                        <span class="status-pill status-pill-neutral">
+                            <i data-lucide="list-checks"></i>
+                            @item.PendingTasksCount pendente(s) de @item.TasksCount
+                        </span>
                     </div>
 
                     <div class="mt-5 flex flex-wrap items-center justify-end gap-2">
@@ -126,3 +137,5 @@
         </div>
     }
 </div>
+
+

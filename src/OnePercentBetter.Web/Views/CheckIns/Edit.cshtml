@@ -33,6 +33,25 @@
             <input asp-for="Date" class="form-input" />
         </div>
 
+        <section class="grid gap-3 md:grid-cols-4">
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div class="text-xs text-slate-500">Tarefas planejadas</div>
+                <div class="mt-1 text-2xl font-black text-white">@Model.PlannedTasks</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div class="text-xs text-slate-500">Concluidas</div>
+                <div class="mt-1 text-2xl font-black text-emerald-300">@Model.CompletedTasks</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div class="text-xs text-slate-500">Adiadas</div>
+                <div class="mt-1 text-2xl font-black text-amber-300">@Model.PostponedTasks</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div class="text-xs text-slate-500">Pendentes</div>
+                <div class="mt-1 text-2xl font-black text-rose-300">@Model.PendingTasks</div>
+            </div>
+        </section>
+
         <div>
             <label asp-for="Mood" class="form-label">Humor</label>
             <div class="grid gap-3 sm:grid-cols-5">
@@ -94,6 +113,12 @@
             <label asp-for="MainDifficulty" class="form-label">Principal dificuldade</label>
             <input asp-for="MainDifficulty" class="form-input" placeholder="Tive dificuldade para manter o foco" />
             <span asp-validation-for="MainDifficulty"></span>
+        </div>
+
+        <div>
+            <label asp-for="TaskBlocker" class="form-label">Alguma tarefa importante ficou travada hoje?</label>
+            <input asp-for="TaskBlocker" class="form-input" placeholder="Ex.: Fiquei bloqueado na modelagem da migration." />
+            <span asp-validation-for="TaskBlocker"></span>
         </div>
 
         <div>

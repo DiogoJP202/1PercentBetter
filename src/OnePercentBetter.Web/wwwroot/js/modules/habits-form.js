@@ -1,4 +1,4 @@
-const form = document.querySelector('[data-habit-form]');
+﻿const form = document.querySelector('[data-habit-form]');
 
 if (form) {
   const frequencySelect = form.querySelector('[data-habit-frequency-select]');
@@ -35,7 +35,11 @@ if (form) {
   const simpleCloseButtons = [...form.querySelectorAll('[data-habit-simple-close]')];
   const simpleNameInput = form.querySelector('[data-habit-simple-name]');
   const simpleTimeInput = form.querySelector('[data-habit-simple-time]');
+  const simpleIdInput = form.querySelector('[data-habit-simple-id]');
+  const simpleExistingSelect = form.querySelector('[data-habit-simple-existing]');
+  const simpleLoad = form.querySelector('[data-habit-simple-load]');
   const simpleSave = form.querySelector('[data-habit-simple-save]');
+  const simpleSaveLabel = form.querySelector('[data-habit-simple-save-label]');
   const simpleError = form.querySelector('[data-habit-simple-error]');
   const simpleSuggestions = [...form.querySelectorAll('[data-habit-simple-suggestion]')];
   const simpleOptGroup = form.querySelector('[data-habit-simple-optgroup]');
@@ -80,7 +84,7 @@ if (form) {
     modal.classList.toggle('flex', visible);
   };
 
-  const stripSelectLabel = (value) => (value ?? '').replace(/\s+-\s+.*$/, '').trim();
+  const stripSelectLabel = (value) => (value ?? ').replace(/\s+-\s+.*$/, ').trim();
 
   const syncDaysVisibility = () => {
     if (!frequencySelect || !daysPanel) {
@@ -99,10 +103,10 @@ if (form) {
 
   const syncPreview = () => {
     const title = titleInput?.value.trim() || 'Seu novo hábito';
-    const trigger = triggerInput?.value.trim() || triggerInput?.placeholder || '';
-    const twoMinute = twoMinuteInput?.value.trim() || twoMinuteInput?.placeholder || '';
+    const trigger = triggerInput?.value.trim() || triggerInput?.placeholder || ';
+    const twoMinute = twoMinuteInput?.value.trim() || twoMinuteInput?.placeholder || ';
     const selectedStack = stackSelect?.selectedOptions?.[0];
-    const baseHabit = selectedStack?.value ? stripSelectLabel(selectedStack.textContent) : '';
+    const baseHabit = selectedStack?.value ? stripSelectLabel(selectedStack.textContent) : ';
 
     if (previewTitle) {
       previewTitle.textContent = title;
@@ -118,7 +122,7 @@ if (form) {
 
     const stackText = baseHabit
       ? `Depois de ${baseHabit}, eu irei ${title === 'Seu novo hábito' ? 'executar este hábito' : title}.`
-      : '';
+      : ';
 
     if (previewStack) {
       previewStack.textContent = stackText;
@@ -208,7 +212,7 @@ if (form) {
     }
 
     if (locationError) {
-      locationError.textContent = '';
+      locationError.textContent = ';
     }
 
     try {
@@ -241,7 +245,7 @@ if (form) {
       locationSelect.value = result.value;
 
       if (locationInput) {
-        locationInput.value = '';
+        locationInput.value = ';
       }
 
       setModalVisible(locationModal, false);
@@ -260,10 +264,84 @@ if (form) {
     }
   };
 
+  const parseSimpleLabel = (label) => {
+    const value = (label || ').trim();
+    if (!value) {
+      return { name: ', time: ' };
+    }
+
+    const match = value.match(/^(.*)\s+(?:às|Ã s|as)\s+(\d{2}:\d{2})$/i);
+    if (!match) {
+      return { name: value, time: ' };
+    }
+
+    return {
+      name: match[1].trim(),
+      time: match[2]
+    };
+  };
+
+  const resetSimpleForm = () => {
+    if (simpleIdInput) {
+      simpleIdInput.value = ';
+    }
+
+    if (simpleNameInput) {
+      simpleNameInput.value = ';
+    }
+
+    if (simpleTimeInput) {
+      simpleTimeInput.value = ';
+    }
+
+    if (simpleSaveLabel) {
+      simpleSaveLabel.textContent = 'Salvar hábito simples';
+    }
+
+    if (simpleError) {
+      simpleError.textContent = ';
+    }
+  };
+
+  const loadSelectedSimpleHabit = () => {
+    const selected = simpleExistingSelect?.selectedOptions?.[0];
+    if (!selected || !selected.value) {
+      if (simpleError) {
+        simpleError.textContent = 'Selecione um hábito simples para editar.';
+      }
+      return;
+    }
+
+    const { name, time } = parseSimpleLabel(selected.textContent || ');
+
+    if (simpleIdInput) {
+      simpleIdInput.value = selected.value;
+    }
+
+    if (simpleNameInput) {
+      simpleNameInput.value = name;
+      simpleNameInput.focus();
+    }
+
+    if (simpleTimeInput) {
+      simpleTimeInput.value = time;
+    }
+
+    if (simpleSaveLabel) {
+      simpleSaveLabel.textContent = 'Atualizar hábito simples';
+    }
+
+    if (simpleError) {
+      simpleError.textContent = ';
+    }
+  };
+
   const saveSimpleHabit = async () => {
     const name = simpleNameInput?.value.trim();
     const url = form.dataset.habitSimpleUrl;
     const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    const simpleId = Number.parseInt(simpleIdInput?.value || '', 10);
+    const isEditing = Number.isInteger(simpleId) && simpleId > 0;
 
     if (!name || !url || !stackSelect || !simpleOptGroup) {
       if (simpleError) {
@@ -273,6 +351,9 @@ if (form) {
     }
 
     const payload = new FormData();
+    if (isEditing) {
+      payload.append('Id', String(simpleId));
+    }
     payload.append('Name', name);
 
     if (simpleTimeInput?.value) {
@@ -304,7 +385,7 @@ if (form) {
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        const message = result.error || 'Não foi possível cadastrar o hábito simples.';
+        const message = result.error || 'Não foi possível salvar o hábito simples.';
         if (simpleError) {
           simpleError.textContent = message;
         }
@@ -316,24 +397,33 @@ if (form) {
       if (!option) {
         option = new Option(result.text, result.value);
         simpleOptGroup.append(option);
+      } else {
+        option.text = result.text;
       }
 
       option.selected = true;
       stackSelect.value = result.value;
 
-      if (simpleNameInput) {
-        simpleNameInput.value = '';
+      if (simpleExistingSelect) {
+        const existingId = String(result.id ?? result.value?.replace('simple:', ''));
+        let existingOption = [...simpleExistingSelect.options].find((item) => item.value === existingId);
+        if (!existingOption) {
+          existingOption = new Option(result.text, existingId);
+          simpleExistingSelect.add(existingOption);
+        } else {
+          existingOption.text = result.text;
+        }
+
+        existingOption.selected = true;
+        simpleExistingSelect.value = existingId;
       }
 
-      if (simpleTimeInput) {
-        simpleTimeInput.value = '';
-      }
-
+      resetSimpleForm();
       setModalVisible(simpleModal, false);
       syncPreview();
-      showMessage('Hábito simples cadastrado.');
+      showMessage(isEditing ? 'Hábito simples atualizado.' : 'Hábito simples cadastrado.');
     } catch {
-      const message = 'Não foi possível cadastrar o hábito simples agora.';
+      const message = 'Não foi possível salvar o hábito simples agora.';
       if (simpleError) {
         simpleError.textContent = message;
       }
@@ -395,13 +485,14 @@ if (form) {
   locationSuggestions.forEach((suggestion) => {
     suggestion.addEventListener('click', () => {
       if (locationInput) {
-        locationInput.value = suggestion.dataset.habitLocationSuggestion ?? '';
+        locationInput.value = suggestion.dataset.habitLocationSuggestion ?? ';
         locationInput.focus();
       }
     });
   });
 
   simpleOpen?.addEventListener('click', () => {
+    resetSimpleForm();
     setModalVisible(simpleModal, true);
     simpleNameInput?.focus();
   });
@@ -413,7 +504,13 @@ if (form) {
       setModalVisible(simpleModal, false);
     }
   });
+  simpleLoad?.addEventListener('click', loadSelectedSimpleHabit);
   simpleSave?.addEventListener('click', saveSimpleHabit);
+  simpleExistingSelect?.addEventListener('change', () => {
+    if (simpleError) {
+      simpleError.textContent = '';
+    }
+  });
   simpleNameInput?.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -429,7 +526,7 @@ if (form) {
   simpleSuggestions.forEach((suggestion) => {
     suggestion.addEventListener('click', () => {
       if (simpleNameInput) {
-        simpleNameInput.value = suggestion.dataset.habitSimpleSuggestion ?? '';
+        simpleNameInput.value = suggestion.dataset.habitSimpleSuggestion ?? ';
         simpleNameInput.focus();
       }
     });
@@ -449,4 +546,7 @@ if (form) {
   syncPreview();
   syncColor(colorInput?.value);
   syncIcon(iconInput?.value);
+  resetSimpleForm();
 }
+
+

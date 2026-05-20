@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OnePercentBetter.Web.Data;
 using OnePercentBetter.Web.Models.Entities;
+using OnePercentBetter.Web.Models.Enums;
 using OnePercentBetter.Web.ViewModels.CheckIns;
 
 namespace OnePercentBetter.Web.Services;
@@ -63,13 +64,21 @@ public class CheckInService
     public async Task<DailyCheckInViewModel> GetByDateAsync(string userId, DateTime date)
     {
         var targetDate = date.Date;
+        var taskSummary = await GetTaskSummaryAsync(userId, targetDate);
         var checkIn = await _dbContext.DailyCheckIns
             .AsNoTracking()
             .FirstOrDefaultAsync(item => item.UserId == userId && item.Date == targetDate);
 
         if (checkIn is null)
         {
-            return new DailyCheckInViewModel { Date = targetDate };
+            return new DailyCheckInViewModel
+            {
+                Date = targetDate,
+                PlannedTasks = taskSummary.Planned,
+                CompletedTasks = taskSummary.Completed,
+                PostponedTasks = taskSummary.Postponed,
+                PendingTasks = taskSummary.Pending
+            };
         }
 
         return new DailyCheckInViewModel
@@ -81,14 +90,20 @@ public class CheckInService
             DayScore = checkIn.DayScore,
             SmallWin = checkIn.SmallWin,
             MainDifficulty = checkIn.MainDifficulty,
+            TaskBlocker = checkIn.TaskBlocker,
             TomorrowAdjustment = checkIn.TomorrowAdjustment,
-            Notes = checkIn.Notes
+            Notes = checkIn.Notes,
+            PlannedTasks = taskSummary.Planned,
+            CompletedTasks = taskSummary.Completed,
+            PostponedTasks = taskSummary.Postponed,
+            PendingTasks = taskSummary.Pending
         };
     }
 
     public async Task<CheckInDetailViewModel> GetDetailAsync(string userId, DateTime date)
     {
         var targetDate = date.Date;
+        var taskSummary = await GetTaskSummaryAsync(userId, targetDate);
         var checkIn = await _dbContext.DailyCheckIns
             .AsNoTracking()
             .FirstOrDefaultAsync(item => item.UserId == userId && item.Date == targetDate);
@@ -98,7 +113,11 @@ public class CheckInService
             return new CheckInDetailViewModel
             {
                 Date = targetDate,
-                Exists = false
+                Exists = false,
+                PlannedTasks = taskSummary.Planned,
+                CompletedTasks = taskSummary.Completed,
+                PostponedTasks = taskSummary.Postponed,
+                PendingTasks = taskSummary.Pending
             };
         }
 
@@ -113,8 +132,13 @@ public class CheckInService
             TotalScore = GetTotalScore(checkIn),
             SmallWin = checkIn.SmallWin,
             MainDifficulty = checkIn.MainDifficulty,
+            TaskBlocker = checkIn.TaskBlocker,
             TomorrowAdjustment = checkIn.TomorrowAdjustment,
-            Notes = checkIn.Notes
+            Notes = checkIn.Notes,
+            PlannedTasks = taskSummary.Planned,
+            CompletedTasks = taskSummary.Completed,
+            PostponedTasks = taskSummary.Postponed,
+            PendingTasks = taskSummary.Pending
         };
     }
 
@@ -140,6 +164,7 @@ public class CheckInService
         checkIn.DayScore = viewModel.DayScore;
         checkIn.SmallWin = viewModel.SmallWin?.Trim();
         checkIn.MainDifficulty = viewModel.MainDifficulty?.Trim();
+        checkIn.TaskBlocker = viewModel.TaskBlocker?.Trim();
         checkIn.TomorrowAdjustment = viewModel.TomorrowAdjustment?.Trim();
         checkIn.Notes = viewModel.Notes?.Trim();
         checkIn.UpdatedAt = DateTime.UtcNow;
@@ -365,5 +390,20 @@ public class CheckInService
     private static int GetTotalScore(DailyCheckIn checkIn)
     {
         return checkIn.DayScore + checkIn.EnergyLevel + checkIn.ProductivityLevel;
+    }
+
+    private async Task<(int Planned, int Completed, int Postponed, int Pending)> GetTaskSummaryAsync(string userId, DateTime date)
+    {
+        var tasks = await _dbContext.TaskItems
+            .AsNoTracking()
+            .Where(taskItem => taskItem.UserId == userId && taskItem.TaskDate.HasValue && taskItem.TaskDate.Value == date)
+            .Select(taskItem => taskItem.Status)
+            .ToListAsync();
+
+        return (
+            Planned: tasks.Count,
+            Completed: tasks.Count(status => status == TaskItemStatus.Completed),
+            Postponed: tasks.Count(status => status == TaskItemStatus.Postponed),
+            Pending: tasks.Count(status => status is TaskItemStatus.Pending or TaskItemStatus.InProgress));
     }
 }

@@ -52,6 +52,19 @@ public class CalendarController : Controller
         return Json(new { message = status == HabitLogStatus.Completed ? "Hábito concluído." : "Registro atualizado." });
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> TaskStatus(int id, TaskItemStatus status)
+    {
+        var updated = await _calendarService.RegisterTaskStatusAsync(User.GetRequiredUserId(), id, status);
+        if (!updated)
+        {
+            return BadRequest(new { error = "Nao foi possivel atualizar esta tarefa." });
+        }
+
+        return Json(new { message = status == TaskItemStatus.Completed ? "Tarefa concluida." : "Tarefa atualizada." });
+    }
+
     private static IReadOnlySet<string> ParseTypes(string? types)
     {
         if (string.IsNullOrWhiteSpace(types))

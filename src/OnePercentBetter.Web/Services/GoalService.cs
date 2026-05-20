@@ -42,7 +42,12 @@ public class GoalService
                 TargetDate = goal.TargetDate,
                 Color = goal.Color,
                 Icon = goal.Icon,
-                HabitsCount = goal.Habits.Count
+                HabitsCount = goal.Habits.Count,
+                TasksCount = goal.TaskItems.Count,
+                PendingTasksCount = goal.TaskItems.Count(taskItem =>
+                    taskItem.Status == TaskItemStatus.Pending
+                    || taskItem.Status == TaskItemStatus.InProgress
+                    || taskItem.Status == TaskItemStatus.Postponed)
             })
             .ToListAsync();
     }

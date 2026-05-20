@@ -38,6 +38,7 @@ public class NotesController : Controller
             viewModel.Identities = form.Identities;
             viewModel.Goals = form.Goals;
             viewModel.Habits = form.Habits;
+            viewModel.TaskItems = form.TaskItems;
             return View(viewModel);
         }
 
@@ -52,6 +53,7 @@ public class NotesController : Controller
             viewModel.Identities = form.Identities;
             viewModel.Goals = form.Goals;
             viewModel.Habits = form.Habits;
+            viewModel.TaskItems = form.TaskItems;
             return View(viewModel);
         }
 
@@ -81,6 +83,7 @@ public class NotesController : Controller
             viewModel.Identities = form.Identities;
             viewModel.Goals = form.Goals;
             viewModel.Habits = form.Habits;
+            viewModel.TaskItems = form.TaskItems;
             return View(viewModel);
         }
 
@@ -95,6 +98,7 @@ public class NotesController : Controller
             viewModel.Identities = form.Identities;
             viewModel.Goals = form.Goals;
             viewModel.Habits = form.Habits;
+            viewModel.TaskItems = form.TaskItems;
             return View(viewModel);
         }
 

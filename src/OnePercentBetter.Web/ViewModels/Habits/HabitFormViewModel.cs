@@ -39,6 +39,9 @@ public class HabitFormViewModel
     [DataType(DataType.Time)]
     public TimeSpan? SuggestedTime { get; set; }
 
+    [DataType(DataType.Time)]
+    public TimeSpan? EndTime { get; set; }
+
     public HabitDifficulty Difficulty { get; set; } = HabitDifficulty.Easy;
 
     [Required(ErrorMessage = "Defina a versão de 2 minutos.")]

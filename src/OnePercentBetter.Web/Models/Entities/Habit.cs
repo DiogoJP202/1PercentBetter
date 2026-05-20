@@ -51,6 +51,8 @@ public class Habit
 
     public TimeSpan? SuggestedTime { get; set; }
 
+    public TimeSpan? EndTime { get; set; }
+
     public HabitDifficulty Difficulty { get; set; } = HabitDifficulty.Easy;
 
     [Required]
@@ -77,6 +79,8 @@ public class Habit
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<HabitLog> Logs { get; } = new List<HabitLog>();
+
+    public ICollection<TaskItem> TaskItems { get; } = new List<TaskItem>();
 
     public ICollection<Note> Notes { get; } = new List<Note>();
 

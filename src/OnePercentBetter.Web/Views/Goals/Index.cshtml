@@ -6,6 +6,8 @@
     var completedCount = Model.Count(item => item.Status == ItemStatus.Completed);
     var overdueCount = Model.Count(item => item.Status == ItemStatus.Active && item.TargetDate.HasValue && item.TargetDate.Value.Date < today);
     var totalHabits = Model.Sum(item => item.HabitsCount);
+    var totalTasks = Model.Sum(item => item.TasksCount);
+    var pendingTasks = Model.Sum(item => item.PendingTasksCount);
 }
 
 <div class="space-y-6">
@@ -21,7 +23,7 @@
         </a>
     </div>
 
-    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Objetivos ativos</div>
             <div class="mt-3 text-4xl font-black text-sky-300">@activeCount</div>
@@ -38,7 +40,12 @@
             <p class="mt-2 text-xs text-slate-500">Ações conectadas aos objetivos.</p>
         </div>
         <div class="app-card p-5">
-            <div class="text-sm text-slate-400">Atenção</div>
+            <div class="text-sm text-slate-400">Tarefas vinculadas</div>
+            <div class="mt-3 text-4xl font-black text-violet-300">@totalTasks</div>
+            <p class="mt-2 text-xs text-slate-500">@pendingTasks pendente(s).</p>
+        </div>
+        <div class="app-card p-5">
+            <div class="text-sm text-slate-400">Atencao</div>
             <div class="mt-3 text-4xl font-black @(overdueCount > 0 ? "text-rose-300" : "text-slate-300")">@overdueCount</div>
             <p class="mt-2 text-xs text-slate-500">Objetivos ativos com data alvo vencida.</p>
         </div>
@@ -112,7 +119,7 @@
                         <p class="mt-4 text-sm leading-6 text-slate-400">@item.Description</p>
                     }
 
-                    <div class="mt-5 grid gap-3 md:grid-cols-4">
+                    <div class="mt-5 grid gap-3 md:grid-cols-5">
                         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
                             <div class="text-xs text-slate-500">Categoria</div>
                             <div class="mt-1 truncate text-sm font-bold text-slate-200">@(string.IsNullOrWhiteSpace(item.CategoryName) ? "Sem categoria" : item.CategoryName)</div>
@@ -128,6 +135,10 @@
                         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
                             <div class="text-xs text-slate-500">Hábitos</div>
                             <div class="mt-1 text-sm font-bold text-slate-200">@item.HabitsCount vinculado(s)</div>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                            <div class="text-xs text-slate-500">Tarefas</div>
+                            <div class="mt-1 text-sm font-bold text-slate-200">@item.PendingTasksCount pendente(s) de @item.TasksCount</div>
                         </div>
                     </div>
 
@@ -185,3 +196,6 @@
         </div>
     }
 </div>
+
+
+

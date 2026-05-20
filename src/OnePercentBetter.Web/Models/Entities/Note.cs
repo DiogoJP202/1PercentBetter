@@ -38,6 +38,10 @@ public class Note
 
     public Habit? Habit { get; set; }
 
+    public int? TaskItemId { get; set; }
+
+    public TaskItem? TaskItem { get; set; }
+
     public DateTime Date { get; set; } = DateTime.Today;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

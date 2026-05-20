@@ -22,7 +22,17 @@ public class CheckInDetailViewModel
 
     public string? MainDifficulty { get; set; }
 
+    public string? TaskBlocker { get; set; }
+
     public string? TomorrowAdjustment { get; set; }
 
     public string? Notes { get; set; }
+
+    public int PlannedTasks { get; set; }
+
+    public int CompletedTasks { get; set; }
+
+    public int PostponedTasks { get; set; }
+
+    public int PendingTasks { get; set; }
 }

@@ -13,6 +13,7 @@ public class CalendarService
     public const string ImprovementType = "improvement";
     public const string CommonType = "common";
     public const string CheckInType = "checkin";
+    public const string TaskType = "task";
 
     private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo("pt-BR");
     private readonly ApplicationDbContext _dbContext;
@@ -41,6 +42,27 @@ public class CalendarService
         var activeSimpleHabits = await _dbContext.SimpleHabits
             .AsNoTracking()
             .CountAsync(simpleHabit => simpleHabit.UserId == userId && simpleHabit.IsActive);
+        var plannedTasks = await _dbContext.TaskItems
+            .AsNoTracking()
+            .CountAsync(taskItem => taskItem.UserId == userId
+                && taskItem.TaskDate.HasValue
+                && taskItem.TaskDate.Value >= start
+                && taskItem.TaskDate.Value < end);
+        var completedTasks = await _dbContext.TaskItems
+            .AsNoTracking()
+            .CountAsync(taskItem => taskItem.UserId == userId
+                && taskItem.Status == TaskItemStatus.Completed
+                && taskItem.TaskDate.HasValue
+                && taskItem.TaskDate.Value >= start
+                && taskItem.TaskDate.Value < end);
+        var overdueTasks = await _dbContext.TaskItems
+            .AsNoTracking()
+            .CountAsync(taskItem => taskItem.UserId == userId
+                && (taskItem.Status == TaskItemStatus.Pending
+                    || taskItem.Status == TaskItemStatus.InProgress
+                    || taskItem.Status == TaskItemStatus.Postponed)
+                && ((taskItem.DueDate.HasValue && taskItem.DueDate.Value < today)
+                    || (taskItem.TaskDate.HasValue && taskItem.TaskDate.Value < today)));
 
         return new CalendarOverviewViewModel
         {
@@ -50,7 +72,10 @@ public class CalendarService
             ConsistencyRate = plannedOccurrences == 0 ? 0 : (int)Math.Round(completedLogs * 100d / plannedOccurrences),
             DaysWithCheckIn = daysWithCheckIn,
             CurrentCheckInStreak = await GetCurrentCheckInStreakAsync(userId),
-            ActiveSimpleHabits = activeSimpleHabits
+            ActiveSimpleHabits = activeSimpleHabits,
+            PlannedTasks = plannedTasks,
+            CompletedTasks = completedTasks,
+            OverdueTasks = overdueTasks
         };
     }
 
@@ -77,6 +102,11 @@ public class CalendarService
         if (IncludesType(selectedTypes, CheckInType))
         {
             events.AddRange(await GetCheckInEventsAsync(userId, startDate, endDate));
+        }
+
+        if (IncludesType(selectedTypes, TaskType))
+        {
+            events.AddRange(await GetTaskEventsAsync(userId, startDate, endDate));
         }
 
         return events
@@ -119,7 +149,7 @@ public class CalendarService
                     Title = habit.Title,
                     Color = habit.Color,
                     Icon = habit.Icon,
-                    SuggestedTime = FormatTime(habit.SuggestedTime),
+                    SuggestedTime = FormatHabitTimeRange(habit.SuggestedTime, habit.EndTime),
                     IdentityName = habit.IdentityName,
                     GoalTitle = habit.GoalTitle,
                     LocationName = habit.LocationName,
@@ -145,6 +175,30 @@ public class CalendarService
             .ThenBy(item => item.Name)
             .ToList();
 
+        var tasks = await _dbContext.TaskItems
+            .AsNoTracking()
+            .Where(taskItem => taskItem.UserId == userId && taskItem.TaskDate.HasValue && taskItem.TaskDate.Value == targetDate)
+            .OrderBy(taskItem => taskItem.StartTime.HasValue ? 0 : 1)
+            .ThenBy(taskItem => taskItem.StartTime)
+            .ThenByDescending(taskItem => taskItem.Priority)
+            .Select(taskItem => new CalendarDayTaskViewModel
+            {
+                Id = taskItem.Id,
+                Title = taskItem.Title,
+                Color = taskItem.Color,
+                Icon = taskItem.Icon,
+                Status = taskItem.Status.ToString(),
+                StatusLabel = taskItem.Status.ToDisplayName(),
+                StatusTone = GetTaskStatusTone(taskItem.Status),
+                Priority = taskItem.Priority.ToString(),
+                PriorityLabel = taskItem.Priority.ToDisplayName(),
+                TimeRange = FormatTaskTimeRange(taskItem.StartTime, taskItem.EndTime),
+                GoalTitle = taskItem.Goal != null ? taskItem.Goal.Title : null,
+                IdentityName = taskItem.Identity != null ? taskItem.Identity.Name : null,
+                IsCompleted = taskItem.Status == TaskItemStatus.Completed
+            })
+            .ToListAsync();
+
         return new CalendarDayDetailViewModel
         {
             Date = targetDate,
@@ -152,8 +206,12 @@ public class CalendarService
             PlannedCount = improvementHabits.Count,
             CompletedCount = improvementHabits.Count(item => item.IsCompleted),
             PendingCount = improvementHabits.Count(item => !item.IsCompleted),
+            PlannedTasksCount = tasks.Count,
+            CompletedTasksCount = tasks.Count(item => item.IsCompleted),
+            PendingTasksCount = tasks.Count(item => !item.IsCompleted),
             ImprovementHabits = improvementHabits,
             CommonHabits = commonHabits,
+            Tasks = tasks,
             CheckIn = checkIn is null
                 ? null
                 : new CalendarDayCheckInViewModel
@@ -200,6 +258,23 @@ public class CalendarService
         return true;
     }
 
+    public async Task<bool> RegisterTaskStatusAsync(string userId, int taskItemId, TaskItemStatus status)
+    {
+        var taskItem = await _dbContext.TaskItems
+            .FirstOrDefaultAsync(item => item.UserId == userId && item.Id == taskItemId);
+
+        if (taskItem is null)
+        {
+            return false;
+        }
+
+        taskItem.Status = status;
+        taskItem.CompletedAt = status == TaskItemStatus.Completed ? DateTime.UtcNow : null;
+        taskItem.UpdatedAt = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
     private async Task<IReadOnlyList<CalendarEventViewModel>> GetImprovementHabitEventsAsync(string userId, DateTime startDate, DateTime endDate)
     {
         var habits = await GetHabitSourcesAsync(userId);
@@ -221,6 +296,7 @@ public class CalendarService
                     Id = $"habit-{habit.Id}-{date:yyyyMMdd}",
                     Title = BuildTimedTitle(habit.Title, habit.SuggestedTime),
                     Start = BuildStart(date, habit.SuggestedTime),
+                    End = BuildEnd(date, habit.SuggestedTime, habit.EndTime),
                     AllDay = !habit.SuggestedTime.HasValue,
                     BackgroundColor = colors.Background,
                     BorderColor = colors.Border,
@@ -236,7 +312,7 @@ public class CalendarService
                         StatusLabel = statusLabel,
                         HabitColor = habit.Color,
                         HabitIcon = habit.Icon,
-                        Time = FormatTime(habit.SuggestedTime),
+                        Time = FormatHabitTimeRange(habit.SuggestedTime, habit.EndTime),
                         Notes = log?.Notes
                     }
                 });
@@ -333,6 +409,76 @@ public class CalendarService
             .ToList();
     }
 
+    private async Task<IReadOnlyList<CalendarEventViewModel>> GetTaskEventsAsync(string userId, DateTime startDate, DateTime endDate)
+    {
+        var tasks = await _dbContext.TaskItems
+            .AsNoTracking()
+            .Where(taskItem => taskItem.UserId == userId
+                && taskItem.ShowOnCalendar
+                && taskItem.TaskDate.HasValue
+                && taskItem.TaskDate.Value >= startDate
+                && taskItem.TaskDate.Value < endDate)
+            .OrderBy(taskItem => taskItem.TaskDate)
+            .ThenBy(taskItem => taskItem.StartTime.HasValue ? 0 : 1)
+            .ThenBy(taskItem => taskItem.StartTime)
+            .ThenByDescending(taskItem => taskItem.Priority)
+            .Select(taskItem => new
+            {
+                taskItem.Id,
+                taskItem.Title,
+                taskItem.TaskDate,
+                taskItem.StartTime,
+                taskItem.EndTime,
+                taskItem.Status,
+                taskItem.Priority,
+                taskItem.Color,
+                taskItem.Icon,
+                taskItem.Notes
+            })
+            .ToListAsync();
+
+        return tasks.Select(taskItem =>
+        {
+            var start = taskItem.TaskDate!.Value;
+            var hasStart = taskItem.StartTime.HasValue;
+            var eventStart = hasStart
+                ? start.Add(taskItem.StartTime!.Value)
+                : start;
+            var eventEnd = taskItem.EndTime.HasValue
+                ? start.Add(taskItem.EndTime.Value)
+                : (DateTime?)null;
+            var (background, border, text) = GetTaskEventColors(taskItem.Status, taskItem.Color);
+
+            return new CalendarEventViewModel
+            {
+                Id = $"task-{taskItem.Id}",
+                Title = BuildTimedTitle(taskItem.Title, taskItem.StartTime),
+                Start = eventStart.ToString(hasStart ? "yyyy-MM-ddTHH:mm:ss" : "yyyy-MM-dd", CultureInfo.InvariantCulture),
+                End = eventEnd?.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
+                AllDay = !hasStart,
+                BackgroundColor = background,
+                BorderColor = border,
+                TextColor = text,
+                ClassNames = ["calendar-event", "calendar-event-task", $"calendar-event-task-{taskItem.Status.ToString().ToLowerInvariant()}"],
+                ExtendedProps = new CalendarEventExtendedPropsViewModel
+                {
+                    Type = TaskType,
+                    TypeLabel = "Tarefa",
+                    TaskItemId = taskItem.Id,
+                    Date = start.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                    Status = taskItem.Status.ToString(),
+                    StatusLabel = taskItem.Status.ToDisplayName(),
+                    Priority = taskItem.Priority.ToString(),
+                    PriorityLabel = taskItem.Priority.ToDisplayName(),
+                    HabitColor = taskItem.Color,
+                    HabitIcon = taskItem.Icon,
+                    Time = FormatTaskTimeRange(taskItem.StartTime, taskItem.EndTime),
+                    Notes = taskItem.Notes
+                }
+            };
+        }).ToList();
+    }
+
     private async Task<IReadOnlyList<CalendarHabitSource>> GetHabitSourcesAsync(string userId)
     {
         return await _dbContext.Habits
@@ -347,6 +493,7 @@ public class CalendarService
                 FrequencyType = habit.FrequencyType,
                 DaysOfWeek = habit.DaysOfWeek,
                 SuggestedTime = habit.SuggestedTime,
+                EndTime = habit.EndTime,
                 CreatedAt = habit.CreatedAt,
                 Color = habit.Color,
                 Icon = habit.Icon,
@@ -483,6 +630,16 @@ public class CalendarService
             : date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
 
+    private static string? BuildEnd(DateTime date, TimeSpan? startTime, TimeSpan? endTime)
+    {
+        if (!startTime.HasValue || !endTime.HasValue)
+        {
+            return null;
+        }
+
+        return date.Date.Add(endTime.Value).ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture);
+    }
+
     private static string BuildTimedTitle(string title, TimeSpan? time)
     {
         return time.HasValue ? $"{time.Value:hh\\:mm} {title}" : title;
@@ -491,6 +648,18 @@ public class CalendarService
     private static string? FormatTime(TimeSpan? time)
     {
         return time?.ToString("hh\\:mm", CultureInfo.InvariantCulture);
+    }
+
+    private static string? FormatHabitTimeRange(TimeSpan? start, TimeSpan? end)
+    {
+        if (!start.HasValue)
+        {
+            return null;
+        }
+
+        return end.HasValue
+            ? $"{start.Value:hh\\:mm} - {end.Value:hh\\:mm}"
+            : $"{start.Value:hh\\:mm}";
     }
 
     private static (string Background, string Border, string Text) GetImprovementEventColors(HabitLogStatus? status, string habitColor)
@@ -505,6 +674,18 @@ public class CalendarService
         };
     }
 
+    private static (string Background, string Border, string Text) GetTaskEventColors(TaskItemStatus status, string taskColor)
+    {
+        return status switch
+        {
+            TaskItemStatus.Completed => ("#064e3b", "#34d399", "#d1fae5"),
+            TaskItemStatus.Cancelled => ("#581c87", "#a78bfa", "#ede9fe"),
+            TaskItemStatus.Postponed => ("#78350f", "#fbbf24", "#fef3c7"),
+            TaskItemStatus.InProgress => ("#0c4a6e", "#38bdf8", "#e0f2fe"),
+            _ => ("#1e1b4b", string.IsNullOrWhiteSpace(taskColor) ? "#a78bfa" : taskColor, "#ede9fe")
+        };
+    }
+
     private static string GetStatusTone(HabitLogStatus? status)
     {
         return status switch
@@ -515,6 +696,30 @@ public class CalendarService
             HabitLogStatus.Partial => "info",
             _ => "warning"
         };
+    }
+
+    private static string GetTaskStatusTone(TaskItemStatus status)
+    {
+        return status switch
+        {
+            TaskItemStatus.Completed => "success",
+            TaskItemStatus.InProgress => "info",
+            TaskItemStatus.Cancelled => "danger",
+            TaskItemStatus.Postponed => "neutral",
+            _ => "warning"
+        };
+    }
+
+    private static string? FormatTaskTimeRange(TimeSpan? start, TimeSpan? end)
+    {
+        if (!start.HasValue)
+        {
+            return null;
+        }
+
+        return end.HasValue
+            ? $"{start.Value:hh\\:mm} - {end.Value:hh\\:mm}"
+            : $"{start.Value:hh\\:mm}";
     }
 
     private static string GetMoodFace(MoodLevel mood)
@@ -541,6 +746,8 @@ public class CalendarService
         public string? DaysOfWeek { get; init; }
 
         public TimeSpan? SuggestedTime { get; init; }
+
+        public TimeSpan? EndTime { get; init; }
 
         public DateTime CreatedAt { get; init; }
 

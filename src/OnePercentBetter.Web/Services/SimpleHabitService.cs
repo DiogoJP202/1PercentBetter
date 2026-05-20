@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using OnePercentBetter.Web.Data;
 using OnePercentBetter.Web.Models.Entities;
 using OnePercentBetter.Web.ViewModels.Habits;
@@ -81,8 +81,63 @@ public class SimpleHabitService
         });
     }
 
+    public async Task<(bool Success, string? Error, SelectOptionViewModel? Option)> UpdateAsync(string userId, SimpleHabitCreateViewModel viewModel)
+    {
+        if (!viewModel.Id.HasValue || viewModel.Id.Value <= 0)
+        {
+            return (false, "Informe um hábito simples válido para edição.", null);
+        }
+
+        var simpleHabit = await _dbContext.SimpleHabits
+            .FirstOrDefaultAsync(item => item.Id == viewModel.Id.Value && item.UserId == userId && item.IsActive);
+
+        if (simpleHabit is null)
+        {
+            return (false, "Hábito simples não encontrado para este usuário.", null);
+        }
+
+        var name = viewModel.Name.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return (false, "Informe o nome do hábito simples.", null);
+        }
+
+        var duplicate = await _dbContext.SimpleHabits
+            .AsNoTracking()
+            .Where(item =>
+                item.UserId == userId
+                && item.IsActive
+                && item.Id != simpleHabit.Id
+                && item.Name == name
+                && item.ScheduledTime == viewModel.ScheduledTime)
+            .Select(item => new SelectOptionViewModel
+            {
+                Value = item.Id.ToString(),
+                Text = BuildLabel(item.Name, item.ScheduledTime)
+            })
+            .FirstOrDefaultAsync();
+
+        if (duplicate is not null)
+        {
+            return (false, "Já existe um hábito simples igual com esse horário.", null);
+        }
+
+        simpleHabit.Name = name;
+        simpleHabit.ScheduledTime = viewModel.ScheduledTime;
+        simpleHabit.UpdatedAt = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        return (true, null, new SelectOptionViewModel
+        {
+            Value = simpleHabit.Id.ToString(),
+            Text = BuildLabel(simpleHabit.Name, simpleHabit.ScheduledTime)
+        });
+    }
+
     public static string BuildLabel(string name, TimeSpan? scheduledTime)
     {
         return scheduledTime.HasValue ? $"{name} às {scheduledTime.Value:hh\\:mm}" : name;
     }
 }
+

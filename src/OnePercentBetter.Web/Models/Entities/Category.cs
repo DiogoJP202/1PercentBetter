@@ -31,4 +31,6 @@ public class Category
     public ICollection<Goal> Goals { get; } = new List<Goal>();
 
     public ICollection<Habit> Habits { get; } = new List<Habit>();
+
+    public ICollection<TaskItem> TaskItems { get; } = new List<TaskItem>();
 }

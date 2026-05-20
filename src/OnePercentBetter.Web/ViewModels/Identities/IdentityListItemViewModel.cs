@@ -23,4 +23,8 @@ public class IdentityListItemViewModel
     public int HabitsCount { get; set; }
 
     public int GoalsCount { get; set; }
+
+    public int TasksCount { get; set; }
+
+    public int PendingTasksCount { get; set; }
 }

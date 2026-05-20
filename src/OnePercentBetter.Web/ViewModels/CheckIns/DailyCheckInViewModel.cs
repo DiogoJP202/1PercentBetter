@@ -26,8 +26,19 @@ public class DailyCheckInViewModel
     public string? MainDifficulty { get; set; }
 
     [MaxLength(500)]
+    public string? TaskBlocker { get; set; }
+
+    [MaxLength(500)]
     public string? TomorrowAdjustment { get; set; }
 
     [MaxLength(1600)]
     public string? Notes { get; set; }
+
+    public int PlannedTasks { get; set; }
+
+    public int CompletedTasks { get; set; }
+
+    public int PostponedTasks { get; set; }
+
+    public int PendingTasks { get; set; }
 }

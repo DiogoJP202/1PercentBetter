@@ -11,17 +11,20 @@ public class NoteService
     private readonly IdentityService _identityService;
     private readonly GoalService _goalService;
     private readonly HabitService _habitService;
+    private readonly TaskItemService _taskItemService;
 
     public NoteService(
         ApplicationDbContext dbContext,
         IdentityService identityService,
         GoalService goalService,
-        HabitService habitService)
+        HabitService habitService,
+        TaskItemService taskItemService)
     {
         _dbContext = dbContext;
         _identityService = identityService;
         _goalService = goalService;
         _habitService = habitService;
+        _taskItemService = taskItemService;
     }
 
     public async Task<IReadOnlyList<NoteListItemViewModel>> GetListAsync(string userId)
@@ -69,6 +72,7 @@ public class NoteService
             GoalId = note.GoalId,
             IdentityId = note.IdentityId,
             HabitId = note.HabitId,
+            TaskItemId = note.TaskItemId,
             Date = note.Date
         }, userId);
     }
@@ -92,6 +96,18 @@ public class NoteService
             errors[nameof(viewModel.HabitId)] = "Habito invalido para este usuario.";
         }
 
+        if (viewModel.TaskItemId.HasValue)
+        {
+            var taskExists = await _dbContext.TaskItems
+                .AsNoTracking()
+                .AnyAsync(taskItem => taskItem.UserId == userId && taskItem.Id == viewModel.TaskItemId.Value);
+
+            if (!taskExists)
+            {
+                errors[nameof(viewModel.TaskItemId)] = "Tarefa invalida para este usuario.";
+            }
+        }
+
         return errors;
     }
 
@@ -107,6 +123,7 @@ public class NoteService
             GoalId = viewModel.GoalId,
             IdentityId = viewModel.IdentityId,
             HabitId = viewModel.HabitId,
+            TaskItemId = viewModel.TaskItemId,
             Date = viewModel.Date.Date
         };
 
@@ -138,6 +155,7 @@ public class NoteService
         note.GoalId = viewModel.GoalId;
         note.IdentityId = viewModel.IdentityId;
         note.HabitId = viewModel.HabitId;
+        note.TaskItemId = viewModel.TaskItemId;
         note.Date = viewModel.Date.Date;
         note.UpdatedAt = DateTime.UtcNow;
 
@@ -150,6 +168,7 @@ public class NoteService
         viewModel.Identities = await _identityService.GetOptionsAsync(userId);
         viewModel.Goals = await _goalService.GetOptionsAsync(userId);
         viewModel.Habits = await _habitService.GetOptionsAsync(userId);
+        viewModel.TaskItems = await _taskItemService.GetOptionsAsync(userId);
         return viewModel;
     }
 }
