@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnePercentBetter.Web.Data;
 using OnePercentBetter.Web.Models.Identity;
+using OnePercentBetter.Web.Options;
 using OnePercentBetter.Web.Services;
+using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,11 +22,29 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services
     .AddDefaultIdentity<ApplicationUser>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = false;
+        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedEmail = true;
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequiredLength = 6;
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     })
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(3);
+});
+
+builder.Services.AddMemoryCache();
+builder.Services.Configure<ResendSettings>(builder.Configuration.GetSection(ResendSettings.SectionName));
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(options =>
+{
+    options.ApiToken = builder.Configuration.GetValue<string>($"{ResendSettings.SectionName}:ApiToken") ?? string.Empty;
+});
+builder.Services.AddTransient<IResend, ResendClient>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -45,6 +65,7 @@ builder.Services.AddScoped<CalendarService>();
 builder.Services.AddScoped<OnboardingService>();
 builder.Services.AddScoped<NoteService>();
 builder.Services.AddScoped<TaskItemService>();
+builder.Services.AddScoped<IEmailService, ResendEmailService>();
 
 builder.Services.AddControllersWithViews();
 

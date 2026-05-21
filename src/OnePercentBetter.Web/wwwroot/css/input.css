@@ -124,6 +124,10 @@ body {
   font-size: 0.8125rem;
 }
 
+.validation-summary-valid {
+  display: none;
+}
+
 .status-pill {
   align-items: center;
   background: rgba(255, 255, 255, 0.045);

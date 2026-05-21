@@ -1,0 +1,97 @@
+﻿@model AccountSettingsViewModel
+@{
+    ViewData["Title"] = "Configurações da conta";
+
+    var createdAt = Model.Profile.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+    var updatedAt = Model.Profile.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+    var confirmedAt = Model.Profile.EmailConfirmedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+}
+
+<div class="space-y-6">
+    <header class="app-card p-5 sm:p-6">
+        <p class="text-xs font-bold uppercase tracking-wide text-emerald-300">Conta</p>
+        <h1 class="mt-2 text-3xl font-black tracking-tight text-white">Configurações da conta</h1>
+        <p class="mt-2 max-w-3xl text-sm text-slate-300">Atualize seus dados e segurança no 1% Better.</p>
+    </header>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+        <section class="app-card p-5 sm:p-6">
+            <h2 class="text-xl font-black text-white">Perfil</h2>
+            <p class="mt-1 text-sm text-slate-400">Se você alterar o e-mail, será necessário confirmar novamente.</p>
+
+            <form asp-action="UpdateSettings" method="post" class="mt-5 space-y-4">
+                <div asp-validation-summary="All" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
+
+                <div>
+                    <label for="DisplayName" class="form-label">Nome de exibição</label>
+                    <input id="DisplayName" name="DisplayName" class="form-input" value="@Model.Profile.DisplayName" autocomplete="name" maxlength="120" />
+                </div>
+
+                <div>
+                    <label for="Email" class="form-label">E-mail</label>
+                    <input id="Email" name="Email" type="email" class="form-input" value="@Model.Profile.Email" autocomplete="email" />
+                </div>
+
+                <button type="submit" class="btn-primary">Salvar dados</button>
+            </form>
+
+            <div class="mt-5 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-300">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-slate-400">Status do e-mail:</span>
+                    @if (Model.Profile.EmailConfirmed)
+                    {
+                        <span class="status-pill status-pill-success">Confirmado</span>
+                    }
+                    else
+                    {
+                        <span class="status-pill status-pill-warning">Pendente de confirmação</span>
+                    }
+                </div>
+
+                <p class="mt-2 text-xs text-slate-400">Conta criada em @createdAt</p>
+                <p class="mt-1 text-xs text-slate-400">Última atualização em @updatedAt</p>
+                @if (Model.Profile.EmailConfirmed && !string.IsNullOrWhiteSpace(confirmedAt))
+                {
+                    <p class="mt-1 text-xs text-slate-400">E-mail confirmado em @confirmedAt</p>
+                }
+            </div>
+
+            @if (!Model.Profile.EmailConfirmed)
+            {
+                <form asp-action="ResendConfirmationFromSettings" method="post" class="mt-4">
+                    <button type="submit" class="btn-secondary">Reenviar e-mail de ativação</button>
+                </form>
+            }
+        </section>
+
+        <section class="app-card p-5 sm:p-6">
+            <h2 class="text-xl font-black text-white">Senha e segurança</h2>
+            <p class="mt-1 text-sm text-slate-400">Troque sua senha sempre que necessário para manter sua conta protegida.</p>
+
+            <form asp-action="ChangePassword" method="post" class="mt-5 space-y-4">
+                <div asp-validation-summary="All" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
+
+                <div>
+                    <label for="CurrentPassword" class="form-label">Senha atual</label>
+                    <input id="CurrentPassword" name="CurrentPassword" type="password" class="form-input" autocomplete="current-password" />
+                </div>
+
+                <div>
+                    <label for="NewPassword" class="form-label">Nova senha</label>
+                    <input id="NewPassword" name="NewPassword" type="password" class="form-input" autocomplete="new-password" />
+                </div>
+
+                <div>
+                    <label for="ConfirmNewPassword" class="form-label">Confirmar nova senha</label>
+                    <input id="ConfirmNewPassword" name="ConfirmNewPassword" type="password" class="form-input" autocomplete="new-password" />
+                </div>
+
+                <button type="submit" class="btn-primary">Atualizar senha</button>
+            </form>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

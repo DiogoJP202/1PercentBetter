@@ -65,4 +65,6 @@ public class TaskItemFormViewModel
     public IReadOnlyList<SelectOptionViewModel> Habits { get; set; } = [];
 
     public IReadOnlyList<SelectOptionViewModel> Tags { get; set; } = [];
+
+    public IReadOnlyList<TaskTagBadgeViewModel> TagItems { get; set; } = [];
 }

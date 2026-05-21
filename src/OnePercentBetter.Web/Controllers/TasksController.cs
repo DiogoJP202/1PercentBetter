@@ -182,6 +182,47 @@ public class TasksController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveTag(TaskTagEditViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            var message = ModelState.Values
+                .SelectMany(value => value.Errors)
+                .Select(error => error.ErrorMessage)
+                .FirstOrDefault() ?? "Não foi possível salvar a tag.";
+
+            return BadRequest(new { error = message });
+        }
+
+        var result = await _taskItemService.SaveTagAsync(User.GetRequiredUserId(), viewModel);
+        if (!result.Success || result.Tag is null)
+        {
+            return BadRequest(new { error = result.Error ?? "Não foi possível salvar a tag." });
+        }
+
+        return Json(new
+        {
+            id = result.Tag.Id,
+            name = result.Tag.Name,
+            color = result.Tag.Color
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteTag(int id)
+    {
+        var result = await _taskItemService.DeleteTagAsync(User.GetRequiredUserId(), id);
+        if (!result.Success)
+        {
+            return BadRequest(new { error = result.Error ?? "Não foi possível excluir a tag." });
+        }
+
+        return Json(new { success = true });
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetTodayTasks()
     {

@@ -1,4 +1,4 @@
-@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+﻿@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
     var title = ViewData["Title"] as string ?? "1% Better";
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
@@ -103,6 +103,7 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
 
 
 

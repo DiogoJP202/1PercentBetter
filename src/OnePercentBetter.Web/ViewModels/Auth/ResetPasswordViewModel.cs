@@ -2,22 +2,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace OnePercentBetter.Web.ViewModels.Auth;
 
-public class RegisterViewModel
+public class ResetPasswordViewModel
 {
-    [Required(ErrorMessage = "Informe seu nome.")]
-    [MaxLength(120)]
-    public string DisplayName { get; set; } = string.Empty;
+    [Required]
+    public string UserId { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Informe seu e-mail.")]
-    [EmailAddress(ErrorMessage = "Informe um e-mail válido.")]
-    public string Email { get; set; } = string.Empty;
+    [Required]
+    public string Token { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Informe sua senha.")]
+    [Required(ErrorMessage = "Informe a nova senha.")]
     [StringLength(100, ErrorMessage = "A senha deve ter pelo menos {2} caracteres.", MinimumLength = 6)]
     [DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Confirme sua senha.")]
+    [Required(ErrorMessage = "Confirme a nova senha.")]
     [DataType(DataType.Password)]
     [Compare(nameof(Password), ErrorMessage = "As senhas não conferem.")]
     public string ConfirmPassword { get; set; } = string.Empty;

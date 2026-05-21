@@ -1,0 +1,32 @@
+﻿@model ResendConfirmationEmailViewModel
+@{
+    ViewData["Title"] = "Reenviar ativação";
+}
+
+<section class="grid min-h-screen place-items-center px-4 py-10">
+    <div class="w-full max-w-md app-card p-6">
+        <h1 class="text-2xl font-black text-white">Reenviar ativação</h1>
+        <p class="mt-2 text-sm text-slate-400">Informe seu e-mail para reenviar o link de confirmação da conta.</p>
+
+        <form asp-action="ResendConfirmationEmail" method="post" class="mt-6 space-y-4">
+            <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
+
+            <div>
+                <label asp-for="Email" class="form-label">E-mail</label>
+                <input asp-for="Email" class="form-input" autocomplete="email" />
+                <span asp-validation-for="Email"></span>
+            </div>
+
+            <button type="submit" class="btn-primary w-full">Reenviar e-mail de ativação</button>
+        </form>
+
+        <p class="mt-6 text-center text-sm text-slate-400">
+            Lembrou sua senha?
+            <a class="font-semibold text-emerald-300 hover:text-emerald-200" asp-action="Login">Entrar</a>
+        </p>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

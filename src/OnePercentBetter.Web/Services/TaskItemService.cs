@@ -4,6 +4,7 @@ using OnePercentBetter.Web.Models.Entities;
 using OnePercentBetter.Web.Models.Enums;
 using OnePercentBetter.Web.ViewModels.Shared;
 using OnePercentBetter.Web.ViewModels.Tasks;
+using System.Text.RegularExpressions;
 
 namespace OnePercentBetter.Web.Services;
 
@@ -139,6 +140,105 @@ public class TaskItemService
     public async Task PopulateOptionsAsync(TaskItemFormViewModel viewModel, string userId)
     {
         await FillOptionsAsync(viewModel, userId);
+    }
+
+    public async Task<(bool Success, string? Error, TaskTagBadgeViewModel? Tag)> SaveTagAsync(string userId, TaskTagEditViewModel viewModel)
+    {
+        var name = viewModel.Name.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return (false, "Informe o nome da tag.", null);
+        }
+
+        if (name.Length > 64)
+        {
+            return (false, "Use no máximo 64 caracteres no nome da tag.", null);
+        }
+
+        var normalizedName = NormalizeTagName(name);
+        var color = NormalizeTagColor(viewModel.Color);
+
+        if (viewModel.Id.HasValue && viewModel.Id.Value > 0)
+        {
+            var existing = await _dbContext.TaskTags
+                .FirstOrDefaultAsync(taskTag => taskTag.UserId == userId && taskTag.Id == viewModel.Id.Value);
+
+            if (existing is null)
+            {
+                return (false, "Tag não encontrada para este usuário.", null);
+            }
+
+            var conflict = await _dbContext.TaskTags
+                .AsNoTracking()
+                .AnyAsync(taskTag =>
+                    taskTag.UserId == userId
+                    && taskTag.Id != existing.Id
+                    && taskTag.Name.ToLower() == normalizedName);
+
+            if (conflict)
+            {
+                return (false, "Já existe uma tag com esse nome.", null);
+            }
+
+            existing.Name = name;
+            existing.Color = color;
+            await _dbContext.SaveChangesAsync();
+
+            return (true, null, new TaskTagBadgeViewModel
+            {
+                Id = existing.Id,
+                Name = existing.Name,
+                Color = existing.Color
+            });
+        }
+
+        var existingByName = await _dbContext.TaskTags
+            .FirstOrDefaultAsync(taskTag => taskTag.UserId == userId && taskTag.Name.ToLower() == normalizedName);
+
+        if (existingByName is not null)
+        {
+            existingByName.Color = color;
+            await _dbContext.SaveChangesAsync();
+
+            return (true, null, new TaskTagBadgeViewModel
+            {
+                Id = existingByName.Id,
+                Name = existingByName.Name,
+                Color = existingByName.Color
+            });
+        }
+
+        var taskTag = new TaskTag
+        {
+            UserId = userId,
+            Name = name,
+            Color = color
+        };
+
+        _dbContext.TaskTags.Add(taskTag);
+        await _dbContext.SaveChangesAsync();
+
+        return (true, null, new TaskTagBadgeViewModel
+        {
+            Id = taskTag.Id,
+            Name = taskTag.Name,
+            Color = taskTag.Color
+        });
+    }
+
+    public async Task<(bool Success, string? Error)> DeleteTagAsync(string userId, int tagId)
+    {
+        var taskTag = await _dbContext.TaskTags
+            .FirstOrDefaultAsync(item => item.UserId == userId && item.Id == tagId);
+
+        if (taskTag is null)
+        {
+            return (false, "Tag não encontrada para este usuário.");
+        }
+
+        _dbContext.TaskTags.Remove(taskTag);
+        await _dbContext.SaveChangesAsync();
+        return (true, null);
     }
 
     public async Task<IReadOnlyDictionary<string, string>> ValidateFormAsync(string userId, TaskItemFormViewModel viewModel)
@@ -504,6 +604,7 @@ public class TaskItemService
         viewModel.Goals = await _goalService.GetOptionsAsync(userId);
         viewModel.Habits = await _habitService.GetOptionsAsync(userId);
         viewModel.Tags = await GetTagOptionsAsync(userId);
+        viewModel.TagItems = await GetTagItemsAsync(userId);
         viewModel.Color = NormalizeColor(viewModel.Color);
         viewModel.Icon = NormalizeIcon(viewModel.Icon);
         return viewModel;
@@ -519,6 +620,21 @@ public class TaskItemService
             {
                 Value = taskTag.Id.ToString(),
                 Text = taskTag.Name
+            })
+            .ToListAsync();
+    }
+
+    private async Task<IReadOnlyList<TaskTagBadgeViewModel>> GetTagItemsAsync(string userId)
+    {
+        return await _dbContext.TaskTags
+            .AsNoTracking()
+            .Where(taskTag => taskTag.UserId == userId)
+            .OrderBy(taskTag => taskTag.Name)
+            .Select(taskTag => new TaskTagBadgeViewModel
+            {
+                Id = taskTag.Id,
+                Name = taskTag.Name,
+                Color = taskTag.Color
             })
             .ToListAsync();
     }
@@ -699,6 +815,12 @@ public class TaskItemService
     private static string NormalizeTagName(string name)
     {
         return name.Trim().ToLowerInvariant();
+    }
+
+    private static string NormalizeTagColor(string? color)
+    {
+        var candidate = string.IsNullOrWhiteSpace(color) ? TaskVisualOptions.DefaultColor : color.Trim();
+        return Regex.IsMatch(candidate, "^#[0-9a-fA-F]{6}$") ? candidate : TaskVisualOptions.DefaultColor;
     }
 
     private static bool IsOverdue(DateTime? taskDate, DateTime? dueDate, DateTime today)

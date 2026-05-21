@@ -13,6 +13,8 @@ public class ApplicationUser : IdentityUser
 
     public string ThemePreference { get; set; } = "dark";
 
+    public DateTime? EmailConfirmedAt { get; set; }
+
     public DateTime? OnboardingTourCompletedAt { get; set; }
 
     public DateTime? OnboardingTourSkippedAt { get; set; }

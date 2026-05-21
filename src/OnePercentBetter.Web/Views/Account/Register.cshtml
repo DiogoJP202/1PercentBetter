@@ -1,4 +1,4 @@
-@model RegisterViewModel
+﻿@model RegisterViewModel
 @{
     ViewData["Title"] = "Criar conta";
 }
@@ -15,20 +15,20 @@
 
         <div class="app-card p-6">
             <h1 class="text-2xl font-black text-white">Criar conta</h1>
-            <p class="mt-2 text-sm text-slate-400">Crie a base para seu primeiro sistema diário.</p>
+            <p class="mt-2 text-sm text-slate-400">Comece seu sistema pessoal de evolução. Após o cadastro, enviaremos um e-mail para ativação.</p>
 
             <form class="mt-6 space-y-4" asp-action="Register" method="post">
                 <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3"></div>
 
                 <div>
-                    <label asp-for="DisplayName" class="form-label">Nome</label>
+                    <label asp-for="DisplayName" class="form-label">Nome de exibição</label>
                     <input asp-for="DisplayName" class="form-input" autocomplete="name" />
                     <span asp-validation-for="DisplayName"></span>
                 </div>
 
                 <div>
                     <label asp-for="Email" class="form-label">E-mail</label>
-                    <input asp-for="Email" class="form-input" autocomplete="username" />
+                    <input asp-for="Email" class="form-input" autocomplete="email" />
                     <span asp-validation-for="Email"></span>
                 </div>
 
@@ -44,7 +44,7 @@
                     <span asp-validation-for="ConfirmPassword"></span>
                 </div>
 
-                <button type="submit" class="btn-primary w-full">Criar conta</button>
+                <button type="submit" class="btn-primary w-full">Criar minha conta</button>
             </form>
 
             <p class="mt-6 text-center text-sm text-slate-400">
