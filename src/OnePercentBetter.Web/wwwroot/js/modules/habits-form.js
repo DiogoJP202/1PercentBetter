@@ -84,7 +84,7 @@ if (form) {
     modal.classList.toggle('flex', visible);
   };
 
-  const stripSelectLabel = (value) => (value ?? ').replace(/\s+-\s+.*$/, ').trim();
+  const stripSelectLabel = (value) => (value ?? '').replace(/\s+-\s+.*$/, '').trim();
 
   const syncDaysVisibility = () => {
     if (!frequencySelect || !daysPanel) {
@@ -103,10 +103,10 @@ if (form) {
 
   const syncPreview = () => {
     const title = titleInput?.value.trim() || 'Seu novo hábito';
-    const trigger = triggerInput?.value.trim() || triggerInput?.placeholder || ';
-    const twoMinute = twoMinuteInput?.value.trim() || twoMinuteInput?.placeholder || ';
+    const trigger = triggerInput?.value.trim() || triggerInput?.placeholder || '';
+    const twoMinute = twoMinuteInput?.value.trim() || twoMinuteInput?.placeholder || '';
     const selectedStack = stackSelect?.selectedOptions?.[0];
-    const baseHabit = selectedStack?.value ? stripSelectLabel(selectedStack.textContent) : ';
+    const baseHabit = selectedStack?.value ? stripSelectLabel(selectedStack.textContent) : '';
 
     if (previewTitle) {
       previewTitle.textContent = title;
@@ -122,7 +122,7 @@ if (form) {
 
     const stackText = baseHabit
       ? `Depois de ${baseHabit}, eu irei ${title === 'Seu novo hábito' ? 'executar este hábito' : title}.`
-      : ';
+      : '';
 
     if (previewStack) {
       previewStack.textContent = stackText;
@@ -212,7 +212,7 @@ if (form) {
     }
 
     if (locationError) {
-      locationError.textContent = ';
+      locationError.textContent = '';
     }
 
     try {
@@ -245,7 +245,7 @@ if (form) {
       locationSelect.value = result.value;
 
       if (locationInput) {
-        locationInput.value = ';
+        locationInput.value = '';
       }
 
       setModalVisible(locationModal, false);
@@ -265,14 +265,14 @@ if (form) {
   };
 
   const parseSimpleLabel = (label) => {
-    const value = (label || ').trim();
+    const value = (label || '').trim();
     if (!value) {
-      return { name: ', time: ' };
+      return { name: '', time: '' };
     }
 
-    const match = value.match(/^(.*)\s+(?:às|Ã s|as)\s+(\d{2}:\d{2})$/i);
+    const match = value.match(/^(.*)\s+(?:às|as)\s+(\d{2}:\d{2})$/i);
     if (!match) {
-      return { name: value, time: ' };
+      return { name: value, time: '' };
     }
 
     return {
@@ -283,15 +283,15 @@ if (form) {
 
   const resetSimpleForm = () => {
     if (simpleIdInput) {
-      simpleIdInput.value = ';
+      simpleIdInput.value = '';
     }
 
     if (simpleNameInput) {
-      simpleNameInput.value = ';
+      simpleNameInput.value = '';
     }
 
     if (simpleTimeInput) {
-      simpleTimeInput.value = ';
+      simpleTimeInput.value = '';
     }
 
     if (simpleSaveLabel) {
@@ -299,7 +299,7 @@ if (form) {
     }
 
     if (simpleError) {
-      simpleError.textContent = ';
+      simpleError.textContent = '';
     }
   };
 
@@ -312,7 +312,7 @@ if (form) {
       return;
     }
 
-    const { name, time } = parseSimpleLabel(selected.textContent || ');
+    const { name, time } = parseSimpleLabel(selected.textContent || '');
 
     if (simpleIdInput) {
       simpleIdInput.value = selected.value;
@@ -332,7 +332,7 @@ if (form) {
     }
 
     if (simpleError) {
-      simpleError.textContent = ';
+      simpleError.textContent = '';
     }
   };
 
@@ -485,7 +485,7 @@ if (form) {
   locationSuggestions.forEach((suggestion) => {
     suggestion.addEventListener('click', () => {
       if (locationInput) {
-        locationInput.value = suggestion.dataset.habitLocationSuggestion ?? ';
+        locationInput.value = suggestion.dataset.habitLocationSuggestion ?? '';
         locationInput.focus();
       }
     });
@@ -526,7 +526,7 @@ if (form) {
   simpleSuggestions.forEach((suggestion) => {
     suggestion.addEventListener('click', () => {
       if (simpleNameInput) {
-        simpleNameInput.value = suggestion.dataset.habitSimpleSuggestion ?? ';
+        simpleNameInput.value = suggestion.dataset.habitSimpleSuggestion ?? '';
         simpleNameInput.focus();
       }
     });
