@@ -162,14 +162,17 @@ public class IdentityService
     public async Task<bool> DeleteAsync(string userId, int id)
     {
         var identity = await _dbContext.UserIdentities
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(item => item.UserId == userId && item.Id == id);
 
-        if (identity is null)
+        if (identity is null || identity.IsDeleted)
         {
             return false;
         }
 
-        _dbContext.UserIdentities.Remove(identity);
+        identity.IsDeleted = true;
+        identity.DeletedAt = DateTime.UtcNow;
+        identity.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
 
         return true;

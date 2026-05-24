@@ -53,7 +53,7 @@ if (form) {
     const title = normalizeText(rawTitle);
 
     if (previewTitle) {
-      previewTitle.textContent = title || 'Sua nova anotacao';
+      previewTitle.textContent = title || 'Sua nova anotação';
     }
 
     if (titleCounter) {
@@ -66,7 +66,7 @@ if (form) {
     const content = normalizeText(rawContent);
 
     if (previewContent) {
-      previewContent.textContent = content || 'Descreva fatos, sinais e proximos passos para transformar observacoes em melhoria continua.';
+      previewContent.textContent = content || 'Descreva fatos, sinais e próximos passos para transformar observações em melhoria contínua.';
     }
 
     if (contentCounter) {
@@ -110,7 +110,7 @@ if (form) {
     tags.forEach((tag) => {
       const badge = document.createElement('span');
       badge.className = 'status-pill status-pill-neutral';
-      badge.textContent = tag;
+      badge.textContent = `#${tag}`;
       previewTags.appendChild(badge);
     });
   };

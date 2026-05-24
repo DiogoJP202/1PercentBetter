@@ -2,13 +2,13 @@ using OnePercentBetter.Web.Models.Enums;
 
 namespace OnePercentBetter.Web.ViewModels.Notes;
 
-public class NoteListItemViewModel
+public class NoteDetailsViewModel
 {
     public int Id { get; set; }
 
     public string Title { get; set; } = string.Empty;
 
-    public string ContentPreview { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
 
     public NoteType NoteType { get; set; }
 

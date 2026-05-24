@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnePercentBetter.Web.Data;
 
@@ -11,9 +12,11 @@ using OnePercentBetter.Web.Data;
 namespace OnePercentBetter.Web.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260524214500_AddNoteSoftDelete")]
+    partial class AddNoteSoftDelete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -371,9 +374,6 @@ namespace OnePercentBetter.Web.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Description")
                         .HasMaxLength(1200)
                         .HasColumnType("nvarchar(1200)");
@@ -385,9 +385,6 @@ namespace OnePercentBetter.Web.Data.Migrations
 
                     b.Property<int?>("IdentityId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<int>("Priority")
                         .HasColumnType("int");
@@ -419,7 +416,7 @@ namespace OnePercentBetter.Web.Data.Migrations
 
                     b.HasIndex("IdentityId");
 
-                    b.HasIndex("UserId", "IsDeleted", "Status");
+                    b.HasIndex("UserId", "Status");
 
                     b.ToTable("Goals");
                 });
@@ -447,9 +444,6 @@ namespace OnePercentBetter.Web.Data.Migrations
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Description")
                         .HasMaxLength(1200)
                         .HasColumnType("nvarchar(1200)");
@@ -473,9 +467,6 @@ namespace OnePercentBetter.Web.Data.Migrations
 
                     b.Property<int?>("IdentityId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<int?>("LocationId")
                         .HasColumnType("int");
@@ -532,7 +523,7 @@ namespace OnePercentBetter.Web.Data.Migrations
 
                     b.HasIndex("StackedAfterSimpleHabitId");
 
-                    b.HasIndex("UserId", "IsDeleted", "Status");
+                    b.HasIndex("UserId", "Status");
 
                     b.ToTable("Habits");
                 });
@@ -753,9 +744,6 @@ namespace OnePercentBetter.Web.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Description")
                         .HasMaxLength(1200)
                         .HasColumnType("nvarchar(1200)");
@@ -779,9 +767,6 @@ namespace OnePercentBetter.Web.Data.Migrations
 
                     b.Property<int?>("IdentityId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(2000)
@@ -824,13 +809,13 @@ namespace OnePercentBetter.Web.Data.Migrations
 
                     b.HasIndex("IdentityId");
 
-                    b.HasIndex("UserId", "IsDeleted", "DueDate");
+                    b.HasIndex("UserId", "DueDate");
 
-                    b.HasIndex("UserId", "IsDeleted", "Priority");
+                    b.HasIndex("UserId", "Priority");
 
-                    b.HasIndex("UserId", "IsDeleted", "Status");
+                    b.HasIndex("UserId", "Status");
 
-                    b.HasIndex("UserId", "IsDeleted", "TaskDate");
+                    b.HasIndex("UserId", "TaskDate");
 
                     b.ToTable("TaskItems");
                 });
@@ -902,9 +887,6 @@ namespace OnePercentBetter.Web.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Description")
                         .HasMaxLength(800)
                         .HasColumnType("nvarchar(800)");
@@ -918,9 +900,6 @@ namespace OnePercentBetter.Web.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(260)
                         .HasColumnType("nvarchar(260)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -941,9 +920,9 @@ namespace OnePercentBetter.Web.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("UserId", "IsDeleted", "Name");
+                    b.HasIndex("UserId", "Name");
 
-                    b.HasIndex("UserId", "IsDeleted", "Status");
+                    b.HasIndex("UserId", "Status");
 
                     b.ToTable("Identities", (string)null);
                 });

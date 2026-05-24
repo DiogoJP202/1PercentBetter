@@ -18,6 +18,22 @@ const escapeHtml = (value) => String(value ?? '')
   .replaceAll('"', '&quot;')
   .replaceAll("'", '&#039;');
 
+const recoverMojibake = (text) => {
+  if (!/[ÃÂ]/.test(text)) {
+    return text;
+  }
+
+  try {
+    return decodeURIComponent(escape(text));
+  } catch {
+    return text;
+  }
+};
+
+const cleanText = (value) => recoverMojibake(String(value ?? '')
+  .replaceAll('\uFFFD', ''))
+  .trim();
+
 const getDateKey = (value) => {
   if (!value) {
     return '';
@@ -86,10 +102,10 @@ const renderImprovementHabits = (habits, date) => {
   list.innerHTML = habits.map((habit) => {
     const statusClass = statusClasses[habit.statusTone] ?? statusClasses.neutral;
     const meta = [
-      habit.suggestedTime ? `${habit.suggestedTime}` : null,
-      habit.goalTitle,
-      habit.locationName
-    ].filter(Boolean).join(' � ');
+      habit.suggestedTime ? cleanText(habit.suggestedTime) : null,
+      cleanText(habit.goalTitle),
+      cleanText(habit.locationName)
+    ].filter(Boolean).join(' - ');
 
     return `
       <article class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
@@ -99,11 +115,11 @@ const renderImprovementHabits = (habits, date) => {
           </span>
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <h4 class="min-w-0 flex-1 truncate text-sm font-black text-white">${escapeHtml(habit.title)}</h4>
-              <span class="status-pill ${statusClass}">${escapeHtml(habit.statusLabel)}</span>
+              <h4 class="min-w-0 flex-1 truncate text-sm font-black text-white">${escapeHtml(cleanText(habit.title))}</h4>
+              <span class="status-pill ${statusClass}">${escapeHtml(cleanText(habit.statusLabel))}</span>
             </div>
             ${meta ? `<p class="mt-1 text-xs text-slate-500">${escapeHtml(meta)}</p>` : ''}
-            ${habit.identityName ? `<p class="mt-1 text-xs text-slate-400">${escapeHtml(habit.identityName)}</p>` : ''}
+            ${habit.identityName ? `<p class="mt-1 text-xs text-slate-400">${escapeHtml(cleanText(habit.identityName))}</p>` : ''}
             <div class="mt-3 flex flex-wrap gap-2">
               ${habit.isCompleted ? '' : `<button type="button" class="btn-primary min-h-0 px-3 py-1 text-xs" data-calendar-complete-habit="${habit.id}" data-calendar-date="${date}"><i data-lucide="check" class="h-3.5 w-3.5"></i>Concluir</button>`}
               ${editUrl ? `<a class="btn-secondary min-h-0 px-3 py-1 text-xs" href="${buildEditUrl(editUrl, habit.id)}"><i data-lucide="pencil" class="h-3.5 w-3.5"></i>Editar</a>` : ''}
@@ -132,8 +148,8 @@ const renderCommonHabits = (habits) => {
           <i data-lucide="calendar-clock" class="h-4 w-4"></i>
         </span>
         <div class="min-w-0">
-          <h4 class="truncate text-sm font-black text-white">${escapeHtml(habit.name)}</h4>
-          <p class="mt-1 text-xs text-violet-100/80">${habit.scheduledTime ? `Horario: ${escapeHtml(habit.scheduledTime)}` : 'Sem horario definido'}</p>
+          <h4 class="truncate text-sm font-black text-white">${escapeHtml(cleanText(habit.name))}</h4>
+          <p class="mt-1 text-xs text-violet-100/80">${habit.scheduledTime ? `Horário: ${escapeHtml(cleanText(habit.scheduledTime))}` : 'Sem horário definido'}</p>
         </div>
       </div>
     </article>
@@ -163,7 +179,7 @@ const renderTasks = (tasks, date) => {
 
   list.innerHTML = tasks.map((task) => {
     const statusClass = statusClasses[task.statusTone] ?? statusClasses.neutral;
-    const meta = [task.timeRange, task.goalTitle, task.identityName].filter(Boolean).join(' � ');
+    const meta = [cleanText(task.timeRange), cleanText(task.goalTitle), cleanText(task.identityName)].filter(Boolean).join(' - ');
 
     return `
       <article class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
@@ -173,10 +189,10 @@ const renderTasks = (tasks, date) => {
           </span>
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <h4 class="truncate text-sm font-black text-white">${escapeHtml(task.title)}</h4>
+              <h4 class="truncate text-sm font-black text-white">${escapeHtml(cleanText(task.title))}</h4>
               <div class="flex gap-1">
-                <span class="status-pill ${statusClass}">${escapeHtml(task.statusLabel)}</span>
-                <span class="status-pill status-pill-neutral">${escapeHtml(task.priorityLabel)}</span>
+                <span class="status-pill ${statusClass}">${escapeHtml(cleanText(task.statusLabel))}</span>
+                <span class="status-pill status-pill-neutral">${escapeHtml(cleanText(task.priorityLabel))}</span>
               </div>
             </div>
             ${meta ? `<p class="mt-1 text-xs text-slate-500">${escapeHtml(meta)}</p>` : ''}
@@ -222,7 +238,7 @@ const renderCheckIn = (checkIn, date) => {
         <span class="text-3xl leading-none" aria-hidden="true">${escapeHtml(checkIn.moodFace)}</span>
         <div class="min-w-0">
           <div class="text-xs font-semibold uppercase tracking-wide text-violet-100/80">Check-in registrado</div>
-          <div class="mt-1 text-lg font-black text-white">${escapeHtml(checkIn.totalScore)}/15 � ${escapeHtml(checkIn.moodLabel)}</div>
+          <div class="mt-1 text-lg font-black text-white">${escapeHtml(checkIn.totalScore)}/15 - ${escapeHtml(checkIn.moodLabel)}</div>
           ${checkIn.smallWin ? `<p class="mt-2 text-sm text-violet-50">${escapeHtml(checkIn.smallWin)}</p>` : ''}
           ${checkIn.mainDifficulty ? `<p class="mt-1 text-xs text-violet-100/80">${escapeHtml(checkIn.mainDifficulty)}</p>` : ''}
         </div>
@@ -240,7 +256,7 @@ const renderDay = (detail) => {
   dayPanel.dataset.selectedDate = date;
 
   setText('[data-calendar-day-title]', detail.dateLabel || 'Detalhes do dia');
-  setText('[data-calendar-day-subtitle]', detail.plannedCount > 0 ? 'Veja o que estava planejado e o que ja foi registrado.' : 'Nenhum habito de melhoria planejado para esta data.');
+  setText('[data-calendar-day-subtitle]', detail.plannedCount > 0 ? 'Veja o que estava planejado e o que já foi registrado.' : 'Nenhum hábito de melhoria planejado para esta data.');
   setText('[data-calendar-day-date]', date);
   setText('[data-calendar-day-planned]', detail.plannedCount);
   setText('[data-calendar-day-completed]', detail.completedCount);
@@ -269,7 +285,7 @@ const loadDay = async (date) => {
   });
 
   if (!response.ok) {
-    showMessage('Nao foi possivel carregar os detalhes do dia.', 'error');
+    showMessage('Não foi possível carregar os detalhes do dia.', 'error');
     return;
   }
 
@@ -304,11 +320,11 @@ const updateHabitStatus = async (habitId, date, status = 'Completed') => {
   const result = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    showMessage(result.error || 'Nao foi possivel atualizar o habito.', 'error');
+    showMessage(result.error || 'Não foi possível atualizar o hábito.', 'error');
     return;
   }
 
-  showMessage(result.message || 'Habito atualizado.');
+  showMessage(result.message || 'Hábito atualizado.');
   window.__calendarInstance?.refetchEvents();
   await loadDay(date);
 };
@@ -341,7 +357,7 @@ const updateTaskStatus = async (taskId, status = 'Completed') => {
   const result = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    showMessage(result.error || 'Nao foi possivel atualizar a tarefa.', 'error');
+    showMessage(result.error || 'Não foi possível atualizar a tarefa.', 'error');
     return;
   }
 
@@ -375,7 +391,6 @@ filterButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const isPressed = button.getAttribute('aria-pressed') !== 'false';
     button.setAttribute('aria-pressed', isPressed ? 'false' : 'true');
-    button.classList.toggle('opacity-60', isPressed);
     window.__calendarInstance?.refetchEvents();
   });
 });
@@ -399,11 +414,11 @@ if (calendarElement && window.FullCalendar) {
     },
     buttonText: {
       today: 'Hoje',
-      month: 'Mes',
+      month: 'Mês',
       week: 'Semana',
       list: 'Lista'
     },
-    noEventsContent: 'Nenhum item encontrado neste periodo.',
+    noEventsContent: 'Nenhum item encontrado neste período.',
     events: async (fetchInfo, successCallback, failureCallback) => {
       if (!eventsUrl) {
         successCallback([]);
@@ -449,7 +464,7 @@ if (calendarElement && window.FullCalendar) {
     }),
     eventDidMount: (info) => {
       const props = info.event.extendedProps;
-      const details = [props.typeLabel, props.statusLabel, props.priorityLabel, props.notes].filter(Boolean).join(' � ');
+      const details = [props.typeLabel, props.statusLabel, props.priorityLabel, props.notes].filter(Boolean).join(' - ');
       info.el.setAttribute('title', details || info.event.title);
     }
   });

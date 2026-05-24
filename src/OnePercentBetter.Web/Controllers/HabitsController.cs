@@ -189,5 +189,19 @@ public class HabitsController : Controller
         TempData["Info"] = "Hábito pulado hoje.";
         return RedirectToAction(nameof(Index));
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var deleted = await _habitService.DeleteAsync(User.GetRequiredUserId(), id);
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        TempData["Success"] = "Hábito removido.";
+        return RedirectToAction(nameof(Index));
+    }
 }
 

@@ -34,6 +34,8 @@ public class HabitListItemViewModel
 
     public HabitLogStatus? TodayStatus { get; set; }
 
+    public bool IsDueToday { get; set; }
+
     public string Color { get; set; } = "#22c55e";
 
     public string Icon { get; set; } = "repeat-2";

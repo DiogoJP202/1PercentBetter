@@ -46,6 +46,10 @@ public class Goal
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    public bool IsDeleted { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
+
     public ICollection<Habit> Habits { get; } = new List<Habit>();
 
     public ICollection<TaskItem> TaskItems { get; } = new List<TaskItem>();

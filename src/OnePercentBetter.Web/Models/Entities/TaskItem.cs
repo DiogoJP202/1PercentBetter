@@ -65,6 +65,10 @@ public class TaskItem
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    public bool IsDeleted { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
+
     public ICollection<TaskItemTag> TaskItemTags { get; } = new List<TaskItemTag>();
 
     public ICollection<Note> NotesLinks { get; } = new List<Note>();

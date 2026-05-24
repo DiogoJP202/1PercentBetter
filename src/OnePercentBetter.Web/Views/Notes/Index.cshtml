@@ -1,25 +1,7 @@
-@model IReadOnlyList<NoteListItemViewModel>
+﻿@model NoteListViewModel
 @{
     ViewData["Title"] = "Anotações";
-
-    var today = DateTime.Today;
-    var weekStart = today.AddDays(-6);
-    var totalNotes = Model.Count;
-    var notesThisWeek = Model.Count(item => item.Date.Date >= weekStart && item.Date.Date <= today);
-    var notesWithTags = Model.Count(item => !string.IsNullOrWhiteSpace(item.Tags));
-    var topTypeGroup = Model
-        .GroupBy(item => item.NoteType)
-        .OrderByDescending(group => group.Count())
-        .ThenBy(group => group.Key)
-        .FirstOrDefault();
-
-    var topTypeLabel = topTypeGroup is null
-        ? "Sem dados ainda"
-        : $"{topTypeGroup.Key.ToDisplayName()} ({topTypeGroup.Count()})";
-
-    var latestDateLabel = Model.Any()
-        ? Model.Max(item => item.Date).ToString("dd/MM/yyyy")
-        : "Nenhuma anotação";
+    var filters = Model.Filters;
 
     IReadOnlyList<string> ParseTags(string? rawTags)
     {
@@ -51,7 +33,7 @@
         <div data-tour-anchor="notes-overview">
             <p class="text-sm font-semibold text-violet-300">Anotações</p>
             <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Biblioteca de aprendizados</h1>
-            <p class="mt-2 max-w-2xl text-sm text-slate-400">Use as anotações para registrar sinais de progresso, dificuldades e ajustes do sistema antes que eles se percam na rotina.</p>
+            <p class="mt-2 max-w-2xl text-sm text-slate-400">Registre sinais de progresso, dificuldades e ajustes do seu sistema antes que se percam na rotina.</p>
         </div>
         <a class="btn-primary" asp-action="Create">
             <i data-lucide="plus" class="h-4 w-4"></i>
@@ -62,102 +44,238 @@
     <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Total de anotações</div>
-            <div class="mt-3 text-4xl font-black text-violet-300">@totalNotes</div>
-            <p class="mt-2 text-xs text-slate-500">Histórico acumulado no seu sistema.</p>
+            <div class="mt-3 text-4xl font-black text-violet-300">@Model.TotalCount</div>
+            <p class="mt-2 text-xs text-slate-500">Histórico geral de aprendizados.</p>
         </div>
         <div class="app-card p-5">
-            <div class="text-sm text-slate-400">Últimos 7 dias</div>
-            <div class="mt-3 text-4xl font-black text-emerald-300">@notesThisWeek</div>
-            <p class="mt-2 text-xs text-slate-500">Ritmo recente de registro.</p>
+            <div class="text-sm text-slate-400">@Model.MonthLabel</div>
+            <div class="mt-3 text-4xl font-black text-emerald-300">@Model.MonthCount</div>
+            <p class="mt-2 text-xs text-slate-500">Anotações registradas no mês.</p>
         </div>
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Com tags</div>
-            <div class="mt-3 text-4xl font-black text-white">@notesWithTags</div>
-            <p class="mt-2 text-xs text-slate-500">Facilita busca e revisão.</p>
+            <div class="mt-3 text-4xl font-black text-white">@Model.NotesWithTagsCount</div>
+            <p class="mt-2 text-xs text-slate-500">Facilita busca e revisão futura.</p>
         </div>
         <div class="app-card p-5">
-            <div class="text-sm text-slate-400">Tipo mais frequente</div>
-            <div class="mt-3 truncate text-xl font-black text-slate-100">@topTypeLabel</div>
-            <p class="mt-2 text-xs text-slate-500">Último registro: @latestDateLabel</p>
+            <div class="text-sm text-slate-400">Revisões</div>
+            <div class="mt-3 text-4xl font-black text-amber-300">@Model.ReviewsCount</div>
+            <p class="mt-2 text-xs text-slate-500">Notas semanais e mensais.</p>
         </div>
     </section>
 
-    <section class="app-card p-5" data-tour-anchor="notes-reviews">
-        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-                <h2 class="text-xl font-black text-white">Revisões semanais e mensais</h2>
-                <p class="mt-2 text-sm text-slate-400">
-                    Reserve um momento para escrever uma nota de revisão semanal ou mensal.
-                    Esse ritual transforma observação em ajuste prático no sistema.
-                </p>
-            </div>
-            <a class="btn-secondary" asp-action="Create">
-                <i data-lucide="calendar-clock" class="h-4 w-4"></i>
-                Nova revisão
-            </a>
-        </div>
-    </section>
-
-    @if (!Model.Any())
-    {
-        <section class="app-card p-8 text-center">
-            <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-violet-300/20 bg-violet-300/10 text-violet-300">
-                <i data-lucide="notebook-pen" class="h-7 w-7"></i>
-            </div>
-            <h2 class="mt-5 text-2xl font-black text-white">Você ainda não registrou anotações.</h2>
-            <p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-400">Comece com uma nota curta sobre o que funcionou hoje. Em poucos dias, você vai ter material suficiente para ajustar hábitos com mais clareza.</p>
-            <a class="btn-primary mt-5" asp-action="Create">
-                <i data-lucide="plus" class="h-4 w-4"></i>
-                Criar primeira anotação
-            </a>
-        </section>
-    }
-    else
-    {
-        <section class="grid gap-4 lg:grid-cols-2">
-            @foreach (var item in Model)
-            {
-                var tags = ParseTags(item.Tags);
-
-                <article class="app-card p-5">
-                    <div class="flex flex-col gap-4 md:grid md:grid-cols-[1fr_auto] md:items-start">
-                        <div class="min-w-0">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="status-pill @TypePillClass(item.NoteType)">@item.NoteType.ToDisplayName()</span>
-                                <span class="text-xs font-semibold text-slate-500">Data: @item.Date.ToString("dd/MM/yyyy")</span>
-                            </div>
-                            <h2 class="mt-3 truncate text-xl font-black text-white">@item.Title</h2>
-                        </div>
-                        <a class="btn-secondary" asp-action="Edit" asp-route-id="@item.Id">
-                            <i data-lucide="pencil" class="h-4 w-4"></i>
-                            Editar
-                        </a>
+    <div class="grid gap-6 xl:grid-cols-[1fr_20rem] xl:items-start">
+        <div class="space-y-6">
+            <section class="app-card p-5" data-tour-anchor="notes-reviews">
+                <form method="get" class="grid gap-3 lg:grid-cols-7">
+                    <div class="lg:col-span-2">
+                        <label class="form-label" for="Search">Busca</label>
+                        <input class="form-input" id="Search" name="Search" value="@filters.Search" placeholder="Título, conteúdo ou tag" />
                     </div>
-
-                    <p class="mt-4 text-sm leading-6 text-slate-300">@item.ContentPreview</p>
-
-                    <div class="mt-5 grid gap-3 md:grid-cols-2">
-                        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-                            <div class="text-xs text-slate-500">Classificação</div>
-                            <div class="mt-1 text-sm font-bold text-slate-200">@item.NoteType.ToDisplayName()</div>
-                        </div>
-                        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-                            <div class="text-xs text-slate-500">Tags registradas</div>
-                            <div class="mt-1 text-sm font-bold text-slate-200">@tags.Count</div>
-                        </div>
+                    <div>
+                        <label class="form-label" for="View">Visão</label>
+                        <select class="form-select" id="View" name="View">
+                            <option value="all" selected="@(filters.View == "all")">Todas</option>
+                            <option value="today" selected="@(filters.View == "today")">Hoje</option>
+                            <option value="week" selected="@(filters.View == "week")">Esta semana</option>
+                            <option value="month" selected="@(filters.View == "month")">Mês</option>
+                            <option value="reviews" selected="@(filters.View == "reviews")">Revisões</option>
+                        </select>
                     </div>
-
-                    @if (tags.Any())
-                    {
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            @foreach (var tag in tags.Take(6))
+                    <div>
+                        <label class="form-label" for="Month">Mês</label>
+                        <input class="form-input" id="Month" name="Month" type="month" value="@filters.Month" />
+                    </div>
+                    <div>
+                        <label class="form-label" for="NoteType">Tipo</label>
+                        <select class="form-select" id="NoteType" name="NoteType">
+                            <option value="">Todos</option>
+                            @foreach (var noteType in Enum.GetValues<NoteType>())
                             {
-                                <span class="status-pill status-pill-neutral">@tag</span>
+                                <option value="@((int)noteType)" selected="@(filters.NoteType == noteType)">@noteType.ToDisplayName()</option>
                             }
-                        </div>
-                    }
-                </article>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="Tag">Tag</label>
+                        <select class="form-select" id="Tag" name="Tag">
+                            <option value="">Todas</option>
+                            @foreach (var tag in filters.Tags)
+                            {
+                                <option value="@tag.Value" selected="@(filters.Tag == tag.Value)">@tag.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="GoalId">Objetivo</label>
+                        <select class="form-select" id="GoalId" name="GoalId">
+                            <option value="">Todos</option>
+                            @foreach (var goal in filters.Goals)
+                            {
+                                <option value="@goal.Value" selected="@(filters.GoalId?.ToString() == goal.Value)">@goal.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="IdentityId">Identidade</label>
+                        <select class="form-select" id="IdentityId" name="IdentityId">
+                            <option value="">Todas</option>
+                            @foreach (var identity in filters.Identities)
+                            {
+                                <option value="@identity.Value" selected="@(filters.IdentityId?.ToString() == identity.Value)">@identity.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="HabitId">Hábito</label>
+                        <select class="form-select" id="HabitId" name="HabitId">
+                            <option value="">Todos</option>
+                            @foreach (var habit in filters.Habits)
+                            {
+                                <option value="@habit.Value" selected="@(filters.HabitId?.ToString() == habit.Value)">@habit.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="TaskItemId">Tarefa</label>
+                        <select class="form-select" id="TaskItemId" name="TaskItemId">
+                            <option value="">Todas</option>
+                            @foreach (var taskItem in filters.TaskItems)
+                            {
+                                <option value="@taskItem.Value" selected="@(filters.TaskItemId?.ToString() == taskItem.Value)">@taskItem.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="flex items-end gap-2 lg:col-span-2">
+                        <button class="btn-primary w-full" style="min-width: 150px;" type="submit">
+                            <i data-lucide="filter" class="h-4 w-4"></i>
+                            Aplicar filtros
+                        </button>
+                        <a class="btn-secondary" asp-action="Index">Limpar</a>
+                    </div>
+                </form>
+            </section>
+
+            @if (!Model.Items.Any())
+            {
+                <section class="app-card p-8 text-center">
+                    <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-violet-300/20 bg-violet-300/10 text-violet-300">
+                        <i data-lucide="notebook-pen" class="h-7 w-7"></i>
+                    </div>
+                    <h2 class="mt-5 text-2xl font-black text-white">Nenhuma anotação encontrada.</h2>
+                    <p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-400">Ajuste os filtros ou crie uma nova anotação para registrar seu próximo aprendizado.</p>
+                    <a class="btn-primary mt-5" asp-action="Create">
+                        <i data-lucide="plus" class="h-4 w-4"></i>
+                        Criar anotação
+                    </a>
+                </section>
             }
-        </section>
-    }
+            else
+            {
+                <section class="grid gap-4 lg:grid-cols-2">
+                    @foreach (var item in Model.Items)
+                    {
+                        var tags = ParseTags(item.Tags);
+
+                        <article class="app-card p-5">
+                            <div class="flex flex-col gap-4 md:grid md:grid-cols-[1fr_auto] md:items-start">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="status-pill @TypePillClass(item.NoteType)">@item.NoteType.ToDisplayName()</span>
+                                        <span class="text-xs font-semibold text-slate-500">Data: @item.Date.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                    <h2 class="mt-3 truncate text-xl font-black text-white">@item.Title</h2>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <a class="btn-secondary" asp-action="Details" asp-route-id="@item.Id">
+                                        <i data-lucide="eye" class="h-4 w-4"></i>
+                                        Detalhes
+                                    </a>
+                                    <a class="btn-secondary" asp-action="Edit" asp-route-id="@item.Id">
+                                        <i data-lucide="pencil" class="h-4 w-4"></i>
+                                        Editar
+                                    </a>
+                                    <form method="post"
+                                          asp-action="Delete"
+                                          asp-route-id="@item.Id"
+                                          data-confirm
+                                          data-confirm-tone="danger"
+                                          data-confirm-title="Excluir anotação?"
+                                          data-confirm-text="A anotação será removida da lista, mas ficará salva como exclusão lógica."
+                                          data-confirm-button="Excluir anotação">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn-danger" type="submit">
+                                            <i data-lucide="trash-2" class="h-4 w-4"></i>
+                                            Excluir
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <p class="mt-4 text-sm leading-6 text-slate-300">@item.ContentPreview</p>
+
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                @if (!string.IsNullOrWhiteSpace(item.IdentityName))
+                                {
+                                    <span class="status-pill status-pill-info"><i data-lucide="user-round-check" class="h-3.5 w-3.5"></i>@item.IdentityName</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(item.GoalTitle))
+                                {
+                                    <span class="status-pill status-pill-warning"><i data-lucide="target" class="h-3.5 w-3.5"></i>@item.GoalTitle</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(item.HabitTitle))
+                                {
+                                    <span class="status-pill status-pill-success"><i data-lucide="repeat-2" class="h-3.5 w-3.5"></i>@item.HabitTitle</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(item.TaskTitle))
+                                {
+                                    <span class="status-pill status-pill-neutral"><i data-lucide="list-checks" class="h-3.5 w-3.5"></i>@item.TaskTitle</span>
+                                }
+                            </div>
+
+                            @if (tags.Any())
+                            {
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    @foreach (var tag in tags.Take(8))
+                                    {
+                                        <span class="status-pill status-pill-neutral">#@tag</span>
+                                    }
+                                </div>
+                            }
+
+                            <p class="mt-4 text-xs text-slate-500">Última edição em @item.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                        </article>
+                    }
+                </section>
+            }
+        </div>
+
+        <aside class="xl:sticky xl:top-24">
+            <section class="app-card p-5">
+                <div class="flex items-center justify-between gap-2">
+                    <h2 class="text-lg font-black text-white">Anotações do mês</h2>
+                    <span class="status-pill status-pill-neutral">@Model.MonthLabel</span>
+                </div>
+
+                @if (!Model.MonthItems.Any())
+                {
+                    <p class="mt-3 text-sm text-slate-400">Nenhuma anotação registrada neste mês ainda.</p>
+                }
+                else
+                {
+                    <ul class="mt-3 space-y-2">
+                        @foreach (var note in Model.MonthItems)
+                        {
+                            <li class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                                <a asp-action="Details" asp-route-id="@note.Id" class="flex items-center justify-between gap-3 hover:text-white">
+                                    <span class="min-w-0 truncate text-sm font-semibold text-slate-200">@note.Title</span>
+                                    <span class="text-xs text-slate-500">@note.Date.ToString("dd/MM")</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                }
+            </section>
+        </aside>
+    </div>
 </div>

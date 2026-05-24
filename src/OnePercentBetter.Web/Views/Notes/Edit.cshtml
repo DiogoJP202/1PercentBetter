@@ -1,19 +1,28 @@
 @model NoteFormViewModel
 @{
-    ViewData["Title"] = "Editar anotacao";
+    ViewData["Title"] = "Editar anotação";
 }
 
 <div class="mx-auto max-w-4xl space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-            <p class="text-sm font-semibold text-violet-300">Editar anotacao</p>
+            <p class="text-sm font-semibold text-violet-300">Editar anotação</p>
             <h1 class="mt-1 text-3xl font-black text-white">Refine sem perder contexto</h1>
-            <p class="mt-2 max-w-2xl text-sm text-slate-400">Ajuste texto, tipo e vinculos para facilitar revisoes futuras e manter seus registros mais uteis para decisoes.</p>
+            <p class="mt-2 max-w-2xl text-sm text-slate-400">Ajuste texto, tipo e vínculos para facilitar revisões futuras e transformar observações em melhorias práticas.</p>
         </div>
-        <a class="btn-secondary" asp-action="Index">
-            <i data-lucide="arrow-left" class="h-4 w-4"></i>
-            Voltar
-        </a>
+        <div class="flex flex-wrap gap-2">
+            @if (Model.Id.HasValue)
+            {
+                <a class="btn-secondary" asp-action="Details" asp-route-id="@Model.Id.Value">
+                    <i data-lucide="eye" class="h-4 w-4"></i>
+                    Ver detalhes
+                </a>
+            }
+            <a class="btn-secondary" asp-action="Index">
+                <i data-lucide="arrow-left" class="h-4 w-4"></i>
+                Voltar
+            </a>
+        </div>
     </div>
 
     <partial name="_Form" model="Model" />

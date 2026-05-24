@@ -28,14 +28,14 @@
     </section>
 
     <section class="rounded-2xl border border-sky-300/20 bg-sky-300/10 p-4 text-sm text-sky-100">
-        Habito e comportamento recorrente. Para acao pontual com comeco e fim, use
+        Hábito é comportamento recorrente. Para ação pontual, com começo e fim, use
         <a class="font-bold text-sky-200 underline underline-offset-4" asp-controller="Tasks" asp-action="Index">Tarefas</a>.
     </section>
 
     <div class="grid gap-4">
         @foreach (var item in Model)
         {
-            var todayPillClass = item.TodayStatus switch
+            var todayPillClass = !item.IsDueToday ? "status-pill-neutral" : item.TodayStatus switch
             {
                 HabitLogStatus.Completed => "status-pill-success",
                 HabitLogStatus.Failed => "status-pill-danger",
@@ -43,7 +43,7 @@
                 HabitLogStatus.Partial => "status-pill-info",
                 _ => "status-pill-warning"
             };
-            var todayIcon = item.TodayStatus switch
+            var todayIcon = !item.IsDueToday ? "calendar-minus" : item.TodayStatus switch
             {
                 HabitLogStatus.Completed => "check",
                 HabitLogStatus.Failed => "x",
@@ -51,6 +51,9 @@
                 HabitLogStatus.Partial => "circle-dashed",
                 _ => "clock"
             };
+            var todayStatusLabel = item.IsDueToday
+                ? item.TodayStatus?.ToDisplayName() ?? "Pendente"
+                : "Não planejado hoje";
             var statusPillClass = item.Status switch
             {
                 ItemStatus.Active => "status-pill-success",
@@ -100,26 +103,42 @@
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="status-pill @todayPillClass"><i data-lucide="@todayIcon"></i>Hoje: @(item.TodayStatus?.ToDisplayName() ?? "Pendente")</span>
+                        <span class="status-pill @todayPillClass"><i data-lucide="@todayIcon"></i>Hoje: @todayStatusLabel</span>
                         <a class="btn-secondary" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
-                        <form asp-action="Complete" asp-route-id="@item.Id" method="post">
-                            <button class="btn-primary" type="submit">Concluir</button>
-                        </form>
-                        <form asp-action="Fail" asp-route-id="@item.Id" method="post"
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post"
                               data-confirm
                               data-confirm-tone="danger"
-                              data-confirm-title="Registrar falha?"
-                              data-confirm-text="Isso marcará este hábito como falhou hoje."
-                              data-confirm-button="Registrar falha">
-                            <button class="btn-danger" type="submit">Falhei</button>
+                              data-confirm-title="Excluir hábito?"
+                              data-confirm-text="O hábito será removido da lista ativa, sem apagar dados já registrados."
+                              data-confirm-button="Excluir hábito">
+                            @Html.AntiForgeryToken()
+                            <button class="btn-danger" type="submit">Excluir</button>
                         </form>
-                        <form asp-action="Skip" asp-route-id="@item.Id" method="post"
-                              data-confirm
-                              data-confirm-title="Pular hábito hoje?"
-                              data-confirm-text="Isso registrará o hábito como pulado no dia atual."
-                              data-confirm-button="Pular hoje">
-                            <button class="btn-secondary" type="submit">Pular</button>
-                        </form>
+                        @if (item.IsDueToday)
+                        {
+                            <form asp-action="Complete" asp-route-id="@item.Id" method="post">
+                                <button class="btn-primary" type="submit">Concluir</button>
+                            </form>
+                            <form asp-action="Fail" asp-route-id="@item.Id" method="post"
+                                  data-confirm
+                                  data-confirm-tone="danger"
+                                  data-confirm-title="Registrar falha?"
+                                  data-confirm-text="Isso marcará este hábito como falhou hoje."
+                                  data-confirm-button="Registrar falha">
+                                <button class="btn-danger" type="submit">Falhei</button>
+                            </form>
+                            <form asp-action="Skip" asp-route-id="@item.Id" method="post"
+                                  data-confirm
+                                  data-confirm-title="Pular hábito hoje?"
+                                  data-confirm-text="Isso registrará o hábito como pulado no dia atual."
+                                  data-confirm-button="Pular hoje">
+                                <button class="btn-secondary" type="submit">Pular</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="status-pill status-pill-neutral">Sem ação hoje</span>
+                        }
                     </div>
                 </div>
             </article>

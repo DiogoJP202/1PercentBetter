@@ -45,6 +45,9 @@ public class DashboardService
                     TodayStatus = todayLog?.Status
                 };
             })
+            .OrderBy(habit => habit.SuggestedTime.HasValue ? 0 : 1)
+            .ThenBy(habit => habit.SuggestedTime ?? TimeSpan.MaxValue)
+            .ThenBy(habit => habit.Title, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
 
         var dueToday = todayHabits.Count;
@@ -270,7 +273,7 @@ public class DashboardService
     {
         if (habits.Count == 0)
         {
-            return ["Crie o primeiro habito para o dashboard sair do zero."];
+            return ["Crie o primeiro hábito para o dashboard sair do zero."];
         }
 
         var alerts = new List<string>();
@@ -286,7 +289,7 @@ public class DashboardService
             var lastTwoLogs = recentLogs.Take(2).ToList();
             if (lastTwoLogs.Count == 2 && lastTwoLogs.All(log => log.Status == HabitLogStatus.Failed))
             {
-                alerts.Add($"O habito \"{habit.Title}\" falhou nas ultimas 2 marcacoes. Reduza a versao de 2 minutos hoje.");
+                alerts.Add($"O hábito \"{habit.Title}\" falhou nas últimas 2 marcações. Reduza a versão de 2 minutos hoje.");
                 continue;
             }
 
@@ -298,7 +301,7 @@ public class DashboardService
 
                 if (completionRate < 50)
                 {
-                    alerts.Add($"O habito \"{habit.Title}\" esta com {completionRate}% de conclusao nos ultimos 7 dias.");
+                    alerts.Add($"O hábito \"{habit.Title}\" está com {completionRate}% de conclusão nos últimos 7 dias.");
                 }
             }
 
@@ -320,30 +323,6 @@ public class DashboardService
 
     private static bool IsDueOn(Habit habit, DateTime date)
     {
-        if (date.Date < habit.CreatedAt.Date)
-        {
-            return false;
-        }
-
-        return habit.FrequencyType switch
-        {
-            HabitFrequencyType.Daily => true,
-            HabitFrequencyType.Weekly => date.DayOfWeek == habit.CreatedAt.DayOfWeek,
-            HabitFrequencyType.Monthly => date.Day == habit.CreatedAt.Day,
-            HabitFrequencyType.SpecificDays => IsSpecificDayDue(habit.DaysOfWeek, date.DayOfWeek),
-            _ => true
-        };
-    }
-
-    private static bool IsSpecificDayDue(string? daysOfWeek, DayOfWeek dayOfWeek)
-    {
-        if (string.IsNullOrWhiteSpace(daysOfWeek))
-        {
-            return false;
-        }
-
-        return daysOfWeek
-            .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-            .Any(day => Enum.TryParse<DayOfWeek>(day, true, out var parsed) && parsed == dayOfWeek);
+        return HabitScheduleRules.IsDueOnDate(habit.FrequencyType, habit.CreatedAt, habit.DaysOfWeek, date);
     }
 }

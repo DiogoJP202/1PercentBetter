@@ -73,8 +73,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<UserIdentity>(entity =>
         {
             entity.ToTable("Identities");
-            entity.HasIndex(identity => new { identity.UserId, identity.Status });
-            entity.HasIndex(identity => new { identity.UserId, identity.Name });
+            entity.HasIndex(identity => new { identity.UserId, identity.IsDeleted, identity.Status });
+            entity.HasIndex(identity => new { identity.UserId, identity.IsDeleted, identity.Name });
+            entity.HasQueryFilter(identity => !identity.IsDeleted);
 
             entity.HasOne(identity => identity.User)
                 .WithMany(user => user.UserIdentities)
@@ -89,9 +90,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<Goal>(entity =>
         {
-            entity.HasIndex(goal => new { goal.UserId, goal.Status });
+            entity.HasIndex(goal => new { goal.UserId, goal.IsDeleted, goal.Status });
             entity.Property(goal => goal.StartDate).HasColumnType("date");
             entity.Property(goal => goal.TargetDate).HasColumnType("date");
+            entity.HasQueryFilter(goal => !goal.IsDeleted);
 
             entity.HasOne(goal => goal.User)
                 .WithMany(user => user.Goals)
@@ -111,9 +113,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<Habit>(entity =>
         {
-            entity.HasIndex(habit => new { habit.UserId, habit.Status });
+            entity.HasIndex(habit => new { habit.UserId, habit.IsDeleted, habit.Status });
             entity.Property(habit => habit.SuggestedTime).HasColumnType("time");
             entity.Property(habit => habit.EndTime).HasColumnType("time");
+            entity.HasQueryFilter(habit => !habit.IsDeleted);
 
             entity.HasOne(habit => habit.User)
                 .WithMany(user => user.Habits)
@@ -153,14 +156,15 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<TaskItem>(entity =>
         {
-            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.Status });
-            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.TaskDate });
-            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.DueDate });
-            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.Priority });
+            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.IsDeleted, taskItem.Status });
+            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.IsDeleted, taskItem.TaskDate });
+            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.IsDeleted, taskItem.DueDate });
+            entity.HasIndex(taskItem => new { taskItem.UserId, taskItem.IsDeleted, taskItem.Priority });
             entity.Property(taskItem => taskItem.TaskDate).HasColumnType("date");
             entity.Property(taskItem => taskItem.DueDate).HasColumnType("date");
             entity.Property(taskItem => taskItem.StartTime).HasColumnType("time");
             entity.Property(taskItem => taskItem.EndTime).HasColumnType("time");
+            entity.HasQueryFilter(taskItem => !taskItem.IsDeleted);
 
             entity.HasOne(taskItem => taskItem.User)
                 .WithMany(user => user.TaskItems)
@@ -201,6 +205,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<TaskItemTag>(entity =>
         {
             entity.HasKey(taskItemTag => new { taskItemTag.TaskItemId, taskItemTag.TaskTagId });
+            entity.HasQueryFilter(taskItemTag => !taskItemTag.TaskItem!.IsDeleted);
 
             entity.HasOne(taskItemTag => taskItemTag.TaskItem)
                 .WithMany(taskItem => taskItem.TaskItemTags)
@@ -238,6 +243,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         {
             entity.Property(log => log.Date).HasColumnType("date");
             entity.HasIndex(log => new { log.UserId, log.HabitId, log.Date }).IsUnique();
+            entity.HasQueryFilter(log => !log.Habit!.IsDeleted);
 
             entity.HasOne(log => log.User)
                 .WithMany()
@@ -264,7 +270,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Note>(entity =>
         {
             entity.Property(note => note.Date).HasColumnType("date");
-            entity.HasIndex(note => new { note.UserId, note.Date });
+            entity.HasIndex(note => new { note.UserId, note.IsDeleted, note.Date });
+            entity.HasQueryFilter(note => !note.IsDeleted);
 
             entity.HasOne(note => note.User)
                 .WithMany()

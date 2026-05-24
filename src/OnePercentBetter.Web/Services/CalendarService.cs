@@ -540,20 +540,7 @@ public class CalendarService
 
     private static bool AppliesOn(CalendarHabitSource habit, DateTime date)
     {
-        var targetDate = date.Date;
-        if (targetDate < habit.CreatedAt.Date)
-        {
-            return false;
-        }
-
-        return habit.FrequencyType switch
-        {
-            HabitFrequencyType.Daily => true,
-            HabitFrequencyType.SpecificDays => ParseDaysOfWeek(habit.DaysOfWeek).Contains(targetDate.DayOfWeek),
-            HabitFrequencyType.Weekly => targetDate.DayOfWeek == habit.CreatedAt.DayOfWeek,
-            HabitFrequencyType.Monthly => targetDate.Day == Math.Min(habit.CreatedAt.Day, DateTime.DaysInMonth(targetDate.Year, targetDate.Month)),
-            _ => false
-        };
+        return HabitScheduleRules.IsDueOnDate(habit.FrequencyType, habit.CreatedAt, habit.DaysOfWeek, date);
     }
 
     private static bool SimpleHabitAppliesOn(CalendarSimpleHabitSource simpleHabit, DateTime date)
@@ -601,21 +588,6 @@ public class CalendarService
         {
             yield return date;
         }
-    }
-
-    private static IReadOnlySet<DayOfWeek> ParseDaysOfWeek(string? daysOfWeek)
-    {
-        if (string.IsNullOrWhiteSpace(daysOfWeek))
-        {
-            return new HashSet<DayOfWeek>();
-        }
-
-        return daysOfWeek
-            .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-            .Select(day => Enum.TryParse<DayOfWeek>(day, true, out var parsed) ? parsed : (DayOfWeek?)null)
-            .Where(day => day.HasValue)
-            .Select(day => day!.Value)
-            .ToHashSet();
     }
 
     private static bool IncludesType(IReadOnlySet<string> selectedTypes, string type)

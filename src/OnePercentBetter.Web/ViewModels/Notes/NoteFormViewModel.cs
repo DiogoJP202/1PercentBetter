@@ -32,6 +32,10 @@ public class NoteFormViewModel
     [DataType(DataType.Date)]
     public DateTime Date { get; set; } = DateTime.Today;
 
+    public DateTime? CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
     public IReadOnlyList<SelectOptionViewModel> Goals { get; set; } = [];
 
     public IReadOnlyList<SelectOptionViewModel> Identities { get; set; } = [];

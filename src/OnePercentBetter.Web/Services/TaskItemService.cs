@@ -397,14 +397,17 @@ public class TaskItemService
     public async Task<bool> DeleteAsync(string userId, int id)
     {
         var taskItem = await _dbContext.TaskItems
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(item => item.UserId == userId && item.Id == id);
 
-        if (taskItem is null)
+        if (taskItem is null || taskItem.IsDeleted)
         {
             return false;
         }
 
-        _dbContext.TaskItems.Remove(taskItem);
+        taskItem.IsDeleted = true;
+        taskItem.DeletedAt = DateTime.UtcNow;
+        taskItem.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
         return true;
     }

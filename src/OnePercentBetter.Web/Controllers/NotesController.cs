@@ -16,9 +16,17 @@ public class NotesController : Controller
         _noteService = noteService;
     }
 
-    public async Task<IActionResult> Index()
+    [HttpGet]
+    public async Task<IActionResult> Index([FromQuery] NoteFiltersViewModel filters)
     {
-        return View(await _noteService.GetListAsync(User.GetRequiredUserId()));
+        return View(await _noteService.GetListAsync(User.GetRequiredUserId(), filters));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        var note = await _noteService.GetDetailsAsync(User.GetRequiredUserId(), id);
+        return note is null ? NotFound() : View(note);
     }
 
     [HttpGet]
@@ -34,11 +42,7 @@ public class NotesController : Controller
         var userId = User.GetRequiredUserId();
         if (!ModelState.IsValid)
         {
-            var form = await _noteService.CreateFormAsync(userId);
-            viewModel.Identities = form.Identities;
-            viewModel.Goals = form.Goals;
-            viewModel.Habits = form.Habits;
-            viewModel.TaskItems = form.TaskItems;
+            await PopulateFormOptionsAsync(userId, viewModel);
             return View(viewModel);
         }
 
@@ -49,18 +53,14 @@ public class NotesController : Controller
 
         if (!ModelState.IsValid)
         {
-            var form = await _noteService.CreateFormAsync(userId);
-            viewModel.Identities = form.Identities;
-            viewModel.Goals = form.Goals;
-            viewModel.Habits = form.Habits;
-            viewModel.TaskItems = form.TaskItems;
+            await PopulateFormOptionsAsync(userId, viewModel);
             return View(viewModel);
         }
 
-        await _noteService.CreateAsync(userId, viewModel);
-        TempData["Success"] = "Anotacao criada com sucesso.";
+        var noteId = await _noteService.CreateAsync(userId, viewModel);
+        TempData["Success"] = "Anotação criada com sucesso.";
 
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Details), new { id = noteId });
     }
 
     [HttpGet]
@@ -79,11 +79,7 @@ public class NotesController : Controller
 
         if (!ModelState.IsValid)
         {
-            var form = await _noteService.CreateFormAsync(userId);
-            viewModel.Identities = form.Identities;
-            viewModel.Goals = form.Goals;
-            viewModel.Habits = form.Habits;
-            viewModel.TaskItems = form.TaskItems;
+            await PopulateFormOptionsAsync(userId, viewModel);
             return View(viewModel);
         }
 
@@ -94,11 +90,7 @@ public class NotesController : Controller
 
         if (!ModelState.IsValid)
         {
-            var form = await _noteService.CreateFormAsync(userId);
-            viewModel.Identities = form.Identities;
-            viewModel.Goals = form.Goals;
-            viewModel.Habits = form.Habits;
-            viewModel.TaskItems = form.TaskItems;
+            await PopulateFormOptionsAsync(userId, viewModel);
             return View(viewModel);
         }
 
@@ -108,7 +100,30 @@ public class NotesController : Controller
             return NotFound();
         }
 
-        TempData["Success"] = "Anotacao atualizada com sucesso.";
+        TempData["Success"] = "Anotação atualizada com sucesso.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var deleted = await _noteService.DeleteAsync(User.GetRequiredUserId(), id);
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        TempData["Success"] = "Anotação removida.";
         return RedirectToAction(nameof(Index));
+    }
+
+    private async Task PopulateFormOptionsAsync(string userId, NoteFormViewModel viewModel)
+    {
+        var form = await _noteService.CreateFormAsync(userId);
+        viewModel.Identities = form.Identities;
+        viewModel.Goals = form.Goals;
+        viewModel.Habits = form.Habits;
+        viewModel.TaskItems = form.TaskItems;
     }
 }

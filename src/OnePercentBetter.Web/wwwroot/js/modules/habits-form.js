@@ -92,13 +92,34 @@ if (form) {
     }
 
     const isSpecificDays = frequencySelect.value === '2';
-    daysPanel.classList.toggle('hidden', !isSpecificDays);
+    const isWeekly = frequencySelect.value === '3';
+    const shouldShowDays = isSpecificDays || isWeekly;
+    daysPanel.classList.toggle('hidden', !shouldShowDays);
 
-    if (!isSpecificDays) {
+    if (!shouldShowDays) {
       daysPanel.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
         checkbox.checked = false;
       });
     }
+
+    if (isWeekly) {
+      const checked = [...daysPanel.querySelectorAll('input[type="checkbox"]:checked')];
+      checked.slice(1).forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+    }
+  };
+
+  const enforceWeeklySingleDay = (targetCheckbox) => {
+    if (!frequencySelect || frequencySelect.value !== '3' || !daysPanel || !targetCheckbox?.checked) {
+      return;
+    }
+
+    daysPanel.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+      if (checkbox !== targetCheckbox) {
+        checkbox.checked = false;
+      }
+    });
   };
 
   const syncPreview = () => {
@@ -440,6 +461,10 @@ if (form) {
   [titleInput, triggerInput, twoMinuteInput, stackSelect].forEach((field) => {
     field?.addEventListener('input', syncPreview);
     field?.addEventListener('change', syncPreview);
+  });
+
+  daysPanel?.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+    checkbox.addEventListener('change', () => enforceWeeklySingleDay(checkbox));
   });
 
   colorInput?.addEventListener('input', () => syncColor(colorInput.value));

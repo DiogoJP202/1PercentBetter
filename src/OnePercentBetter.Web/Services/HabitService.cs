@@ -56,6 +56,8 @@ public class HabitService
                 StackedAfterSimpleHabitTime = habit.StackedAfterSimpleHabit != null ? habit.StackedAfterSimpleHabit.ScheduledTime : null,
                 habit.Status,
                 habit.FrequencyType,
+                habit.DaysOfWeek,
+                habit.CreatedAt,
                 habit.SuggestedTime,
                 habit.EndTime,
                 TodayStatus = habit.Logs
@@ -68,29 +70,43 @@ public class HabitService
             .ToListAsync();
 
         return habits
-            .Select(habit => new HabitListItemViewModel
+            .Select(habit =>
             {
-                Id = habit.Id,
-                Title = habit.Title,
-                TwoMinuteVersion = habit.TwoMinuteVersion,
-                Trigger = habit.Trigger,
-                IdentityName = habit.IdentityName,
-                GoalTitle = habit.GoalTitle,
-                CategoryName = habit.CategoryName,
-                LocationName = habit.LocationName,
-                StackedAfterHabitTitle = habit.StackedAfterHabitTitle,
-                StackedAfterText = habit.StackedAfterHabitTitle
-                    ?? (habit.StackedAfterSimpleHabitName is not null
-                        ? SimpleHabitService.BuildLabel(habit.StackedAfterSimpleHabitName, habit.StackedAfterSimpleHabitTime)
-                        : null),
-                Status = habit.Status,
-                FrequencyType = habit.FrequencyType,
-                SuggestedTime = habit.SuggestedTime,
-                EndTime = habit.EndTime,
-                TodayStatus = habit.TodayStatus,
-                Color = habit.Color,
-                Icon = habit.Icon
+                var nextDueDate = HabitScheduleRules.GetNextDueDate(habit.FrequencyType, habit.CreatedAt, habit.DaysOfWeek, today);
+                return new
+                {
+                    NextDueDate = nextDueDate,
+                    Item = new HabitListItemViewModel
+                    {
+                        Id = habit.Id,
+                        Title = habit.Title,
+                        TwoMinuteVersion = habit.TwoMinuteVersion,
+                        Trigger = habit.Trigger,
+                        IdentityName = habit.IdentityName,
+                        GoalTitle = habit.GoalTitle,
+                        CategoryName = habit.CategoryName,
+                        LocationName = habit.LocationName,
+                        StackedAfterHabitTitle = habit.StackedAfterHabitTitle,
+                        StackedAfterText = habit.StackedAfterHabitTitle
+                            ?? (habit.StackedAfterSimpleHabitName is not null
+                                ? SimpleHabitService.BuildLabel(habit.StackedAfterSimpleHabitName, habit.StackedAfterSimpleHabitTime)
+                                : null),
+                        Status = habit.Status,
+                        FrequencyType = habit.FrequencyType,
+                        SuggestedTime = habit.SuggestedTime,
+                        EndTime = habit.EndTime,
+                        TodayStatus = habit.TodayStatus,
+                        IsDueToday = HabitScheduleRules.IsDueOnDate(habit.FrequencyType, habit.CreatedAt, habit.DaysOfWeek, today),
+                        Color = habit.Color,
+                        Icon = habit.Icon
+                    }
+                };
             })
+            .OrderBy(item => item.Item.SuggestedTime.HasValue ? 0 : 1)
+            .ThenBy(item => item.Item.SuggestedTime ?? TimeSpan.MaxValue)
+            .ThenBy(item => item.NextDueDate ?? DateTime.MaxValue)
+            .ThenBy(item => item.Item.Title, StringComparer.CurrentCultureIgnoreCase)
+            .Select(item => item.Item)
             .ToList();
     }
 
@@ -110,6 +126,12 @@ public class HabitService
             return null;
         }
 
+        var selectedDays = ParseDaysOfWeek(habit.DaysOfWeek);
+        if (habit.FrequencyType == HabitFrequencyType.Weekly && selectedDays.Count == 0)
+        {
+            selectedDays = [habit.CreatedAt.DayOfWeek];
+        }
+
         return await PopulateOptionsAsync(new HabitFormViewModel
         {
             Id = habit.Id,
@@ -124,7 +146,7 @@ public class HabitService
             StackBaseKey = BuildStackBaseKey(habit.StackedAfterHabitId, habit.StackedAfterSimpleHabitId),
             FrequencyType = habit.FrequencyType,
             DaysOfWeek = habit.DaysOfWeek,
-            SelectedDaysOfWeek = ParseDaysOfWeek(habit.DaysOfWeek),
+            SelectedDaysOfWeek = selectedDays,
             SuggestedTime = habit.SuggestedTime,
             EndTime = habit.EndTime,
             Difficulty = habit.Difficulty,
@@ -160,6 +182,16 @@ public class HabitService
         if (viewModel.FrequencyType == HabitFrequencyType.SpecificDays && viewModel.SelectedDaysOfWeek.Count == 0)
         {
             errors[nameof(viewModel.SelectedDaysOfWeek)] = "Escolha pelo menos um dia da semana.";
+        }
+
+        if (viewModel.FrequencyType == HabitFrequencyType.Weekly && viewModel.SelectedDaysOfWeek.Count == 0)
+        {
+            errors[nameof(viewModel.SelectedDaysOfWeek)] = "Escolha o dia da semana para o hábito semanal.";
+        }
+
+        if (viewModel.FrequencyType == HabitFrequencyType.Weekly && viewModel.SelectedDaysOfWeek.Count > 1)
+        {
+            errors[nameof(viewModel.SelectedDaysOfWeek)] = "Escolha apenas um dia da semana para o hábito semanal.";
         }
 
         if (viewModel.CategoryId.HasValue && !await CategoryBelongsToUserAsync(userId, viewModel.CategoryId.Value))
@@ -331,6 +363,25 @@ public class HabitService
         return true;
     }
 
+    public async Task<bool> DeleteAsync(string userId, int id)
+    {
+        var habit = await _dbContext.Habits
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(item => item.UserId == userId && item.Id == id);
+
+        if (habit is null || habit.IsDeleted)
+        {
+            return false;
+        }
+
+        habit.IsDeleted = true;
+        habit.DeletedAt = DateTime.UtcNow;
+        habit.UpdatedAt = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
     private async Task<bool> CategoryBelongsToUserAsync(string userId, int categoryId)
     {
         return await _dbContext.Categories
@@ -457,7 +508,8 @@ public class HabitService
 
     private static string? BuildDaysOfWeek(HabitFormViewModel viewModel)
     {
-        if (viewModel.FrequencyType != HabitFrequencyType.SpecificDays)
+        if (viewModel.FrequencyType != HabitFrequencyType.SpecificDays
+            && viewModel.FrequencyType != HabitFrequencyType.Weekly)
         {
             return null;
         }
@@ -467,6 +519,11 @@ public class HabitService
             .OrderBy(day => (int)day)
             .Select(day => day.ToString())
             .ToList();
+
+        if (viewModel.FrequencyType == HabitFrequencyType.Weekly && selectedDays.Count > 1)
+        {
+            selectedDays = [selectedDays.First()];
+        }
 
         return selectedDays.Count == 0 ? null : string.Join(',', selectedDays);
     }

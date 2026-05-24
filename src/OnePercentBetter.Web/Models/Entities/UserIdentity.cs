@@ -40,6 +40,10 @@ public class UserIdentity
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    public bool IsDeleted { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
+
     public ICollection<Goal> Goals { get; } = new List<Goal>();
 
     public ICollection<Habit> Habits { get; } = new List<Habit>();

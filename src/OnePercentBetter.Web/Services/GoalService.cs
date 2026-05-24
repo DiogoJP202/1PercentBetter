@@ -201,14 +201,17 @@ public class GoalService
     public async Task<bool> DeleteAsync(string userId, int id)
     {
         var goal = await _dbContext.Goals
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(item => item.UserId == userId && item.Id == id);
 
-        if (goal is null)
+        if (goal is null || goal.IsDeleted)
         {
             return false;
         }
 
-        _dbContext.Goals.Remove(goal);
+        goal.IsDeleted = true;
+        goal.DeletedAt = DateTime.UtcNow;
+        goal.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
 
         return true;
