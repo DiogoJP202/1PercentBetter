@@ -25,7 +25,13 @@
     var dueDateLabel = Model.DueDate.HasValue ? Model.DueDate.Value.ToString("dd/MM/yyyy") : "Sem prazo";
 }
 
-<article class="app-card p-5">
+<article class="app-card p-5"
+         data-task-card
+         data-task-id="@Model.Id"
+         data-task-status="@Model.Status"
+         data-task-status-key="@Model.Status.ToString().ToLowerInvariant()"
+         data-task-date="@(Model.TaskDate?.ToString("yyyy-MM-dd") ?? string.Empty)"
+         data-task-due-date="@(Model.DueDate?.ToString("yyyy-MM-dd") ?? string.Empty)">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div class="min-w-0">
             <div class="flex items-center gap-3">
@@ -43,7 +49,7 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
-            <span class="status-pill @statusClass">@Model.Status.ToDisplayName()</span>
+            <span class="status-pill @statusClass" data-task-status-pill>@Model.Status.ToDisplayName()</span>
             <span class="status-pill @priorityClass">@Model.Priority.ToDisplayName()</span>
             @if (Model.IsOverdue)
             {
@@ -55,7 +61,7 @@
     <div class="mt-4 grid gap-3 md:grid-cols-4">
         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
             <div class="text-xs text-slate-500">Data</div>
-            <div class="mt-1 text-sm font-bold text-slate-200">@taskDateLabel</div>
+            <div class="mt-1 text-sm font-bold text-slate-200" data-task-date-label>@taskDateLabel</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
             <div class="text-xs text-slate-500">Horário</div>
@@ -76,7 +82,7 @@
         </div>
         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
             <div class="text-xs text-slate-500">Prazo</div>
-            <div class="mt-1 text-sm font-bold @(Model.IsOverdue ? "text-rose-300" : "text-slate-200")">@dueDateLabel</div>
+            <div class="mt-1 text-sm font-bold @(Model.IsOverdue ? "text-rose-300" : "text-slate-200")" data-task-due-date-label>@dueDateLabel</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
             <div class="text-xs text-slate-500">Calendário</div>
@@ -113,7 +119,7 @@
         </div>
     }
 
-    <div class="mt-5 flex flex-wrap justify-end gap-2">
+    <div class="mt-5 flex flex-wrap justify-end gap-2" data-task-actions>
         <a class="btn-secondary" asp-action="Details" asp-route-id="@Model.Id">
             <i data-lucide="eye" class="h-4 w-4"></i>
             Detalhes
@@ -138,7 +144,11 @@
         {
             <form asp-action="Complete"
                   asp-route-id="@Model.Id"
-                  method="post">
+                  method="post"
+                  data-async-action
+                  data-action-kind="complete"
+                  data-success-message="Tarefa concluída."
+                  data-task-status-form>
                 <button class="btn-primary" type="submit">
                     <i data-lucide="check" class="h-4 w-4"></i>
                     Concluir
@@ -146,7 +156,11 @@
             </form>
             <form asp-action="Postpone"
                   asp-route-id="@Model.Id"
-                  method="post">
+                  method="post"
+                  data-async-action
+                  data-action-kind="postpone"
+                  data-success-message="Tarefa adiada."
+                  data-task-status-form>
                 <button class="btn-secondary" type="submit">
                     <i data-lucide="calendar-plus" class="h-4 w-4"></i>
                     Adiar
@@ -155,6 +169,10 @@
             <form asp-action="Cancel"
                   asp-route-id="@Model.Id"
                   method="post"
+                  data-async-action
+                  data-action-kind="cancel"
+                  data-success-message="Tarefa cancelada."
+                  data-task-status-form
                   data-confirm
                   data-confirm-title="Cancelar tarefa?"
                   data-confirm-text="A tarefa será marcada como cancelada."

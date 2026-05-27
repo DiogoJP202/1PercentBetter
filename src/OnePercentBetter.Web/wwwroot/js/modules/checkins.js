@@ -1,4 +1,4 @@
-const chartElement = document.querySelector('[data-checkins-chart]');
+﻿const chartElement = document.querySelector('[data-checkins-chart]');
 const detailPanel = document.querySelector('[data-checkin-detail-panel]');
 
 const moodProfiles = {
@@ -116,9 +116,8 @@ const renderSummary = (point) => {
   }
 
   const action = detailPanel.querySelector('[data-checkin-detail-action]');
-  const title = point.key?.length === 4 ? `Resumo de ${point.label}` : `Resumo de ${point.label}`;
 
-  setText('[data-checkin-detail-title]', title);
+  setText('[data-checkin-detail-title]', `Resumo de ${point.label}`);
   setText('[data-checkin-detail-subtitle]', point.summary);
   setText('[data-checkin-detail-day-score]', '-');
   setText('[data-checkin-detail-energy]', '-');
@@ -152,10 +151,27 @@ if (chartElement && window.ApexCharts) {
   const detailUrl = chartElement.dataset.detailUrl;
   const period = chartElement.dataset.period;
   const hasData = points.some((point) => point.hasCheckIn);
+  const seriesName = period === 'month' ? 'Nota total do dia' : 'Média do período';
+  const seriesData = points.map((point) => {
+    const value = Number(point.score);
+    return Number.isFinite(value) ? value : 0;
+  });
+
+  const missingMarkers = points
+    .map((point, index) => (point.hasCheckIn
+      ? null
+      : {
+          seriesIndex: 0,
+          dataPointIndex: index,
+          fillColor: '#0f172a',
+          strokeColor: '#64748b',
+          size: 3
+        }))
+    .filter((marker) => marker !== null);
 
   const chart = new window.ApexCharts(chartElement, {
     chart: {
-      type: 'bar',
+      type: 'line',
       height: 360,
       toolbar: { show: false },
       foreColor: '#cbd5e1',
@@ -187,16 +203,32 @@ if (chartElement && window.ApexCharts) {
     },
     series: [
       {
-        name: period === 'month' ? 'Nota total do dia' : 'Média do período',
-        data: points.map((point) => point.score)
+        name: seriesName,
+        data: seriesData
       }
     ],
     colors: ['#34d399'],
-    plotOptions: {
-      bar: {
-        borderRadius: 7,
-        columnWidth: period === 'month' ? '58%' : '42%',
-        distributed: true
+    stroke: {
+      curve: 'smooth',
+      width: 3
+    },
+    markers: {
+      size: 4,
+      strokeWidth: 2,
+      strokeColors: '#0f172a',
+      hover: {
+        sizeOffset: 2
+      },
+      discrete: missingMarkers
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shade: 'dark',
+        shadeIntensity: 0.2,
+        opacityFrom: 0.28,
+        opacityTo: 0.04,
+        stops: [0, 100]
       }
     },
     states: {
@@ -214,15 +246,26 @@ if (chartElement && window.ApexCharts) {
       categories: points.map((point) => point.label),
       labels: {
         rotate: period === 'month' ? -45 : 0
+      },
+      axisBorder: {
+        color: 'rgba(148, 163, 184, 0.2)'
+      },
+      axisTicks: {
+        color: 'rgba(148, 163, 184, 0.2)'
       }
     },
     yaxis: {
       min: 0,
       max: 15,
-      tickAmount: 5
+      tickAmount: 5,
+      labels: {
+        formatter: (value) => (Number.isInteger(value) ? value : value.toFixed(1))
+      }
     },
     tooltip: {
       theme: 'dark',
+      intersect: true,
+      shared: false,
       y: {
         formatter: (value, { dataPointIndex }) => {
           const point = points[dataPointIndex];

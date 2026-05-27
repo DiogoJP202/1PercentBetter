@@ -1,9 +1,9 @@
-@model IReadOnlyList<HabitListItemViewModel>
+﻿@model IReadOnlyList<HabitListItemViewModel>
 @{
     ViewData["Title"] = "Hábitos";
 }
 
-<div class="space-y-6">
+<div class="space-y-6" data-habits-board>
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div data-tour-anchor="habits-good">
             <p class="text-sm font-semibold text-emerald-300">Hábitos</p>
@@ -32,7 +32,7 @@
         <a class="font-bold text-sky-200 underline underline-offset-4" asp-controller="Tasks" asp-action="Index">Tarefas</a>.
     </section>
 
-    <div class="grid gap-4">
+    <div class="grid gap-4" data-habits-list>
         @foreach (var item in Model)
         {
             var todayPillClass = !item.IsDueToday ? "status-pill-neutral" : item.TodayStatus switch
@@ -62,7 +62,7 @@
                 ItemStatus.Canceled => "status-pill-danger",
                 _ => "status-pill-neutral"
             };
-            <article class="app-card p-5">
+            <article class="app-card p-5" data-habit-card data-habit-id="@item.Id" data-habit-due-today="@item.IsDueToday.ToString().ToLowerInvariant()">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div class="min-w-0">
                         <div class="flex items-center gap-3">
@@ -102,8 +102,8 @@
                             <p class="rounded-xl bg-slate-950/60 px-3 py-2 text-sm text-slate-300">@item.TwoMinuteVersion</p>
                         </div>
                     </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="status-pill @todayPillClass"><i data-lucide="@todayIcon"></i>Hoje: @todayStatusLabel</span>
+                    <div class="flex flex-wrap gap-2" data-habit-actions>
+                        <span class="status-pill @todayPillClass" data-habit-today-pill><i data-lucide="@todayIcon"></i>Hoje: @todayStatusLabel</span>
                         <a class="btn-secondary" asp-action="Edit" asp-route-id="@item.Id">Editar</a>
                         <form asp-action="Delete" asp-route-id="@item.Id" method="post"
                               data-confirm
@@ -116,10 +116,18 @@
                         </form>
                         @if (item.IsDueToday)
                         {
-                            <form asp-action="Complete" asp-route-id="@item.Id" method="post">
+                            <form asp-action="Complete" asp-route-id="@item.Id" method="post"
+                                  data-async-action
+                                  data-action-kind="complete"
+                                  data-success-message="Hábito concluído."
+                                  data-habit-status-form>
                                 <button class="btn-primary" type="submit">Concluir</button>
                             </form>
                             <form asp-action="Fail" asp-route-id="@item.Id" method="post"
+                                  data-async-action
+                                  data-action-kind="fail"
+                                  data-success-message="Falha registrada."
+                                  data-habit-status-form
                                   data-confirm
                                   data-confirm-tone="danger"
                                   data-confirm-title="Registrar falha?"
@@ -128,6 +136,10 @@
                                 <button class="btn-danger" type="submit">Falhei</button>
                             </form>
                             <form asp-action="Skip" asp-route-id="@item.Id" method="post"
+                                  data-async-action
+                                  data-action-kind="skip"
+                                  data-success-message="Hábito pulado hoje."
+                                  data-habit-status-form
                                   data-confirm
                                   data-confirm-title="Pular hábito hoje?"
                                   data-confirm-text="Isso registrará o hábito como pulado no dia atual."
@@ -150,3 +162,7 @@
         <div class="app-card p-8 text-center text-slate-400">Nenhum hábito criado ainda.</div>
     }
 </div>
+
+@section Scripts {
+    <script type="module" src="~/js/modules/daily-actions.js" asp-append-version="true"></script>
+}

@@ -38,6 +38,8 @@ public class TaskItemCardViewModel
 
     public DateTime? CompletedAt { get; set; }
 
+    public DateTime UpdatedAt { get; set; }
+
     public bool IsOverdue { get; set; }
 
     public IReadOnlyList<TaskTagBadgeViewModel> Tags { get; set; } = [];

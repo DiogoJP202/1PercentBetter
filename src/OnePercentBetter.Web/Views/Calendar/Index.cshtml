@@ -1,7 +1,7 @@
-﻿@using System.Globalization
+@using System.Globalization
 @model CalendarOverviewViewModel
 @{
-    ViewData["Title"] = "CalendÃ¡rio";
+    ViewData["Title"] = "Calendário";
     var todayKey = AppClock.Today.ToString("yyyy-MM-dd");
     var culture = CultureInfo.GetCultureInfo("pt-BR");
     var todayLabel = culture.TextInfo.ToTitleCase(AppClock.Today.ToString("dddd, dd 'de' MMMM 'de' yyyy", culture));
@@ -12,14 +12,14 @@
 
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-            <p class="text-sm font-semibold text-sky-300">CalendÃ¡rio</p>
-            <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Rotina, hÃ¡bitos e evoluÃ§Ã£o</h1>
-            <p class="mt-2 max-w-2xl text-sm text-slate-400">Visualize hÃ¡bitos planejados, registros concluÃ­dos, compromissos comuns e check-ins em uma linha do tempo mais clara.</p>
+            <p class="text-sm font-semibold text-sky-300">Calendário</p>
+            <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Rotina, hábitos e evolução</h1>
+            <p class="mt-2 max-w-2xl text-sm text-slate-400">Visualize hábitos planejados, registros concluídos, compromissos comuns e check-ins em uma linha do tempo mais clara.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <a class="btn-secondary" asp-controller="Habits" asp-action="Create">
                 <i data-lucide="plus" class="h-4 w-4"></i>
-                Novo hÃ¡bito
+                Novo hábito
             </a>
             <a class="btn-primary" asp-controller="CheckIns" asp-action="Edit" asp-route-date="@todayKey">
                 <i data-lucide="calendar-check" class="h-4 w-4"></i>
@@ -34,24 +34,24 @@
 
     <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="app-card p-5">
-            <div class="text-sm text-slate-400">HÃ¡bitos concluÃ­dos</div>
+            <div class="text-sm text-slate-400">Hábitos concluídos</div>
             <div class="mt-3 text-4xl font-black text-emerald-300">@Model.CompletedHabitLogs</div>
-            <p class="mt-2 text-xs text-slate-500">Registros concluÃ­dos no mÃªs.</p>
+            <p class="mt-2 text-xs text-slate-500">Registros concluídos no mês.</p>
         </div>
         <div class="app-card p-5">
-            <div class="text-sm text-slate-400">ConsistÃªncia</div>
+            <div class="text-sm text-slate-400">Consistência</div>
             <div class="mt-3 text-4xl font-black text-sky-300">@Model.ConsistencyRate%</div>
-            <p class="mt-2 text-xs text-slate-500">@Model.PlannedHabitOccurrences ocorrÃªncia(s) planejada(s).</p>
+            <p class="mt-2 text-xs text-slate-500">@Model.PlannedHabitOccurrences ocorrência(s) planejada(s).</p>
         </div>
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Dias com check-in</div>
             <div class="mt-3 text-4xl font-black text-violet-300">@Model.DaysWithCheckIn</div>
-            <p class="mt-2 text-xs text-slate-500">SequÃªncia atual: @Model.CurrentCheckInStreak dia(s).</p>
+            <p class="mt-2 text-xs text-slate-500">Sequência atual: @Model.CurrentCheckInStreak dia(s).</p>
         </div>
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Tarefas atrasadas</div>
             <div class="mt-3 text-4xl font-black @(Model.OverdueTasks > 0 ? "text-rose-300" : "text-slate-300")">@Model.OverdueTasks</div>
-            <p class="mt-2 text-xs text-slate-500">PendÃªncias que pedem ajuste.</p>
+            <p class="mt-2 text-xs text-slate-500">Pendências que pedem ajuste.</p>
         </div>
     </section>
 
@@ -60,17 +60,17 @@
             <div class="mb-4 space-y-3">
                 <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                     <div>
-                        <h2 class="text-xl font-black text-white">CalendÃ¡rio de evoluÃ§Ã£o</h2>
+                        <h2 class="text-xl font-black text-white">Calendário de evolução</h2>
                         <p class="mt-1 text-sm text-slate-400">Filtre eventos para focar no que importa hoje.</p>
                     </div>
                     <div class="flex flex-wrap gap-2" data-calendar-filters>
                         <button type="button" class="status-pill status-pill-success calendar-filter-chip" data-calendar-filter="improvement" aria-pressed="true">
                             <i data-lucide="repeat-2"></i>
-                            HÃ¡bitos de melhoria
+                            Hábitos de melhoria
                         </button>
                         <button type="button" class="status-pill status-pill-info calendar-filter-chip" data-calendar-filter="common" aria-pressed="true">
                             <i data-lucide="calendar-clock"></i>
-                            HÃ¡bitos comuns
+                            Hábitos comuns
                         </button>
                         <button type="button" class="status-pill status-pill-neutral calendar-filter-chip" data-calendar-filter="checkin" aria-pressed="true">
                             <i data-lucide="calendar-check"></i>
@@ -84,7 +84,7 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2 text-xs font-bold text-slate-300">
-                    <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1"><span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>ConcluÃ­do</span>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1"><span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>Concluído</span>
                     <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1"><span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span>Pendente ou pulado</span>
                     <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1"><span class="h-2.5 w-2.5 rounded-full bg-rose-400"></span>Falhou</span>
                     <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1"><span class="h-2.5 w-2.5 rounded-full bg-sky-400"></span>Parcial</span>
@@ -114,7 +114,7 @@
                 <div>
                     <p class="text-sm font-semibold text-sky-300">Detalhes do dia</p>
                     <h2 class="mt-1 text-xl font-black text-white" data-calendar-day-title>Hoje</h2>
-                    <p class="mt-1 text-sm text-slate-400" data-calendar-day-subtitle>Selecione um dia no calendÃ¡rio.</p>
+                    <p class="mt-1 text-sm text-slate-400" data-calendar-day-subtitle>Selecione um dia no calendário.</p>
                 </div>
                 <span class="status-pill status-pill-neutral calendar-day-date-pill" data-calendar-day-date>@todayKey</span>
             </div>
@@ -125,7 +125,7 @@
                     <div class="mt-1 text-2xl font-black text-white" data-calendar-day-planned>-</div>
                 </div>
                 <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-                    <div class="text-xs text-slate-500">ConcluÃ­dos</div>
+                    <div class="text-xs text-slate-500">Concluídos</div>
                     <div class="mt-1 text-2xl font-black text-emerald-300" data-calendar-day-completed>-</div>
                 </div>
                 <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
@@ -137,15 +137,15 @@
             <div class="mt-5 space-y-5">
                 <section>
                     <div class="mb-3 flex items-center justify-between gap-3">
-                        <h3 class="text-sm font-black text-white">HÃ¡bitos do dia</h3>
-                        <a class="text-xs font-bold text-emerald-300 hover:text-emerald-200" asp-controller="Habits" asp-action="Create">Novo hÃ¡bito</a>
+                        <h3 class="text-sm font-black text-white">Hábitos do dia</h3>
+                        <a class="text-xs font-bold text-emerald-300 hover:text-emerald-200" asp-controller="Habits" asp-action="Create">Novo hábito</a>
                     </div>
                     <div class="space-y-3 calendar-day-habits-scroll" data-calendar-improvement-list></div>
-                    <p class="hidden rounded-2xl border border-dashed border-white/15 p-4 text-sm text-slate-400" data-calendar-improvement-empty>Nenhum hÃ¡bito planejado para este dia.</p>
+                    <p class="hidden rounded-2xl border border-dashed border-white/15 p-4 text-sm text-slate-400" data-calendar-improvement-empty>Nenhum hábito planejado para este dia.</p>
                 </section>
 
                 <section>
-                    <h3 class="mb-3 text-sm font-black text-white">Compromissos e hÃ¡bitos comuns</h3>
+                    <h3 class="mb-3 text-sm font-black text-white">Compromissos e hábitos comuns</h3>
                     <div class="space-y-3" data-calendar-common-list></div>
                     <p class="hidden rounded-2xl border border-dashed border-white/15 p-4 text-sm text-slate-400" data-calendar-common-empty>Nenhum compromisso cadastrado para este dia.</p>
                 </section>
@@ -161,7 +161,7 @@
                             <div class="mt-1 text-lg font-black text-white" data-calendar-task-planned>-</div>
                         </div>
                         <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                            <div class="text-[11px] text-slate-500">ConcluÃ­das</div>
+                            <div class="text-[11px] text-slate-500">Concluídas</div>
                             <div class="mt-1 text-lg font-black text-emerald-300" data-calendar-task-completed>-</div>
                         </div>
                         <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">

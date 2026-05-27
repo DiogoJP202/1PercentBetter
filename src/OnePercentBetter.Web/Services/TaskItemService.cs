@@ -858,6 +858,7 @@ public class TaskItemService
             Icon = taskItem.Icon,
             ShowOnCalendar = taskItem.ShowOnCalendar,
             CompletedAt = taskItem.CompletedAt,
+            UpdatedAt = taskItem.UpdatedAt,
             IsOverdue = IsOpenStatus(taskItem.Status) && IsOverdue(taskItem.TaskDate, taskItem.DueDate, today),
             Tags = taskItem.TaskItemTags
                 .Where(taskItemTag => taskItemTag.TaskTag != null)

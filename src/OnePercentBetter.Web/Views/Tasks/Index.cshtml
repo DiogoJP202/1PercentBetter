@@ -3,6 +3,33 @@
     ViewData["Title"] = "Tarefas";
     var filters = Model.Filters;
     var currentView = filters.View;
+    var today = AppClock.Today;
+    var todayOpenItems = Model.Items
+        .Where(item => item.TaskDate.HasValue
+            && item.TaskDate.Value.Date == today
+            && item.Status is TaskItemStatus.Pending or TaskItemStatus.InProgress)
+        .OrderBy(item => item.StartTime.HasValue ? 0 : 1)
+        .ThenBy(item => item.StartTime)
+        .ThenByDescending(item => item.Priority)
+        .ToList();
+    var todayResolvedItems = Model.Items
+        .Where(item =>
+            (item.TaskDate.HasValue
+                && item.TaskDate.Value.Date == today
+                && item.Status is TaskItemStatus.Completed or TaskItemStatus.Cancelled or TaskItemStatus.Postponed)
+            || (item.Status is TaskItemStatus.Completed
+                && ((item.CompletedAt.HasValue && item.CompletedAt.Value.Date == today) || item.UpdatedAt.Date == today))
+            || ((item.Status is TaskItemStatus.Cancelled or TaskItemStatus.Postponed) && item.UpdatedAt.Date == today))
+        .OrderBy(item => item.StartTime.HasValue ? 0 : 1)
+        .ThenBy(item => item.StartTime)
+        .ThenBy(item => item.Title, StringComparer.CurrentCultureIgnoreCase)
+        .DistinctBy(item => item.Id)
+        .ToList();
+    var todayResolvedIds = todayResolvedItems.Select(item => item.Id).ToHashSet();
+    var historicalCompletedItems = Model.CompletedItems
+        .Where(item => !todayResolvedIds.Contains(item.Id))
+        .ToList();
+    var hasTodayTaskSections = todayOpenItems.Any() || todayResolvedItems.Any();
 
     IEnumerable<IGrouping<string, TaskItemCardViewModel>> groupedItems = [];
     if (currentView != "all")
@@ -28,7 +55,7 @@
     }
 }
 
-<div class="space-y-6">
+<div class="space-y-6" data-task-board data-today="@today.ToString("yyyy-MM-dd")">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
             <p class="text-sm font-semibold text-violet-300">Tarefas</p>
@@ -46,22 +73,22 @@
     <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Ações de hoje</div>
-            <div class="mt-3 text-4xl font-black text-violet-300">@Model.TodayCount</div>
+            <div class="mt-3 text-4xl font-black text-violet-300" data-task-counter="today">@Model.TodayCount</div>
             <p class="mt-2 text-xs text-slate-500">Pendentes para hoje.</p>
         </div>
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Pendentes</div>
-            <div class="mt-3 text-4xl font-black text-sky-300">@Model.PendingCount</div>
+            <div class="mt-3 text-4xl font-black text-sky-300" data-task-counter="pending">@Model.PendingCount</div>
             <p class="mt-2 text-xs text-slate-500">Não concluídas ou adiadas.</p>
         </div>
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Atrasadas</div>
-            <div class="mt-3 text-4xl font-black @(Model.OverdueCount > 0 ? "text-rose-300" : "text-slate-200")">@Model.OverdueCount</div>
+            <div class="mt-3 text-4xl font-black @(Model.OverdueCount > 0 ? "text-rose-300" : "text-slate-200")" data-task-counter="overdue">@Model.OverdueCount</div>
             <p class="mt-2 text-xs text-slate-500">Pedem ajuste imediato.</p>
         </div>
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Concluídas</div>
-            <div class="mt-3 text-4xl font-black text-emerald-300">@Model.CompletedCount</div>
+            <div class="mt-3 text-4xl font-black text-emerald-300" data-task-counter="completed">@Model.CompletedCount</div>
             <p class="mt-2 text-xs text-slate-500">Entregas finalizadas.</p>
         </div>
     </section>
@@ -189,14 +216,48 @@
                 </section>
             }
 
-            @if (Model.TodayItems.Any())
+            @if (hasTodayTaskSections)
             {
-                <section class="space-y-3">
-                    <h2 class="text-lg font-black text-violet-200">Hoje</h2>
-                    @foreach (var item in Model.TodayItems)
-                    {
-                        <partial name="_TaskCard" model="item" />
-                    }
+                <section class="space-y-5">
+                    <div class="space-y-3">
+                        <h2 class="text-lg font-black text-violet-200">Hoje - pendentes</h2>
+                        <p class="text-sm text-slate-400">Ações do dia que ainda precisam ser checadas.</p>
+                        <div class="space-y-3" data-task-open-today-list>
+                            @if (!todayOpenItems.Any())
+                            {
+                                <div class="rounded-2xl border border-dashed border-white/15 p-4 text-sm text-slate-400" data-task-open-empty>
+                                    Nenhuma tarefa pendente para hoje.
+                                </div>
+                            }
+                            else
+                            {
+                                @foreach (var item in todayOpenItems)
+                                {
+                                    <partial name="_TaskCard" model="item" />
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h2 class="text-lg font-black text-emerald-200">Resolvidas hoje</h2>
+                        <p class="text-sm text-slate-400">Itens que já foram concluídos, cancelados ou adiados hoje.</p>
+                        <div class="space-y-3" data-task-resolved-today-list>
+                            @if (!todayResolvedItems.Any())
+                            {
+                                <div class="rounded-2xl border border-dashed border-white/15 p-4 text-sm text-slate-400" data-task-resolved-empty>
+                                    Ainda não há tarefas resolvidas hoje.
+                                </div>
+                            }
+                            else
+                            {
+                                @foreach (var item in todayResolvedItems)
+                                {
+                                    <partial name="_TaskCard" model="item" />
+                                }
+                            }
+                        </div>
+                    </div>
                 </section>
             }
 
@@ -211,11 +272,11 @@
                 </section>
             }
 
-            @if (Model.CompletedItems.Any())
+            @if (historicalCompletedItems.Any())
             {
                 <section class="space-y-3">
                     <h2 class="text-lg font-black text-emerald-200">Concluídas</h2>
-                    @foreach (var item in Model.CompletedItems.Take(12))
+                    @foreach (var item in historicalCompletedItems.Take(12))
                     {
                         <partial name="_TaskCard" model="item" />
                     }
@@ -242,3 +303,7 @@
         </section>
     }
 </div>
+
+@section Scripts {
+    <script type="module" src="~/js/modules/daily-actions.js" asp-append-version="true"></script>
+}

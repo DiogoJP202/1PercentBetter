@@ -1,4 +1,4 @@
-﻿@model CheckInsOverviewViewModel
+@model CheckInsOverviewViewModel
 @{
     ViewData["Title"] = "Check-ins";
     var today = AppClock.Today;
@@ -17,8 +17,8 @@
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div data-tour-anchor="checkins-overview">
             <p class="text-sm font-semibold text-emerald-300">Check-ins</p>
-            <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Sua evoluÃ§Ã£o ao longo do tempo</h1>
-            <p class="mt-2 max-w-2xl text-sm text-slate-400">Acompanhe energia, produtividade e nota do dia para enxergar padrÃµes reais de progresso.</p>
+            <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Sua evolução ao longo do tempo</h1>
+            <p class="mt-2 max-w-2xl text-sm text-slate-400">Acompanhe energia, produtividade e nota do dia para enxergar padrões reais de progresso.</p>
         </div>
         <a class="btn-primary" asp-action="Edit" asp-route-date="@today.ToString("yyyy-MM-dd")">
             <i data-lucide="calendar-check" class="h-4 w-4"></i>
@@ -29,7 +29,7 @@
     <section class="app-card p-5">
         <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-                <h2 class="text-lg font-black text-white">PerÃ­odo</h2>
+                <h2 class="text-lg font-black text-white">Período</h2>
                 <p class="mt-1 text-sm text-slate-400">@Model.PeriodLabel</p>
             </div>
             <div class="flex flex-wrap gap-2">
@@ -61,10 +61,10 @@
             {
                 <a class="btn-secondary" asp-action="Index" asp-route-period="month" asp-route-year="@previousMonth.Year" asp-route-month="@previousMonth.Month">
                     <i data-lucide="chevron-left" class="h-4 w-4"></i>
-                    MÃªs anterior
+                    Mês anterior
                 </a>
                 <a class="btn-secondary" asp-action="Index" asp-route-period="month" asp-route-year="@nextMonth.Year" asp-route-month="@nextMonth.Month">
-                    PrÃ³ximo mÃªs
+                    Próximo mês
                     <i data-lucide="chevron-right" class="h-4 w-4"></i>
                 </a>
             }
@@ -75,7 +75,7 @@
                     Ano anterior
                 </a>
                 <a class="btn-secondary" asp-action="Index" asp-route-period="year" asp-route-year="@nextYear">
-                    PrÃ³ximo ano
+                    Próximo ano
                     <i data-lucide="chevron-right" class="h-4 w-4"></i>
                 </a>
             }
@@ -86,7 +86,7 @@
                     5 anos anteriores
                 </a>
                 <a class="btn-secondary" asp-action="Index" asp-route-period="five-years" asp-route-year="@nextFiveYears">
-                    PrÃ³ximos 5 anos
+                    Próximos 5 anos
                     <i data-lucide="chevron-right" class="h-4 w-4"></i>
                 </a>
             }
@@ -95,22 +95,22 @@
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="app-card p-5">
-            <div class="text-sm text-slate-400">MÃ©dia no perÃ­odo</div>
+            <div class="text-sm text-slate-400">Média no período</div>
             <div class="mt-3 text-4xl font-black text-emerald-300">@Model.Metrics.AverageScore.ToString("0.#")</div>
-            <div class="mt-2 text-xs text-slate-500">Nota total mÃ¡xima: 15</div>
+            <div class="mt-2 text-xs text-slate-500">Nota total máxima: 15</div>
         </div>
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Melhor dia</div>
             <div class="mt-3 text-4xl font-black text-white">@(Model.Metrics.BestScore?.ToString() ?? "-")</div>
-            <div class="mt-2 text-xs text-slate-500">@(Model.Metrics.BestDate?.ToString("dd/MM/yyyy") ?? "Sem check-ins no perÃ­odo")</div>
+            <div class="mt-2 text-xs text-slate-500">@(Model.Metrics.BestDate?.ToString("dd/MM/yyyy") ?? "Sem check-ins no período")</div>
         </div>
         <div class="app-card p-5">
-            <div class="text-sm text-slate-400">Check-ins no perÃ­odo</div>
+            <div class="text-sm text-slate-400">Check-ins no período</div>
             <div class="mt-3 text-4xl font-black text-sky-300">@Model.Metrics.CheckInCount</div>
-            <div class="mt-2 text-xs text-slate-500">ConsistÃªncia registrada</div>
+            <div class="mt-2 text-xs text-slate-500">Consistência registrada</div>
         </div>
         <div class="app-card p-5">
-            <div class="text-sm text-slate-400">SequÃªncia atual</div>
+            <div class="text-sm text-slate-400">Sequência atual</div>
             <div class="mt-3 text-4xl font-black text-white">@Model.Metrics.CurrentStreak</div>
             <div class="mt-2 text-xs text-slate-500">Dias seguidos com check-in</div>
         </div>
@@ -120,8 +120,8 @@
         <section class="app-card p-5">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h2 class="text-xl font-black text-white">EvoluÃ§Ã£o dos check-ins</h2>
-                    <p class="mt-1 text-sm text-slate-400">Clique em um ponto do grÃ¡fico para ver ou editar o check-in daquele dia.</p>
+                    <h2 class="text-xl font-black text-white">Evolução dos check-ins</h2>
+                    <p class="mt-1 text-sm text-slate-400">Clique em um ponto do gráfico para ver ou editar o check-in daquele dia.</p>
                 </div>
                 <span class="status-pill status-pill-info"><i data-lucide="line-chart"></i>Nota total</span>
             </div>
@@ -133,7 +133,7 @@
             @if (!Model.Points.Any(point => point.HasCheckIn))
             {
                 <div class="mt-4 rounded-2xl border border-dashed border-white/15 p-6 text-center">
-                    <p class="text-sm text-slate-300">VocÃª ainda nÃ£o possui check-ins neste perÃ­odo.</p>
+                    <p class="text-sm text-slate-300">Você ainda não possui check-ins neste período.</p>
                     <a class="btn-secondary mt-4" asp-action="Edit" asp-route-date="@today.ToString("yyyy-MM-dd")">Criar primeiro check-in</a>
                 </div>
             }
@@ -143,7 +143,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-xl font-black text-white" data-checkin-detail-title>Check-in</h2>
-                    <p class="mt-1 text-sm text-slate-400" data-checkin-detail-subtitle>Selecione um dia no grÃ¡fico.</p>
+                    <p class="mt-1 text-sm text-slate-400" data-checkin-detail-subtitle>Selecione um dia no gráfico.</p>
                 </div>
                 <span class="status-pill status-pill-neutral" data-checkin-detail-status>Hoje</span>
             </div>
@@ -197,7 +197,7 @@
 
             <div class="mt-5 space-y-3 text-sm">
                 <div>
-                    <div class="font-bold text-slate-300">Pequena vitÃ³ria</div>
+                    <div class="font-bold text-slate-300">Pequena vitória</div>
                     <p class="mt-1 text-slate-400" data-checkin-detail-win>-</p>
                 </div>
                 <div>
@@ -209,7 +209,7 @@
                     <p class="mt-1 text-slate-400" data-checkin-detail-task-blocker>-</p>
                 </div>
                 <div>
-                    <div class="font-bold text-slate-300">Ajuste para amanhÃ£</div>
+                    <div class="font-bold text-slate-300">Ajuste para amanhã</div>
                     <p class="mt-1 text-slate-400" data-checkin-detail-adjustment>-</p>
                 </div>
                 <div>
