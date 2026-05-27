@@ -35,7 +35,7 @@ public class NoteService
     public async Task<NoteListViewModel> GetListAsync(string userId, NoteFiltersViewModel? filters)
     {
         var normalizedFilters = await FillFilterOptionsAsync(filters ?? new NoteFiltersViewModel(), userId);
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var monthStart = ParseMonthOrCurrent(normalizedFilters.Month, today);
         var monthEnd = monthStart.AddMonths(1);
 
@@ -269,7 +269,7 @@ public class NoteService
 
     private async Task<NoteFiltersViewModel> FillFilterOptionsAsync(NoteFiltersViewModel filters, string userId)
     {
-        var normalizedMonth = ParseMonthOrCurrent(filters.Month, DateTime.Today);
+        var normalizedMonth = ParseMonthOrCurrent(filters.Month, AppClock.Today);
 
         filters.View = NormalizeView(filters.View);
         filters.Month = normalizedMonth.ToString("yyyy-MM", CultureInfo.InvariantCulture);
@@ -417,3 +417,4 @@ public class NoteService
         return viewModel;
     }
 }
+

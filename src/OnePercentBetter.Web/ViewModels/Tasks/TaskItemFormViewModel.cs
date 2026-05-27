@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using OnePercentBetter.Web.Models.Enums;
 using OnePercentBetter.Web.ViewModels.Shared;
 
@@ -23,7 +23,7 @@ public class TaskItemFormViewModel
     public TaskItemPriority Priority { get; set; } = TaskItemPriority.Medium;
 
     [DataType(DataType.Date)]
-    public DateTime? TaskDate { get; set; } = DateTime.Today;
+    public DateTime? TaskDate { get; set; } = AppClock.Today;
 
     [DataType(DataType.Time)]
     public TimeSpan? StartTime { get; set; }
@@ -68,3 +68,4 @@ public class TaskItemFormViewModel
 
     public IReadOnlyList<TaskTagBadgeViewModel> TagItems { get; set; } = [];
 }
+

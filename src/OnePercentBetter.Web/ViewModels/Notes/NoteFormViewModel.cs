@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using OnePercentBetter.Web.Models.Enums;
 using OnePercentBetter.Web.ViewModels.Shared;
 
@@ -30,7 +30,7 @@ public class NoteFormViewModel
     public int? TaskItemId { get; set; }
 
     [DataType(DataType.Date)]
-    public DateTime Date { get; set; } = DateTime.Today;
+    public DateTime Date { get; set; } = AppClock.Today;
 
     public DateTime? CreatedAt { get; set; }
 
@@ -44,3 +44,4 @@ public class NoteFormViewModel
 
     public IReadOnlyList<SelectOptionViewModel> TaskItems { get; set; } = [];
 }
+

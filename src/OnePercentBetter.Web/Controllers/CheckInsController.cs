@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnePercentBetter.Web.Extensions;
 using OnePercentBetter.Web.Services;
@@ -42,7 +42,7 @@ public class CheckInsController : Controller
     [HttpGet]
     public IActionResult Today()
     {
-        return RedirectToAction(nameof(Edit), new { date = DateTime.Today.ToString("yyyy-MM-dd") });
+        return RedirectToAction(nameof(Edit), new { date = AppClock.Today.ToString("yyyy-MM-dd") });
     }
 
     [HttpPost]
@@ -55,7 +55,7 @@ public class CheckInsController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(DateTime? date)
     {
-        var targetDate = (date ?? DateTime.Today).Date;
+        var targetDate = (date ?? AppClock.Today).Date;
         var viewModel = await _checkInService.GetByDateAsync(User.GetRequiredUserId(), targetDate);
         return View(viewModel);
     }
@@ -85,3 +85,4 @@ public class CheckInsController : Controller
         });
     }
 }
+

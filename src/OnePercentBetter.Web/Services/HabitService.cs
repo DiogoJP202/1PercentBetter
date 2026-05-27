@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using OnePercentBetter.Web.Data;
 using OnePercentBetter.Web.Extensions;
 using OnePercentBetter.Web.Models.Entities;
@@ -35,7 +35,7 @@ public class HabitService
 
     public async Task<IReadOnlyList<HabitListItemViewModel>> GetListAsync(string userId)
     {
-        var today = DateTime.Today;
+        var today = AppClock.Today;
 
         var habits = await _dbContext.Habits
             .AsNoTracking()
@@ -176,7 +176,7 @@ public class HabitService
 
         if (viewModel.FrequencyType == HabitFrequencyType.Custom)
         {
-            errors[nameof(viewModel.FrequencyType)] = "Frequência personalizada ainda não está disponível.";
+            errors[nameof(viewModel.FrequencyType)] = "FrequÃªncia personalizada ainda nÃ£o estÃ¡ disponÃ­vel.";
         }
 
         if (viewModel.FrequencyType == HabitFrequencyType.SpecificDays && viewModel.SelectedDaysOfWeek.Count == 0)
@@ -186,32 +186,32 @@ public class HabitService
 
         if (viewModel.FrequencyType == HabitFrequencyType.Weekly && viewModel.SelectedDaysOfWeek.Count == 0)
         {
-            errors[nameof(viewModel.SelectedDaysOfWeek)] = "Escolha o dia da semana para o hábito semanal.";
+            errors[nameof(viewModel.SelectedDaysOfWeek)] = "Escolha o dia da semana para o hÃ¡bito semanal.";
         }
 
         if (viewModel.FrequencyType == HabitFrequencyType.Weekly && viewModel.SelectedDaysOfWeek.Count > 1)
         {
-            errors[nameof(viewModel.SelectedDaysOfWeek)] = "Escolha apenas um dia da semana para o hábito semanal.";
+            errors[nameof(viewModel.SelectedDaysOfWeek)] = "Escolha apenas um dia da semana para o hÃ¡bito semanal.";
         }
 
         if (viewModel.CategoryId.HasValue && !await CategoryBelongsToUserAsync(userId, viewModel.CategoryId.Value))
         {
-            errors[nameof(viewModel.CategoryId)] = "Categoria inválida para este usuário.";
+            errors[nameof(viewModel.CategoryId)] = "Categoria invÃ¡lida para este usuÃ¡rio.";
         }
 
         if (viewModel.IdentityId.HasValue && !await IdentityBelongsToUserAsync(userId, viewModel.IdentityId.Value))
         {
-            errors[nameof(viewModel.IdentityId)] = "Identidade inválida para este usuário.";
+            errors[nameof(viewModel.IdentityId)] = "Identidade invÃ¡lida para este usuÃ¡rio.";
         }
 
         if (viewModel.GoalId.HasValue && !await GoalBelongsToUserAsync(userId, viewModel.GoalId.Value))
         {
-            errors[nameof(viewModel.GoalId)] = "Objetivo inválido para este usuário.";
+            errors[nameof(viewModel.GoalId)] = "Objetivo invÃ¡lido para este usuÃ¡rio.";
         }
 
         if (viewModel.LocationId.HasValue && !await _habitLocationService.ExistsForUserAsync(userId, viewModel.LocationId.Value))
         {
-            errors[nameof(viewModel.LocationId)] = "Local inválido para este usuário.";
+            errors[nameof(viewModel.LocationId)] = "Local invÃ¡lido para este usuÃ¡rio.";
         }
 
         var stackError = await ApplyStackingSelectionAsync(userId, viewModel);
@@ -222,17 +222,17 @@ public class HabitService
 
         if (!HabitVisualOptions.IsAllowedIcon(viewModel.Icon))
         {
-            errors[nameof(viewModel.Icon)] = "Escolha um ícone válido.";
+            errors[nameof(viewModel.Icon)] = "Escolha um Ã­cone vÃ¡lido.";
         }
 
         if (viewModel.EndTime.HasValue && !viewModel.SuggestedTime.HasValue)
         {
-            errors[nameof(viewModel.SuggestedTime)] = "Defina o horário de início para usar horário de fim.";
+            errors[nameof(viewModel.SuggestedTime)] = "Defina o horÃ¡rio de inÃ­cio para usar horÃ¡rio de fim.";
         }
 
         if (viewModel.SuggestedTime.HasValue && viewModel.EndTime.HasValue && viewModel.EndTime <= viewModel.SuggestedTime)
         {
-            errors[nameof(viewModel.EndTime)] = "O horário de fim deve ser maior que o horário de início.";
+            errors[nameof(viewModel.EndTime)] = "O horÃ¡rio de fim deve ser maior que o horÃ¡rio de inÃ­cio.";
         }
 
         return errors;
@@ -341,7 +341,7 @@ public class HabitService
             return false;
         }
 
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var log = await _dbContext.HabitLogs
             .FirstOrDefaultAsync(item => item.UserId == userId && item.HabitId == habitId && item.Date == today);
 
@@ -468,24 +468,24 @@ public class HabitService
         var segments = viewModel.StackBaseKey.Split(':', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         if (segments.Length != 2 || !int.TryParse(segments[1], out var id))
         {
-            return "Escolha uma base de empilhamento válida.";
+            return "Escolha uma base de empilhamento vÃ¡lida.";
         }
 
         if (segments[0] == "habit")
         {
             if (viewModel.Id.HasValue && id == viewModel.Id.Value)
             {
-                return "Um hábito não pode ser empilhado depois dele mesmo.";
+                return "Um hÃ¡bito nÃ£o pode ser empilhado depois dele mesmo.";
             }
 
             if (!await ExistsForUserAsync(userId, id))
             {
-                return "Hábito base inválido para este usuário.";
+                return "HÃ¡bito base invÃ¡lido para este usuÃ¡rio.";
             }
 
             if (viewModel.Id.HasValue && await WouldCreateStackingCycleAsync(userId, viewModel.Id.Value, id))
             {
-                return "Escolha outro hábito base para evitar um ciclo de empilhamento.";
+                return "Escolha outro hÃ¡bito base para evitar um ciclo de empilhamento.";
             }
 
             viewModel.StackedAfterHabitId = id;
@@ -496,14 +496,14 @@ public class HabitService
         {
             if (!await _simpleHabitService.ExistsForUserAsync(userId, id))
             {
-                return "Hábito simples inválido para este usuário.";
+                return "HÃ¡bito simples invÃ¡lido para este usuÃ¡rio.";
             }
 
             viewModel.StackedAfterSimpleHabitId = id;
             return null;
         }
 
-        return "Escolha uma base de empilhamento válida.";
+        return "Escolha uma base de empilhamento vÃ¡lida.";
     }
 
     private static string? BuildDaysOfWeek(HabitFormViewModel viewModel)
@@ -548,7 +548,7 @@ public class HabitService
     private static string BuildStackableHabitLabel(string title, HabitFrequencyType frequencyType, TimeSpan? suggestedTime)
     {
         var label = $"{title} - {frequencyType.ToDisplayName()}";
-        return suggestedTime.HasValue ? $"{label} às {suggestedTime.Value:hh\\:mm}" : label;
+        return suggestedTime.HasValue ? $"{label} Ã s {suggestedTime.Value:hh\\:mm}" : label;
     }
 
     private static string? BuildStackBaseKey(int? stackedAfterHabitId, int? stackedAfterSimpleHabitId)
@@ -576,3 +576,4 @@ public class HabitService
         return HabitVisualOptions.IsAllowedIcon(icon) ? icon!.Trim() : HabitVisualOptions.DefaultIcon;
     }
 }
+

@@ -1,7 +1,7 @@
-@model IReadOnlyList<GoalListItemViewModel>
+﻿@model IReadOnlyList<GoalListItemViewModel>
 @{
     ViewData["Title"] = "Objetivos";
-    var today = DateTime.Today;
+    var today = AppClock.Today;
     var activeCount = Model.Count(item => item.Status == ItemStatus.Active);
     var completedCount = Model.Count(item => item.Status == ItemStatus.Completed);
     var overdueCount = Model.Count(item => item.Status == ItemStatus.Active && item.TargetDate.HasValue && item.TargetDate.Value.Date < today);
@@ -14,8 +14,8 @@
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div data-tour-anchor="goals-overview">
             <p class="text-sm font-semibold text-sky-300">Objetivos</p>
-            <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">Direções do seu sistema</h1>
-            <p class="mt-2 max-w-2xl text-sm text-slate-400">Objetivos traduzem suas identidades em resultados claros. Depois, os hábitos transformam esses resultados em rotina.</p>
+            <h1 class="mt-1 text-3xl font-black text-white sm:text-4xl">DireÃ§Ãµes do seu sistema</h1>
+            <p class="mt-2 max-w-2xl text-sm text-slate-400">Objetivos traduzem suas identidades em resultados claros. Depois, os hÃ¡bitos transformam esses resultados em rotina.</p>
         </div>
         <a class="btn-primary" asp-action="Create">
             <i data-lucide="plus" class="h-4 w-4"></i>
@@ -27,17 +27,17 @@
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Objetivos ativos</div>
             <div class="mt-3 text-4xl font-black text-sky-300">@activeCount</div>
-            <p class="mt-2 text-xs text-slate-500">Direções abertas no sistema.</p>
+            <p class="mt-2 text-xs text-slate-500">DireÃ§Ãµes abertas no sistema.</p>
         </div>
         <div class="app-card p-5">
-            <div class="text-sm text-slate-400">Concluídos</div>
+            <div class="text-sm text-slate-400">ConcluÃ­dos</div>
             <div class="mt-3 text-4xl font-black text-emerald-300">@completedCount</div>
-            <p class="mt-2 text-xs text-slate-500">Resultados já alcançados.</p>
+            <p class="mt-2 text-xs text-slate-500">Resultados jÃ¡ alcanÃ§ados.</p>
         </div>
         <div class="app-card p-5">
-            <div class="text-sm text-slate-400">Hábitos vinculados</div>
+            <div class="text-sm text-slate-400">HÃ¡bitos vinculados</div>
             <div class="mt-3 text-4xl font-black text-white">@totalHabits</div>
-            <p class="mt-2 text-xs text-slate-500">Ações conectadas aos objetivos.</p>
+            <p class="mt-2 text-xs text-slate-500">AÃ§Ãµes conectadas aos objetivos.</p>
         </div>
         <div class="app-card p-5">
             <div class="text-sm text-slate-400">Tarefas vinculadas</div>
@@ -57,8 +57,8 @@
             <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-sky-300/20 bg-sky-300/10 text-sky-300">
                 <i data-lucide="target" class="h-7 w-7"></i>
             </div>
-            <h2 class="mt-5 text-2xl font-black text-white">Você ainda não criou nenhum objetivo.</h2>
-            <p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-400">Comece escolhendo uma direção clara. Um bom objetivo conecta quem você quer se tornar com os hábitos que vai praticar.</p>
+            <h2 class="mt-5 text-2xl font-black text-white">VocÃª ainda nÃ£o criou nenhum objetivo.</h2>
+            <p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-400">Comece escolhendo uma direÃ§Ã£o clara. Um bom objetivo conecta quem vocÃª quer se tornar com os hÃ¡bitos que vai praticar.</p>
             <a class="btn-primary mt-5" asp-action="Create">
                 <i data-lucide="plus" class="h-4 w-4"></i>
                 Criar primeiro objetivo
@@ -125,7 +125,7 @@
                             <div class="mt-1 truncate text-sm font-bold text-slate-200">@(string.IsNullOrWhiteSpace(item.CategoryName) ? "Sem categoria" : item.CategoryName)</div>
                         </div>
                         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-                            <div class="text-xs text-slate-500">Início</div>
+                            <div class="text-xs text-slate-500">InÃ­cio</div>
                             <div class="mt-1 text-sm font-bold text-slate-200">@item.StartDate.ToString("dd/MM/yyyy")</div>
                         </div>
                         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
@@ -133,7 +133,7 @@
                             <div class="mt-1 text-sm font-bold @(isOverdue ? "text-rose-300" : "text-slate-200")">@targetLabel</div>
                         </div>
                         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-                            <div class="text-xs text-slate-500">Hábitos</div>
+                            <div class="text-xs text-slate-500">HÃ¡bitos</div>
                             <div class="mt-1 text-sm font-bold text-slate-200">@item.HabitsCount vinculado(s)</div>
                         </div>
                         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
@@ -154,7 +154,7 @@
                                   method="post"
                                   data-confirm
                                   data-confirm-title="Pausar objetivo?"
-                                  data-confirm-text="O objetivo sairá dos objetivos ativos até ser reativado por edição."
+                                  data-confirm-text="O objetivo sairÃ¡ dos objetivos ativos atÃ© ser reativado por ediÃ§Ã£o."
                                   data-confirm-button="Pausar">
                                 <button class="btn-secondary" type="submit">
                                     <i data-lucide="pause" class="h-4 w-4"></i>
@@ -169,7 +169,7 @@
                                   method="post"
                                   data-confirm
                                   data-confirm-title="Concluir objetivo?"
-                                  data-confirm-text="Isso marcará o objetivo como concluído."
+                                  data-confirm-text="Isso marcarÃ¡ o objetivo como concluÃ­do."
                                   data-confirm-button="Concluir">
                                 <button class="btn-primary" type="submit">
                                     <i data-lucide="check" class="h-4 w-4"></i>
@@ -183,7 +183,7 @@
                               data-confirm
                               data-confirm-tone="danger"
                               data-confirm-title="Excluir objetivo?"
-                              data-confirm-text="Hábitos e anotações vinculados serão preservados, mas ficarão sem este objetivo."
+                              data-confirm-text="HÃ¡bitos e anotaÃ§Ãµes vinculados serÃ£o preservados, mas ficarÃ£o sem este objetivo."
                               data-confirm-button="Excluir">
                             <button class="btn-danger" type="submit">
                                 <i data-lucide="trash-2" class="h-4 w-4"></i>
@@ -196,6 +196,7 @@
         </div>
     }
 </div>
+
 
 
 

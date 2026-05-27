@@ -1,27 +1,27 @@
-@model DailyCheckInViewModel
+﻿@model DailyCheckInViewModel
 @{
     ViewData["Title"] = "Check-in";
-    var isToday = Model.Date.Date == DateTime.Today;
+    var isToday = Model.Date.Date == AppClock.Today;
     var moodOptions = new[]
     {
-        new { Value = MoodLevel.VeryBad, Face = "😞", Label = "Muito ruim", Hint = "Dia pesado" },
-        new { Value = MoodLevel.Bad, Face = "🙁", Label = "Ruim", Hint = "Abaixo do normal" },
-        new { Value = MoodLevel.Neutral, Face = "😐", Label = "Neutro", Hint = "Dia estável" },
-        new { Value = MoodLevel.Good, Face = "🙂", Label = "Bom", Hint = "Boa energia" },
-        new { Value = MoodLevel.VeryGood, Face = "😄", Label = "Muito bom", Hint = "Dia excelente" }
+        new { Value = MoodLevel.VeryBad, Face = "ðŸ˜ž", Label = "Muito ruim", Hint = "Dia pesado" },
+        new { Value = MoodLevel.Bad, Face = "ðŸ™", Label = "Ruim", Hint = "Abaixo do normal" },
+        new { Value = MoodLevel.Neutral, Face = "ðŸ˜", Label = "Neutro", Hint = "Dia estÃ¡vel" },
+        new { Value = MoodLevel.Good, Face = "ðŸ™‚", Label = "Bom", Hint = "Boa energia" },
+        new { Value = MoodLevel.VeryGood, Face = "ðŸ˜„", Label = "Muito bom", Hint = "Dia excelente" }
     };
 }
 
 <div class="mx-auto max-w-4xl space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-            <p class="text-sm font-semibold text-emerald-300">Check-in diário</p>
+            <p class="text-sm font-semibold text-emerald-300">Check-in diÃ¡rio</p>
             <h1 class="mt-1 text-3xl font-black text-white">@(isToday ? "Como foi seu dia?" : $"Check-in de {Model.Date:dd/MM/yyyy}")</h1>
             <p class="mt-2 text-sm text-slate-400">Registre uma leitura honesta do dia. Pequeno hoje, forte no acumulado.</p>
         </div>
         <a class="btn-secondary" asp-action="Index" asp-route-period="month" asp-route-year="@Model.Date.Year" asp-route-month="@Model.Date.Month">
             <i data-lucide="arrow-left" class="h-4 w-4"></i>
-            Voltar para evolução
+            Voltar para evoluÃ§Ã£o
         </a>
     </div>
 
@@ -72,7 +72,7 @@
                     </label>
                 }
             </div>
-            <p class="mt-2 text-xs text-slate-500">Escolha a carinha que melhor representa como você se sentiu hoje.</p>
+            <p class="mt-2 text-xs text-slate-500">Escolha a carinha que melhor representa como vocÃª se sentiu hoje.</p>
             <span asp-validation-for="Mood"></span>
         </div>
 
@@ -100,11 +100,11 @@
         <div class="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4">
             <div class="text-sm font-semibold text-emerald-100">Nota total do check-in</div>
             <div class="mt-1 text-4xl font-black text-white" data-checkin-total>@(Model.DayScore + Model.EnergyLevel + Model.ProductivityLevel)</div>
-            <p class="mt-1 text-xs text-emerald-100/80">Soma de nota do dia, energia e produtividade. Máximo: 15.</p>
+            <p class="mt-1 text-xs text-emerald-100/80">Soma de nota do dia, energia e produtividade. MÃ¡ximo: 15.</p>
         </div>
 
         <div>
-            <label asp-for="SmallWin" class="form-label">Pequena vitória</label>
+            <label asp-for="SmallWin" class="form-label">Pequena vitÃ³ria</label>
             <input asp-for="SmallWin" class="form-input" placeholder="Consegui estudar por 20 minutos" />
             <span asp-validation-for="SmallWin"></span>
         </div>
@@ -122,14 +122,14 @@
         </div>
 
         <div>
-            <label asp-for="TomorrowAdjustment" class="form-label">Ajuste para amanhã</label>
-            <input asp-for="TomorrowAdjustment" class="form-input" placeholder="Começar pelo hábito mais fácil" />
+            <label asp-for="TomorrowAdjustment" class="form-label">Ajuste para amanhÃ£</label>
+            <input asp-for="TomorrowAdjustment" class="form-input" placeholder="ComeÃ§ar pelo hÃ¡bito mais fÃ¡cil" />
             <span asp-validation-for="TomorrowAdjustment"></span>
         </div>
 
         <div>
             <label asp-for="Notes" class="form-label">Notas</label>
-            <textarea asp-for="Notes" class="form-textarea" placeholder="Escreva observações livres sobre seu dia"></textarea>
+            <textarea asp-for="Notes" class="form-textarea" placeholder="Escreva observaÃ§Ãµes livres sobre seu dia"></textarea>
             <span asp-validation-for="Notes"></span>
         </div>
 
@@ -147,3 +147,4 @@
     <partial name="_ValidationScriptsPartial" />
     <script type="module" src="~/js/modules/checkins-form.js" asp-append-version="true"></script>
 }
+

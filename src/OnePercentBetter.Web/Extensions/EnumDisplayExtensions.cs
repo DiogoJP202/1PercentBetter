@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using OnePercentBetter.Web.Models.Enums;
 
@@ -120,7 +120,7 @@ public static class EnumDisplayExtensions
         {
             TaskItemStatus.Pending => "Pendente",
             TaskItemStatus.InProgress => "Em andamento",
-            TaskItemStatus.Completed => "Concluida",
+            TaskItemStatus.Completed => "Concluída",
             TaskItemStatus.Cancelled => "Cancelada",
             TaskItemStatus.Postponed => "Adiada",
             _ => status.ToString()
@@ -132,7 +132,7 @@ public static class EnumDisplayExtensions
         return priority switch
         {
             TaskItemPriority.Low => "Baixa",
-            TaskItemPriority.Medium => "Media",
+            TaskItemPriority.Medium => "Média",
             TaskItemPriority.High => "Alta",
             TaskItemPriority.Urgent => "Urgente",
             _ => priority.ToString()

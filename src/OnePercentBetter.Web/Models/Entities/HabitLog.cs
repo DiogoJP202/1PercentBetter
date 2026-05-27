@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using OnePercentBetter.Web.Models.Enums;
 using OnePercentBetter.Web.Models.Identity;
 
@@ -17,7 +17,7 @@ public class HabitLog
 
     public ApplicationUser? User { get; set; }
 
-    public DateTime Date { get; set; } = DateTime.Today;
+    public DateTime Date { get; set; } = AppClock.Today;
 
     public HabitLogStatus Status { get; set; } = HabitLogStatus.Completed;
 
@@ -34,3 +34,4 @@ public class HabitLog
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
+

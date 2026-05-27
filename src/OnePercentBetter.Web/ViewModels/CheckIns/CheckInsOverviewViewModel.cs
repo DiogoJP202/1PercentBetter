@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace OnePercentBetter.Web.ViewModels.CheckIns;
 
@@ -6,9 +6,9 @@ public class CheckInsOverviewViewModel
 {
     public string Period { get; set; } = "month";
 
-    public int Year { get; set; } = DateTime.Today.Year;
+    public int Year { get; set; } = AppClock.Today.Year;
 
-    public int Month { get; set; } = DateTime.Today.Month;
+    public int Month { get; set; } = AppClock.Today.Month;
 
     public string PeriodLabel { get; set; } = string.Empty;
 
@@ -24,3 +24,4 @@ public class CheckInsOverviewViewModel
 
     public IReadOnlyList<SelectListItem> YearOptions { get; set; } = [];
 }
+

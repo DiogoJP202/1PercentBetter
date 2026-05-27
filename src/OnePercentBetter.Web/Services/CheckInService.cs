@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OnePercentBetter.Web.Data;
@@ -23,7 +23,7 @@ public class CheckInService
     public async Task<CheckInsOverviewViewModel> GetOverviewAsync(string userId, string? period, int? year, int? month)
     {
         var normalizedPeriod = NormalizePeriod(period);
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var selectedYear = year.GetValueOrDefault(today.Year);
         var selectedMonth = Math.Clamp(month.GetValueOrDefault(today.Month), 1, 12);
         var range = GetRange(normalizedPeriod, selectedYear, selectedMonth);
@@ -47,7 +47,7 @@ public class CheckInService
     public async Task<IReadOnlyList<CheckInChartPointViewModel>> GetChartPointsAsync(string userId, string? period, int? year, int? month)
     {
         var normalizedPeriod = NormalizePeriod(period);
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var selectedYear = year.GetValueOrDefault(today.Year);
         var selectedMonth = Math.Clamp(month.GetValueOrDefault(today.Month), 1, 12);
         var range = GetRange(normalizedPeriod, selectedYear, selectedMonth);
@@ -58,7 +58,7 @@ public class CheckInService
 
     public async Task<DailyCheckInViewModel> GetTodayAsync(string userId)
     {
-        return await GetByDateAsync(userId, DateTime.Today);
+        return await GetByDateAsync(userId, AppClock.Today);
     }
 
     public async Task<DailyCheckInViewModel> GetByDateAsync(string userId, DateTime date)
@@ -209,7 +209,7 @@ public class CheckInService
 
     private async Task<int> GetCurrentStreakAsync(string userId)
     {
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var dates = await _dbContext.DailyCheckIns
             .AsNoTracking()
             .Where(checkIn => checkIn.UserId == userId && checkIn.Date <= today)
@@ -291,7 +291,7 @@ public class CheckInService
                 Score = average,
                 Count = count,
                 HasCheckIn = count > 0,
-                Summary = count == 0 ? "Sem check-ins neste mês." : $"Média mensal: {average}/15 em {count} check-in(s)."
+                Summary = count == 0 ? "Sem check-ins neste mÃªs." : $"MÃ©dia mensal: {average}/15 em {count} check-in(s)."
             });
         }
 
@@ -317,7 +317,7 @@ public class CheckInService
                 Score = average,
                 Count = count,
                 HasCheckIn = count > 0,
-                Summary = count == 0 ? "Sem check-ins neste ano." : $"Média anual: {average}/15 em {count} check-in(s)."
+                Summary = count == 0 ? "Sem check-ins neste ano." : $"MÃ©dia anual: {average}/15 em {count} check-in(s)."
             });
         }
 
@@ -353,7 +353,7 @@ public class CheckInService
             .Distinct()
             .ToListAsync();
 
-        years.Add(DateTime.Today.Year);
+        years.Add(AppClock.Today.Year);
         years.Add(selectedYear);
 
         return years
@@ -407,3 +407,4 @@ public class CheckInService
             Pending: tasks.Count(status => status is TaskItemStatus.Pending or TaskItemStatus.InProgress));
     }
 }
+

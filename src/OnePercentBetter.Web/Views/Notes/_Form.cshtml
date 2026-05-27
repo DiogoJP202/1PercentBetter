@@ -1,11 +1,11 @@
-@model NoteFormViewModel
+ï»¿@model NoteFormViewModel
 @{
     var isEdit = Model.Id.HasValue;
-    var previewTitle = string.IsNullOrWhiteSpace(Model.Title) ? "Sua nova anotação" : Model.Title;
+    var previewTitle = string.IsNullOrWhiteSpace(Model.Title) ? "Sua nova anotaÃ§Ã£o" : Model.Title;
     var previewContent = string.IsNullOrWhiteSpace(Model.Content)
-        ? "Descreva fatos, sinais e próximos passos para transformar observações em melhoria contínua."
+        ? "Descreva fatos, sinais e prÃ³ximos passos para transformar observaÃ§Ãµes em melhoria contÃ­nua."
         : Model.Content;
-    var previewDate = Model.Date == default ? DateTime.Today : Model.Date;
+    var previewDate = Model.Date == default ? AppClock.Today : Model.Date;
     var titleLength = Model.Title?.Length ?? 0;
     var contentLength = Model.Content?.Length ?? 0;
     var initialTags = string.IsNullOrWhiteSpace(Model.Tags)
@@ -31,7 +31,7 @@
                 <div class="mt-1 text-sm font-semibold text-slate-200">@(Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
             </div>
             <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-                <div class="text-xs text-slate-500">Última atualização</div>
+                <div class="text-xs text-slate-500">Ãšltima atualizaÃ§Ã£o</div>
                 <div class="mt-1 text-sm font-semibold text-slate-200">@(Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
             </div>
         </section>
@@ -43,7 +43,7 @@
                 <i data-lucide="notebook-pen" class="h-7 w-7"></i>
             </span>
             <div class="min-w-0">
-                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Preview da anotação</p>
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Preview da anotaÃ§Ã£o</p>
                 <h2 class="mt-1 truncate text-2xl font-black text-white" data-note-preview-title>@previewTitle</h2>
                 <p class="mt-2 text-sm leading-6 text-slate-300" data-note-preview-content>@previewContent</p>
                 <div class="mt-3 flex flex-wrap items-center gap-2">
@@ -70,33 +70,33 @@
     <section class="grid gap-4 sm:grid-cols-3">
         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
             <div class="text-sm font-bold text-white">Foco na utilidade</div>
-            <p class="mt-2 text-xs leading-5 text-slate-400">Escreva para facilitar revisão e decisão futura, não para ficar perfeito agora.</p>
+            <p class="mt-2 text-xs leading-5 text-slate-400">Escreva para facilitar revisÃ£o e decisÃ£o futura, nÃ£o para ficar perfeito agora.</p>
         </div>
         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
             <div class="text-sm font-bold text-white">Contexto breve</div>
-            <p class="mt-2 text-xs leading-5 text-slate-400">Inclua situação, sinal observado e impacto no dia para tornar o registro acionável.</p>
+            <p class="mt-2 text-xs leading-5 text-slate-400">Inclua situaÃ§Ã£o, sinal observado e impacto no dia para tornar o registro acionÃ¡vel.</p>
         </div>
         <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-            <div class="text-sm font-bold text-white">Feche com próximo passo</div>
-            <p class="mt-2 text-xs leading-5 text-slate-400">Sempre que possível, termine com um ajuste simples para o próximo ciclo.</p>
+            <div class="text-sm font-bold text-white">Feche com prÃ³ximo passo</div>
+            <p class="mt-2 text-xs leading-5 text-slate-400">Sempre que possÃ­vel, termine com um ajuste simples para o prÃ³ximo ciclo.</p>
         </div>
     </section>
 
     <div>
-        <label asp-for="Title" class="form-label">Título</label>
+        <label asp-for="Title" class="form-label">TÃ­tulo</label>
         <input asp-for="Title" class="form-input" placeholder="Ex.: Ajuste no estudo noturno" data-note-title-input />
         <div class="mt-2 flex items-center justify-between gap-2 text-xs text-slate-500">
-            <p>Use um título curto para localizar essa anotação em segundos.</p>
+            <p>Use um tÃ­tulo curto para localizar essa anotaÃ§Ã£o em segundos.</p>
             <span data-note-title-counter>@titleLength/160</span>
         </div>
         <span asp-validation-for="Title"></span>
     </div>
 
     <div>
-        <label asp-for="Content" class="form-label">Conteúdo</label>
+        <label asp-for="Content" class="form-label">ConteÃºdo</label>
         <textarea asp-for="Content" class="form-textarea" placeholder="O que aconteceu? O que aprendi? Qual ajuste vou testar?" data-note-content-input></textarea>
         <div class="mt-2 flex items-center justify-between gap-2 text-xs text-slate-500">
-            <p>Transforme observação em ação clara e testável.</p>
+            <p>Transforme observaÃ§Ã£o em aÃ§Ã£o clara e testÃ¡vel.</p>
             <span data-note-content-counter>@contentLength/6000</span>
         </div>
         <span asp-validation-for="Content"></span>
@@ -106,7 +106,7 @@
         <div>
             <label asp-for="Date" class="form-label">Data</label>
             <input asp-for="Date" class="form-input" data-note-date-input />
-            <p class="mt-2 text-xs text-slate-500">Data de referência do registro.</p>
+            <p class="mt-2 text-xs text-slate-500">Data de referÃªncia do registro.</p>
             <span asp-validation-for="Date"></span>
         </div>
         <div>
@@ -118,15 +118,15 @@
         <div>
             <label asp-for="Tags" class="form-label">Tags</label>
             <input asp-for="Tags" class="form-input" placeholder="ex.: foco, energia, estudo" data-note-tags-input />
-            <p class="mt-2 text-xs text-slate-500">Separe por vírgula para criar múltiplas tags.</p>
+            <p class="mt-2 text-xs text-slate-500">Separe por vÃ­rgula para criar mÃºltiplas tags.</p>
             <span asp-validation-for="Tags"></span>
         </div>
     </div>
 
     <section class="space-y-4">
         <div>
-            <h3 class="text-lg font-black text-white">Vínculos opcionais</h3>
-            <p class="mt-1 text-sm text-slate-400">Conecte a anotação com identidade, objetivo, hábito e tarefa quando isso ajudar no contexto.</p>
+            <h3 class="text-lg font-black text-white">VÃ­nculos opcionais</h3>
+            <p class="mt-1 text-sm text-slate-400">Conecte a anotaÃ§Ã£o com identidade, objetivo, hÃ¡bito e tarefa quando isso ajudar no contexto.</p>
         </div>
 
         <div class="grid gap-4 md:grid-cols-4">
@@ -153,7 +153,7 @@
                 <span asp-validation-for="GoalId"></span>
             </div>
             <div>
-                <label asp-for="HabitId" class="form-label">Hábito</label>
+                <label asp-for="HabitId" class="form-label">HÃ¡bito</label>
                 <select asp-for="HabitId" class="form-select">
                     <option value="">Nenhum</option>
                     @foreach (var habit in Model.Habits)
@@ -184,7 +184,8 @@
         </a>
         <button class="btn-primary" type="submit">
             <i data-lucide="save" class="h-4 w-4"></i>
-            @(isEdit ? "Salvar ajustes" : "Salvar anotação")
+            @(isEdit ? "Salvar ajustes" : "Salvar anotaÃ§Ã£o")
         </button>
     </div>
 </form>
+

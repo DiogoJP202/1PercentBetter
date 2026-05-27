@@ -7,6 +7,7 @@ using OnePercentBetter.Web.Services;
 using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
+AppClock.Configure(builder.Configuration["AppTime:TimeZoneId"]);
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -70,6 +71,7 @@ builder.Services.AddScoped<IEmailService, ResendEmailService>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+app.Logger.LogInformation("App timezone configured as {TimeZoneId}.", AppClock.TimeZoneId);
 
 if (app.Environment.IsDevelopment())
 {

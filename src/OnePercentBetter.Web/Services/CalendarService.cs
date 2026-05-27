@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using OnePercentBetter.Web.Data;
 using OnePercentBetter.Web.Extensions;
@@ -25,7 +25,7 @@ public class CalendarService
 
     public async Task<CalendarOverviewViewModel> GetOverviewAsync(string userId)
     {
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var start = new DateTime(today.Year, today.Month, 1);
         var end = start.AddMonths(1);
         var habits = await GetHabitSourcesAsync(userId);
@@ -85,8 +85,8 @@ public class CalendarService
         DateTime? end,
         IReadOnlySet<string> selectedTypes)
     {
-        var startDate = (start ?? DateTime.Today.AddMonths(-1)).Date;
-        var endDate = (end ?? DateTime.Today.AddMonths(1)).Date;
+        var startDate = (start ?? AppClock.Today.AddMonths(-1)).Date;
+        var endDate = (end ?? AppClock.Today.AddMonths(1)).Date;
         var events = new List<CalendarEventViewModel>();
 
         if (IncludesType(selectedTypes, ImprovementType))
@@ -305,7 +305,7 @@ public class CalendarService
                     ExtendedProps = new CalendarEventExtendedPropsViewModel
                     {
                         Type = ImprovementType,
-                        TypeLabel = "Hábito de melhoria",
+                        TypeLabel = "HÃ¡bito de melhoria",
                         HabitId = habit.Id,
                         Date = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                         Status = statusKey,
@@ -344,7 +344,7 @@ public class CalendarService
                     ExtendedProps = new CalendarEventExtendedPropsViewModel
                     {
                         Type = CommonType,
-                        TypeLabel = "Hábito comum",
+                        TypeLabel = "HÃ¡bito comum",
                         SimpleHabitId = simpleHabit.Id,
                         Date = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                         Status = "Scheduled",
@@ -562,7 +562,7 @@ public class CalendarService
 
     private async Task<int> GetCurrentCheckInStreakAsync(string userId)
     {
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var dates = await _dbContext.DailyCheckIns
             .AsNoTracking()
             .Where(checkIn => checkIn.UserId == userId && checkIn.Date <= today)
@@ -698,12 +698,12 @@ public class CalendarService
     {
         return mood switch
         {
-            MoodLevel.VeryBad => "😞",
-            MoodLevel.Bad => "🙁",
-            MoodLevel.Neutral => "😐",
-            MoodLevel.Good => "🙂",
-            MoodLevel.VeryGood => "😄",
-            _ => "😐"
+            MoodLevel.VeryBad => "ðŸ˜ž",
+            MoodLevel.Bad => "ðŸ™",
+            MoodLevel.Neutral => "ðŸ˜",
+            MoodLevel.Good => "ðŸ™‚",
+            MoodLevel.VeryGood => "ðŸ˜„",
+            _ => "ðŸ˜"
         };
     }
 
@@ -756,3 +756,4 @@ public class CalendarService
         public string? Notes { get; init; }
     }
 }
+

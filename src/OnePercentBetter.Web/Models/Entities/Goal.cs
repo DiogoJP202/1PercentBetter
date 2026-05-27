@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using OnePercentBetter.Web.Models.Enums;
 using OnePercentBetter.Web.Models.Identity;
 
@@ -32,7 +32,7 @@ public class Goal
 
     public GoalPriority Priority { get; set; } = GoalPriority.Medium;
 
-    public DateTime StartDate { get; set; } = DateTime.Today;
+    public DateTime StartDate { get; set; } = AppClock.Today;
 
     public DateTime? TargetDate { get; set; }
 
@@ -56,3 +56,4 @@ public class Goal
 
     public ICollection<Note> Notes { get; } = new List<Note>();
 }
+

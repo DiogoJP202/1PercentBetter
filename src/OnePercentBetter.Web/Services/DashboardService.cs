@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using OnePercentBetter.Web.Data;
 using OnePercentBetter.Web.Models.Entities;
 using OnePercentBetter.Web.Models.Enums;
@@ -17,7 +17,7 @@ public class DashboardService
 
     public async Task<DashboardViewModel> GetDashboardAsync(string userId)
     {
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var weekStart = today.AddDays(-6);
         var historyStart = today.AddDays(-89);
 
@@ -273,7 +273,7 @@ public class DashboardService
     {
         if (habits.Count == 0)
         {
-            return ["Crie o primeiro hábito para o dashboard sair do zero."];
+            return ["Crie o primeiro hÃ¡bito para o dashboard sair do zero."];
         }
 
         var alerts = new List<string>();
@@ -289,7 +289,7 @@ public class DashboardService
             var lastTwoLogs = recentLogs.Take(2).ToList();
             if (lastTwoLogs.Count == 2 && lastTwoLogs.All(log => log.Status == HabitLogStatus.Failed))
             {
-                alerts.Add($"O hábito \"{habit.Title}\" falhou nas últimas 2 marcações. Reduza a versão de 2 minutos hoje.");
+                alerts.Add($"O hÃ¡bito \"{habit.Title}\" falhou nas Ãºltimas 2 marcaÃ§Ãµes. Reduza a versÃ£o de 2 minutos hoje.");
                 continue;
             }
 
@@ -301,7 +301,7 @@ public class DashboardService
 
                 if (completionRate < 50)
                 {
-                    alerts.Add($"O hábito \"{habit.Title}\" está com {completionRate}% de conclusão nos últimos 7 dias.");
+                    alerts.Add($"O hÃ¡bito \"{habit.Title}\" estÃ¡ com {completionRate}% de conclusÃ£o nos Ãºltimos 7 dias.");
                 }
             }
 
@@ -326,3 +326,4 @@ public class DashboardService
         return HabitScheduleRules.IsDueOnDate(habit.FrequencyType, habit.CreatedAt, habit.DaysOfWeek, date);
     }
 }
+

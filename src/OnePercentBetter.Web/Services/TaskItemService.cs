@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using OnePercentBetter.Web.Data;
 using OnePercentBetter.Web.Models.Entities;
 using OnePercentBetter.Web.Models.Enums;
@@ -33,7 +33,7 @@ public class TaskItemService
     public async Task<TaskItemListViewModel> GetListAsync(string userId, TaskFiltersViewModel? filters)
     {
         var normalizedFilters = await FillFilterOptionsAsync(filters ?? new TaskFiltersViewModel(), userId);
-        var today = DateTime.Today;
+        var today = AppClock.Today;
 
         var query = _dbContext.TaskItems
             .AsNoTracking()
@@ -152,7 +152,7 @@ public class TaskItemService
 
         if (name.Length > 64)
         {
-            return (false, "Use no máximo 64 caracteres no nome da tag.", null);
+            return (false, "Use no mÃ¡ximo 64 caracteres no nome da tag.", null);
         }
 
         var normalizedName = NormalizeTagName(name);
@@ -165,7 +165,7 @@ public class TaskItemService
 
             if (existing is null)
             {
-                return (false, "Tag não encontrada para este usuário.", null);
+                return (false, "Tag nÃ£o encontrada para este usuÃ¡rio.", null);
             }
 
             var conflict = await _dbContext.TaskTags
@@ -177,7 +177,7 @@ public class TaskItemService
 
             if (conflict)
             {
-                return (false, "Já existe uma tag com esse nome.", null);
+                return (false, "JÃ¡ existe uma tag com esse nome.", null);
             }
 
             existing.Name = name;
@@ -233,7 +233,7 @@ public class TaskItemService
 
         if (taskTag is null)
         {
-            return (false, "Tag não encontrada para este usuário.");
+            return (false, "Tag nÃ£o encontrada para este usuÃ¡rio.");
         }
 
         _dbContext.TaskTags.Remove(taskTag);
@@ -247,37 +247,37 @@ public class TaskItemService
 
         if (viewModel.CategoryId.HasValue && !await _categoryService.ExistsForUserAsync(userId, viewModel.CategoryId.Value))
         {
-            errors[nameof(viewModel.CategoryId)] = "Categoria inválida para este usuário.";
+            errors[nameof(viewModel.CategoryId)] = "Categoria invÃ¡lida para este usuÃ¡rio.";
         }
 
         if (viewModel.IdentityId.HasValue && !await _identityService.ExistsForUserAsync(userId, viewModel.IdentityId.Value))
         {
-            errors[nameof(viewModel.IdentityId)] = "Identidade inválida para este usuário.";
+            errors[nameof(viewModel.IdentityId)] = "Identidade invÃ¡lida para este usuÃ¡rio.";
         }
 
         if (viewModel.GoalId.HasValue && !await _goalService.ExistsForUserAsync(userId, viewModel.GoalId.Value))
         {
-            errors[nameof(viewModel.GoalId)] = "Objetivo inválido para este usuário.";
+            errors[nameof(viewModel.GoalId)] = "Objetivo invÃ¡lido para este usuÃ¡rio.";
         }
 
         if (viewModel.HabitId.HasValue && !await _habitService.ExistsForUserAsync(userId, viewModel.HabitId.Value))
         {
-            errors[nameof(viewModel.HabitId)] = "Hábito inválido para este usuário.";
+            errors[nameof(viewModel.HabitId)] = "HÃ¡bito invÃ¡lido para este usuÃ¡rio.";
         }
 
         if (viewModel.StartTime.HasValue && viewModel.EndTime.HasValue && viewModel.EndTime <= viewModel.StartTime)
         {
-            errors[nameof(viewModel.EndTime)] = "O horário final deve ser maior que o horário inicial.";
+            errors[nameof(viewModel.EndTime)] = "O horÃ¡rio final deve ser maior que o horÃ¡rio inicial.";
         }
 
         if (viewModel.TaskDate.HasValue && viewModel.DueDate.HasValue && viewModel.DueDate.Value.Date < viewModel.TaskDate.Value.Date)
         {
-            errors[nameof(viewModel.DueDate)] = "O prazo não pode ser anterior à data da tarefa.";
+            errors[nameof(viewModel.DueDate)] = "O prazo nÃ£o pode ser anterior Ã  data da tarefa.";
         }
 
         if (!TaskVisualOptions.IsAllowedIcon(viewModel.Icon))
         {
-            errors[nameof(viewModel.Icon)] = "Escolha um ícone válido para a tarefa.";
+            errors[nameof(viewModel.Icon)] = "Escolha um Ã­cone vÃ¡lido para a tarefa.";
         }
 
         if (viewModel.SelectedTagIds.Count > 0)
@@ -289,13 +289,13 @@ public class TaskItemService
 
             if (validCount != distinctIds.Count)
             {
-                errors[nameof(viewModel.SelectedTagIds)] = "Uma ou mais tags selecionadas são inválidas para este usuário.";
+                errors[nameof(viewModel.SelectedTagIds)] = "Uma ou mais tags selecionadas sÃ£o invÃ¡lidas para este usuÃ¡rio.";
             }
         }
 
         if (ParseNewTags(viewModel.NewTags).Count > 12)
         {
-            errors[nameof(viewModel.NewTags)] = "Use no máximo 12 tags novas por vez.";
+            errors[nameof(viewModel.NewTags)] = "Use no mÃ¡ximo 12 tags novas por vez.";
         }
 
         return errors;
@@ -440,7 +440,7 @@ public class TaskItemService
         }
 
         var postponeDays = Math.Max(1, days);
-        var baseDate = taskItem.TaskDate?.Date ?? DateTime.Today;
+        var baseDate = taskItem.TaskDate?.Date ?? AppClock.Today;
         taskItem.TaskDate = baseDate.AddDays(postponeDays);
 
         if (taskItem.DueDate.HasValue && taskItem.DueDate.Value.Date < taskItem.TaskDate.Value.Date)
@@ -483,7 +483,7 @@ public class TaskItemService
 
     public async Task<IReadOnlyList<TaskItemCardViewModel>> GetTodayTasksAsync(string userId)
     {
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var taskItems = await _dbContext.TaskItems
             .AsNoTracking()
             .Include(taskItem => taskItem.Category)
@@ -504,7 +504,7 @@ public class TaskItemService
 
     public async Task<IReadOnlyList<TaskItemCardViewModel>> GetTasksByGoalAsync(string userId, int goalId)
     {
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var taskItems = await _dbContext.TaskItems
             .AsNoTracking()
             .Include(taskItem => taskItem.Category)
@@ -526,7 +526,7 @@ public class TaskItemService
 
     public async Task<IReadOnlyList<TaskItemCardViewModel>> GetTasksByIdentityAsync(string userId, int identityId)
     {
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var taskItems = await _dbContext.TaskItems
             .AsNoTracking()
             .Include(taskItem => taskItem.Category)
@@ -548,7 +548,7 @@ public class TaskItemService
 
     public async Task<TaskItemDetailsViewModel?> GetDetailsAsync(string userId, int id)
     {
-        var today = DateTime.Today;
+        var today = AppClock.Today;
         var task = await _dbContext.TaskItems
             .AsNoTracking()
             .Include(taskItem => taskItem.Category)
@@ -872,3 +872,4 @@ public class TaskItemService
         };
     }
 }
+

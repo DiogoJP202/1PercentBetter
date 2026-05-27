@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnePercentBetter.Web.Extensions;
@@ -136,7 +136,7 @@ public class TasksController : Controller
             return NotFound();
         }
 
-        TempData["Success"] = "Tarefa concluída.";
+        TempData["Success"] = "Tarefa concluÃ­da.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -191,7 +191,7 @@ public class TasksController : Controller
             var message = ModelState.Values
                 .SelectMany(value => value.Errors)
                 .Select(error => error.ErrorMessage)
-                .FirstOrDefault() ?? "Não foi possível salvar a tag.";
+                .FirstOrDefault() ?? "NÃ£o foi possÃ­vel salvar a tag.";
 
             return BadRequest(new { error = message });
         }
@@ -199,7 +199,7 @@ public class TasksController : Controller
         var result = await _taskItemService.SaveTagAsync(User.GetRequiredUserId(), viewModel);
         if (!result.Success || result.Tag is null)
         {
-            return BadRequest(new { error = result.Error ?? "Não foi possível salvar a tag." });
+            return BadRequest(new { error = result.Error ?? "NÃ£o foi possÃ­vel salvar a tag." });
         }
 
         return Json(new
@@ -217,7 +217,7 @@ public class TasksController : Controller
         var result = await _taskItemService.DeleteTagAsync(User.GetRequiredUserId(), id);
         if (!result.Success)
         {
-            return BadRequest(new { error = result.Error ?? "Não foi possível excluir a tag." });
+            return BadRequest(new { error = result.Error ?? "NÃ£o foi possÃ­vel excluir a tag." });
         }
 
         return Json(new { success = true });
@@ -245,8 +245,8 @@ public class TasksController : Controller
     public async Task<IActionResult> GetCalendarTasks([FromQuery] DateTime? start, [FromQuery] DateTime? end)
     {
         var userId = User.GetRequiredUserId();
-        var startDate = (start ?? DateTime.Today.AddMonths(-1)).Date;
-        var endDate = (end ?? DateTime.Today.AddMonths(1)).Date;
+        var startDate = (start ?? AppClock.Today.AddMonths(-1)).Date;
+        var endDate = (end ?? AppClock.Today.AddMonths(1)).Date;
 
         var tasks = await _taskItemService.QueryUserTasks(userId)
             .Where(taskItem => taskItem.ShowOnCalendar
@@ -273,3 +273,4 @@ public class TasksController : Controller
         return Json(tasks);
     }
 }
+

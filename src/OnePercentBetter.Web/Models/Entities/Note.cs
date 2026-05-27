@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using OnePercentBetter.Web.Models.Enums;
 using OnePercentBetter.Web.Models.Identity;
 
@@ -42,7 +42,7 @@ public class Note
 
     public TaskItem? TaskItem { get; set; }
 
-    public DateTime Date { get; set; } = DateTime.Today;
+    public DateTime Date { get; set; } = AppClock.Today;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -52,3 +52,4 @@ public class Note
 
     public DateTime? DeletedAt { get; set; }
 }
+

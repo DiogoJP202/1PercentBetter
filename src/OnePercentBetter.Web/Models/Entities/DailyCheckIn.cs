@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using OnePercentBetter.Web.Models.Enums;
 using OnePercentBetter.Web.Models.Identity;
 
@@ -13,7 +13,7 @@ public class DailyCheckIn
 
     public ApplicationUser? User { get; set; }
 
-    public DateTime Date { get; set; } = DateTime.Today;
+    public DateTime Date { get; set; } = AppClock.Today;
 
     public MoodLevel Mood { get; set; } = MoodLevel.Neutral;
 
@@ -42,3 +42,4 @@ public class DailyCheckIn
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
+
