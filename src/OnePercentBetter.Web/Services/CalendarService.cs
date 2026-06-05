@@ -698,12 +698,12 @@ public class CalendarService
     {
         return mood switch
         {
-            MoodLevel.VeryBad => "ðŸ˜ž",
-            MoodLevel.Bad => "ðŸ™",
-            MoodLevel.Neutral => "ðŸ˜",
-            MoodLevel.Good => "ðŸ™‚",
-            MoodLevel.VeryGood => "ðŸ˜„",
-            _ => "ðŸ˜"
+            MoodLevel.VeryBad => "😞",
+            MoodLevel.Bad => "🙁",
+            MoodLevel.Neutral => "😐",
+            MoodLevel.Good => "🙂",
+            MoodLevel.VeryGood => "😄",
+            _ => "😐"
         };
     }
 

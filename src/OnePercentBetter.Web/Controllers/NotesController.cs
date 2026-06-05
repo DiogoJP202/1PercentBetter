@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+ï»¿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnePercentBetter.Web.Extensions;
 using OnePercentBetter.Web.Services;
@@ -58,7 +58,7 @@ public class NotesController : Controller
         }
 
         var noteId = await _noteService.CreateAsync(userId, viewModel);
-        TempData["Success"] = "Anotação criada com sucesso.";
+        TempData["Success"] = "AnotaÃ§Ã£o criada com sucesso.";
 
         return RedirectToAction(nameof(Details), new { id = noteId });
     }
@@ -100,7 +100,7 @@ public class NotesController : Controller
             return NotFound();
         }
 
-        TempData["Success"] = "Anotação atualizada com sucesso.";
+        TempData["Success"] = "AnotaÃ§Ã£o atualizada com sucesso.";
         return RedirectToAction(nameof(Details), new { id });
     }
 
@@ -114,7 +114,7 @@ public class NotesController : Controller
             return NotFound();
         }
 
-        TempData["Success"] = "Anotação removida.";
+        TempData["Success"] = "AnotaÃ§Ã£o removida.";
         return RedirectToAction(nameof(Index));
     }
 

@@ -4,6 +4,10 @@ export function bindConfirmDialogs(root = document) {
   }
 
   root.querySelectorAll('form[data-confirm]').forEach((form) => {
+    if (form.hasAttribute('data-async-action')) {
+      return;
+    }
+
     if (form.dataset.confirmBound === 'true') {
       return;
     }
@@ -19,8 +23,8 @@ export function bindConfirmDialogs(root = document) {
 
       const tone = form.dataset.confirmTone ?? 'default';
       const result = await window.Swal.fire({
-        title: form.dataset.confirmTitle ?? 'Confirmar acao?',
-        text: form.dataset.confirmText ?? 'Esta acao sera aplicada agora.',
+        title: form.dataset.confirmTitle ?? 'Confirmar ação?',
+        text: form.dataset.confirmText ?? 'Esta ação será aplicada agora.',
         icon: form.dataset.confirmIcon ?? 'warning',
         showCancelButton: true,
         confirmButtonText: form.dataset.confirmButton ?? 'Confirmar',
